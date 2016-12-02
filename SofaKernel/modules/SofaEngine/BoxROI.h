@@ -147,12 +147,14 @@ public:
 
     //Output
     Data<SetIndex> f_indices;
+    Data<SetIndex> f_indicesOut;
     Data<SetIndex> f_edgeIndices;
     Data<SetIndex> f_triangleIndices;
     Data<SetIndex> f_tetrahedronIndices;
     Data<SetIndex> f_hexahedronIndices;
     Data<SetIndex> f_quadIndices;
     Data<VecCoord > f_pointsInROI;
+    Data<VecCoord > f_pointsOutROI;
     Data<vector<Edge> > f_edgesInROI;
     Data<vector<Triangle> > f_trianglesInROI;
     Data<vector<Tetra> > f_tetrahedraInROI;
