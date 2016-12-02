@@ -82,12 +82,14 @@ BoxROI<DataTypes>::BoxROI()
     , f_computeHexahedra( initData(&f_computeHexahedra, true,"computeHexahedra","If true, will compute hexahedra list and index list inside the ROI. (default = true)") )
     , f_computeQuad( initData(&f_computeQuad, true,"computeQuad","If true, will compute quad list and index list inside the ROI. (default = true)") )
     , f_indices( initData(&f_indices,"indices","Indices of the points contained in the ROI") )
+    , f_indicesOut( initData(&f_indicesOut,"indicesOut","Indices of the points not contained in the ROI") )    
     , f_edgeIndices( initData(&f_edgeIndices,"edgeIndices","Indices of the edges contained in the ROI") )
     , f_triangleIndices( initData(&f_triangleIndices,"triangleIndices","Indices of the triangles contained in the ROI") )
     , f_tetrahedronIndices( initData(&f_tetrahedronIndices,"tetrahedronIndices","Indices of the tetrahedra contained in the ROI") )
     , f_hexahedronIndices( initData(&f_hexahedronIndices,"hexahedronIndices","Indices of the hexahedra contained in the ROI") )
     , f_quadIndices( initData(&f_quadIndices,"quadIndices","Indices of the quad contained in the ROI") )
     , f_pointsInROI( initData(&f_pointsInROI,"pointsInROI","Points contained in the ROI") )
+    , f_pointsOutROI( initData(&f_pointsOutROI,"pointsOutROI","Points not contained in the ROI") )
     , f_edgesInROI( initData(&f_edgesInROI,"edgesInROI","Edges contained in the ROI") )
     , f_trianglesInROI( initData(&f_trianglesInROI,"trianglesInROI","Triangles contained in the ROI") )
     , f_tetrahedraInROI( initData(&f_tetrahedraInROI,"tetrahedraInROI","Tetrahedra contained in the ROI") )
@@ -130,6 +132,9 @@ BoxROI<DataTypes>::BoxROI()
 
     f_indices.beginEdit()->push_back(0);
     f_indices.endEdit();
+        
+    f_indicesOut.beginEdit()->push_back(0);
+    f_indicesOut.endEdit();
 }
 
 template <class DataTypes>
@@ -292,12 +297,14 @@ void BoxROI<DataTypes>::init()
     addInput(&f_quad);
 
     addOutput(&f_indices);
+    addOutput(&f_indicesOut);
     addOutput(&f_edgeIndices);
     addOutput(&f_triangleIndices);
     addOutput(&f_tetrahedronIndices);
     addOutput(&f_hexahedronIndices);
     addOutput(&f_quadIndices);
     addOutput(&f_pointsInROI);
+    addOutput(&f_pointsOutROI);
     addOutput(&f_edgesInROI);
     addOutput(&f_trianglesInROI);
     addOutput(&f_tetrahedraInROI);
@@ -313,6 +320,12 @@ void BoxROI<DataTypes>::init()
     setDirtyValue();
     reinit();
     p_doUpdate.setValue(tmp);
+}
+    
+template <class DataTypes>
+void BoxROI<DataTypes>::bwdInit()
+{
+ update();   
 }
 
 template <class DataTypes>
@@ -447,6 +460,7 @@ void BoxROI<DataTypes>::update()
 
     // Write accessor for topological element indices in BOX
     SetIndex& indices = *f_indices.beginWriteOnly();
+    SetIndex& indicesOut = *f_indicesOut.beginWriteOnly();
     SetIndex& edgeIndices = *f_edgeIndices.beginWriteOnly();
     SetIndex& triangleIndices = *f_triangleIndices.beginWriteOnly();
     SetIndex& tetrahedronIndices = *f_tetrahedronIndices.beginWriteOnly();
@@ -455,6 +469,7 @@ void BoxROI<DataTypes>::update()
 
     // Write accessor for toplogical element in BOX
     WriteOnlyAccessor< Data<VecCoord > > pointsInROI = f_pointsInROI;
+    WriteOnlyAccessor< Data<VecCoord > > pointsOutROI = f_pointsOutROI;
     WriteOnlyAccessor< Data<vector<Edge> > > edgesInROI = f_edgesInROI;
     WriteOnlyAccessor< Data<vector<Triangle> > > trianglesInROI = f_trianglesInROI;
     WriteOnlyAccessor< Data<vector<Tetra> > > tetrahedraInROI = f_tetrahedraInROI;
@@ -464,6 +479,7 @@ void BoxROI<DataTypes>::update()
 
     // Clear lists
     indices.clear();
+    indicesOut.clear();
     edgeIndices.clear();
     triangleIndices.clear();
     tetrahedronIndices.clear();
@@ -472,6 +488,7 @@ void BoxROI<DataTypes>::update()
 
 
     pointsInROI.clear();
+    pointsOutROI.clear();
     edgesInROI.clear();
     trianglesInROI.clear();
     tetrahedraInROI.clear();
@@ -489,6 +506,11 @@ void BoxROI<DataTypes>::update()
                 indices.push_back(i);
                 pointsInROI.push_back(x0[i]);
                 break;
+            }
+            else if (bi == vb.size()-1)
+            {
+                indicesOut.push_back(i);
+                pointsOutROI.push_back(x0[i]);
             }
         }
     }
@@ -587,6 +609,7 @@ void BoxROI<DataTypes>::update()
     f_nbIndices.setValue(indices.size());
 
     f_indices.endEdit();
+    f_indicesOut.endEdit();
     f_edgeIndices.endEdit();
     f_triangleIndices.endEdit();
     f_tetrahedronIndices.endEdit();
