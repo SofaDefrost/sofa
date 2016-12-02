@@ -92,6 +92,7 @@ public:
 public:
     void init();
     void reinit();
+    void bwdInit();
     void update();
     void draw(const VisualParams*);
 
