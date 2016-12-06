@@ -81,7 +81,6 @@ struct BoxROITest :  public ::testing::Test
     Node::SPtr m_root ;
     Node::SPtr m_node ;
     typename TheBoxROI::SPtr m_boxroi;
-    typename MechanicalObject<TDataType>::SPtr m_meca;
 
     virtual void SetUp()
     {
