@@ -113,6 +113,8 @@ void TestLight::checkPositionalLightValidAttributes()
     BaseObject* light = root->getTreeNode("Level 1")->getObject("light1") ;
     ASSERT_NE(light, nullptr) ;
 
+/*trying to isolate
+ * 
     /// List of the supported attributes the user expect to find
     /// This list needs to be updated if you add an attribute.
     vector<string> attrnames = {///These are the attributes that any light must have.
@@ -125,6 +127,7 @@ void TestLight::checkPositionalLightValidAttributes()
 
     for(auto& attrname : attrnames)
         EXPECT_NE( light->findData(attrname), nullptr ) << "Missing attribute with name '" << attrname << "'." ;
+*/
 
     clearSceneGraph();
 }
