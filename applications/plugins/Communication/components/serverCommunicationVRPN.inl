@@ -218,7 +218,7 @@ void ServerCommunicationVRPN::createVRPNMessage(CommunicationSubscriber* subscri
 void ServerCommunicationVRPN::receiveData()
 {
     std::string address = d_address.getValueString();
-    std::vector<vrpn_BaseClass*> receivers;
+    std::vector<std::unique_ptr<vrpn_BaseClass>> receivers;
 
     std::map<std::string, CommunicationSubscriber*> subscribersMap = getSubscribers();
     if (subscribersMap.size() == 0)
@@ -236,24 +236,24 @@ void ServerCommunicationVRPN::receiveData()
         const char *device = str.c_str();
 
         //Recieving Text via VRPN
-        vrpn_Text_Receiver *vrpnText = new vrpn_Text_Receiver(device);
+        std::unique_ptr<vrpn_Text_Receiver> vrpnText =  std::make_unique<vrpn_Text_Receiver>(device);
         vrpnText->register_message_handler( (void*) this, processTextMessage );
-        receivers.push_back(vrpnText);
+        receivers.push_back(std::move(vrpnText));
 
         //Receiving Analog via VRPN
-        vrpn_Analog_Remote *vrpnAnalog = new vrpn_Analog_Remote(device);
+        std::unique_ptr<vrpn_Analog_Remote> vrpnAnalog = std::make_unique<vrpn_Analog_Remote>(device);
         vrpnAnalog->register_change_handler( (void*) this, processAnalogMessage);
-        receivers.push_back(vrpnAnalog);
+        receivers.push_back(std::move(vrpnAnalog));
 
         //Receiving Tracker via VRPN
-        // vrpn_Tracker_Remote *vrpnTracker = new vrpn_Tracker_Remote(device);
+        // std::unique_ptr<vrpn_Tracker_Remote> *vrpnTracker = std::make_unique<vrpn_Tracker_Remote>(device);
         // vrpnTracker->register_change_handler( (void*) this, processTrackerMessage);
-        // receivers.push_back(vrpnTracker);
+        // receivers.push_back(std::move(vrpnTracker));
     }
 
     while(this->m_running)
     {
-        for(auto rec : receivers )
+        for(std::unique_ptr<vrpn_BaseClass>&rec : receivers )
         {
             rec->mainloop();
         }
