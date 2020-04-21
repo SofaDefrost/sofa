@@ -220,7 +220,7 @@ TEST_F(BaseClass_test, checkStaticDefaultTemplate  )
     EXPECT_EQ(m_ptr8.getTemplateName(),"One,Two") ;
 
     EXPECT_EQ(m_ptr9.getClassName(),"DefaultTemplate3") ;
-    EXPECT_EQ(m_ptr9.getTemplateName(),"One,Two") ;
+    EXPECT_EQ(m_ptr9.getTemplateName(),"One,Two, NotAType") ;
 }
 
 TEST_F(BaseClass_test, checkStaticDefaultTemplateOverridenByCustom  )
