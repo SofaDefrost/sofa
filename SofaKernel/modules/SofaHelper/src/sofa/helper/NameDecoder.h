@@ -128,21 +128,6 @@ public:
     enum { value = sizeof(test<T>(0)) == sizeof(YesType) };
 };
 
-template<typename T>
-std::string GetSofaTypeTemplateName(const std::string prefix="")
-{
-    if constexpr (HasName<T>::value )
-            return prefix + T::Name();
-    return prefix + typeid(T).name();
-}
-
-template<typename T, typename ...Ts>
-std::enable_if_t<sizeof...(Ts)!=0, std::string>
-GetSofaTypeTemplateName(const std::string prefix="")
-{
-    return GetSofaTypeTemplateName<T>(prefix) + GetSofaTypeTemplateName<Ts...>(",");
-}
-
 class SOFA_HELPER_API NameDecoder
 {
 public:
@@ -255,7 +240,21 @@ private:
         /// Finally if nothing match...assumes there is no templates in this object.
         return "";
     }
-
 };
 
+template<typename T>
+std::string GetSofaTypeTemplateName(const std::string prefix="")
+{
+    if constexpr (HasName<T>::value )
+            return prefix + T::Name();
+    return prefix + sofa::helper::NameDecoder::decodeClassName(typeid(T));
+}
+
+template<typename T, typename ...Ts>
+std::enable_if_t<sizeof...(Ts)!=0, std::string>
+GetSofaTypeTemplateName(const std::string prefix="")
+{
+    return GetSofaTypeTemplateName<T>(prefix) + GetSofaTypeTemplateName<Ts...>(",");
+}
+        
 }
