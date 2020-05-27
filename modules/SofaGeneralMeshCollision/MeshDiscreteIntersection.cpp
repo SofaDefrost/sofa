@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -48,9 +48,9 @@ MeshDiscreteIntersection::MeshDiscreteIntersection(DiscreteIntersection* object,
 {
     if (addSelf)
     {
-        intersection->intersectors.add<TriangleModel,     LineModel,       MeshDiscreteIntersection>  (this);
-        intersection->intersectors.add<CapsuleModel,LineModel,MeshDiscreteIntersection>(this);
-        intersection->intersectors.add<CapsuleModel,TriangleModel,MeshDiscreteIntersection>(this);
+        intersection->intersectors.add<TriangleCollisionModel<sofa::defaulttype::Vec3Types>, LineCollisionModel<sofa::defaulttype::Vec3Types>, MeshDiscreteIntersection>  (this);
+        intersection->intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>, LineCollisionModel<sofa::defaulttype::Vec3Types>, MeshDiscreteIntersection>(this);
+        intersection->intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>, TriangleCollisionModel<sofa::defaulttype::Vec3Types>, MeshDiscreteIntersection>(this);
     }
 }
 

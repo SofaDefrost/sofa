@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,11 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-
-// Author: Hadrien Courtecuisse
-//
-// Copyright: See COPYING file that comes with this distribution
-
 #ifndef SOFA_COMPONENT_LINEARSOLVER_WARPPRECONDITIONER_INL
 #define SOFA_COMPONENT_LINEARSOLVER_WARPPRECONDITIONER_INL
 
@@ -82,7 +77,9 @@ template<class TMatrix, class TVector,class ThreadManager>
 void WarpPreconditioner<TMatrix,TVector,ThreadManager >::bwdInit() {
     this->getContext()->get(realSolver, solverName.getValue());
 
-    if (realSolver==nullptr) serr << "Error the cannot find the solver " << solverName.getValue() << sendl;
+    if (realSolver == nullptr) {
+        msg_error() << "The cannot find the solver " << solverName.getValue();
+    }
 
     sofa::core::objectmodel::BaseContext * c = this->getContext();
     c->get<sofa::core::behavior::BaseRotationFinder >(&rotationFinders, sofa::core::objectmodel::BaseContext::Local);

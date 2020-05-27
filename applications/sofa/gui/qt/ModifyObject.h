@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -22,14 +22,13 @@
 #ifndef SOFA_GUI_QT_MODIFYOBJECT_H
 #define SOFA_GUI_QT_MODIFYOBJECT_H
 
-#include <sofa/gui/qt/SofaGUIQt.h>
+#include <sofa/gui/qt/SofaGuiQt.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/helper/fixed_array.h>
 #include <sofa/simulation/Node.h>
-#include <SofaValidation/Monitor.h>
 #include <sofa/gui/qt/WDoubleLineEdit.h>
 
 #include <QDialog>
@@ -60,7 +59,7 @@ namespace qt
 {
 
 class QTransformationWidget;
-#ifdef SOFA_HAVE_QWT
+#if SOFAGUIQT_HAVE_QWT
 class QEnergyStatWidget;
 class QMomentumStatWidget;
 #endif
@@ -186,7 +185,7 @@ protected:
     //Widget specific to Node:
     //Transformation widget: translation, rotation, scale ( only experimental and deactivated)
     QTransformationWidget* transformation;
-#ifdef SOFA_HAVE_QWT
+#if SOFAGUIQT_HAVE_QWT
     //Energy widget: plot the kinetic & potential energy
     QEnergyStatWidget* energy;
     //Momentum widget: plot the linear & angular momentum

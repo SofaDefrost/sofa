@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -330,7 +330,7 @@ size_t GNode::getNbParents() const
     return parent() ? 1 : 0;
 }
 
-/// return the first parent (returns NULL if no parent)
+/// return the first parent (returns nullptr if no parent)
 core::objectmodel::BaseNode* GNode::getFirstParent() const
 {
     return parent();
@@ -352,10 +352,16 @@ bool GNode::hasAncestor(const BaseContext* context) const
 
 /// Mesh Topology that is relevant for this context
 /// (within it or its parents until a mapping is reached that does not preserve topologies).
-core::topology::BaseMeshTopology* GNode::getActiveMeshTopology() const
+core::topology::BaseMeshTopology* GNode::getMeshTopologyLink(SearchDirection dir) const
 {
     if (this->meshTopology)
         return this->meshTopology;
+
+    if (dir != Local)
+        return Node::getMeshTopologyLink(dir);
+
+    //local case similar to getActiveMeshTopology ...
+
     // Check if a local mapping stops the search
     if (this->mechanicalMapping && !this->mechanicalMapping->sameTopology())
     {
@@ -376,7 +382,7 @@ core::topology::BaseMeshTopology* GNode::getActiveMeshTopology() const
     }
     else
     {
-        return p->getActiveMeshTopology();
+        return p->getMeshTopologyLink(Local);
     }
 }
 

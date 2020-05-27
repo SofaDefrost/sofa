@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -95,6 +95,11 @@ public:
     Data< defaulttype::RGBAColor > d_color;         ///< drawing color
     Data< unsigned >       d_geometricStiffness; ///< how to compute geometric stiffness (0->no GS, 1->exact GS, 2->stabilized GS)
 
+    /// Link to be set to the topology container in the component graph. 
+    SingleLink<DistanceMapping<TIn, TOut>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
+
+
     void init() override;
 
     using Inherit::apply;
@@ -123,7 +128,7 @@ protected:
     DistanceMapping();
     virtual ~DistanceMapping();
 
-    topology::EdgeSetTopologyContainer* edgeContainer;  ///< where the edges are defined
+    topology::EdgeSetTopologyContainer* m_edgeContainer;  ///< where the edges are defined
     SparseMatrixEigen jacobian;                         ///< Jacobian of the mapping
     helper::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Jacobian of the mapping, in a vector
     SparseKMatrixEigen K;                               ///< Assembled geometric stiffness matrix
@@ -190,6 +195,10 @@ public:
     Data< helper::vector<defaulttype::Vec2i> > d_indexPairs;  ///< for each child, its parent and index in parent
     Data< unsigned >                           d_geometricStiffness; ///< how to compute geometric stiffness (0->no GS, 1->exact GS, 2->stabilized GS)
 
+    /// Link to be set to the topology container in the component graph. 
+    SingleLink<DistanceMultiMapping<TIn, TOut>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
+
     // Append particle of given index within the given model to the subset.
     void addPoint(const core::BaseState* fromModel, int index);
     // Append particle of given index within the given model to the subset.
@@ -201,58 +210,64 @@ public:
 
     void apply(const core::MechanicalParams *mparams, const helper::vector<OutDataVecCoord*>& dataVecOutPos, const helper::vector<const InDataVecCoord*>& dataVecInPos) override
     {
+        SOFA_UNUSED(mparams);
+
         //Not optimized at all...
         helper::vector<OutVecCoord*> vecOutPos;
         for(unsigned int i=0; i<dataVecOutPos.size(); i++)
-            vecOutPos.push_back(dataVecOutPos[i]->beginEdit(mparams));
+            vecOutPos.push_back(dataVecOutPos[i]->beginEdit());
 
         helper::vector<const InVecCoord*> vecInPos;
         for(unsigned int i=0; i<dataVecInPos.size(); i++)
-            vecInPos.push_back(&dataVecInPos[i]->getValue(mparams));
+            vecInPos.push_back(&dataVecInPos[i]->getValue());
 
         this->apply(vecOutPos, vecInPos);
 
         //Really Not optimized at all...
         for(unsigned int i=0; i<dataVecOutPos.size(); i++)
-            dataVecOutPos[i]->endEdit(mparams);
+            dataVecOutPos[i]->endEdit();
 
     }
 
     void applyJ(const core::MechanicalParams *mparams, const helper::vector<OutDataVecDeriv*>& dataVecOutVel, const helper::vector<const InDataVecDeriv*>& dataVecInVel) override
     {
+        SOFA_UNUSED(mparams);
+
         //Not optimized at all...
         helper::vector<OutVecDeriv*> vecOutVel;
         for(unsigned int i=0; i<dataVecOutVel.size(); i++)
-            vecOutVel.push_back(dataVecOutVel[i]->beginEdit(mparams));
+            vecOutVel.push_back(dataVecOutVel[i]->beginEdit());
 
         helper::vector<const InVecDeriv*> vecInVel;
         for(unsigned int i=0; i<dataVecInVel.size(); i++)
-            vecInVel.push_back(&dataVecInVel[i]->getValue(mparams));
+            vecInVel.push_back(&dataVecInVel[i]->getValue());
 
         this->applyJ(vecOutVel, vecInVel);
 
         //Really Not optimized at all...
         for(unsigned int i=0; i<dataVecOutVel.size(); i++)
-            dataVecOutVel[i]->endEdit(mparams);
+            dataVecOutVel[i]->endEdit();
 
     }
 
     void applyJT(const core::MechanicalParams *mparams, const helper::vector<InDataVecDeriv*>& dataVecOutForce, const helper::vector<const OutDataVecDeriv*>& dataVecInForce) override
     {
+        SOFA_UNUSED(mparams);
+
         //Not optimized at all...
         helper::vector<InVecDeriv*> vecOutForce;
         for(unsigned int i=0; i<dataVecOutForce.size(); i++)
-            vecOutForce.push_back(dataVecOutForce[i]->beginEdit(mparams));
+            vecOutForce.push_back(dataVecOutForce[i]->beginEdit());
 
         helper::vector<const OutVecDeriv*> vecInForce;
         for(unsigned int i=0; i<dataVecInForce.size(); i++)
-            vecInForce.push_back(&dataVecInForce[i]->getValue(mparams));
+            vecInForce.push_back(&dataVecInForce[i]->getValue());
 
         this->applyJT(vecOutForce, vecInForce);
 
         //Really Not optimized at all...
         for(unsigned int i=0; i<dataVecOutForce.size(); i++)
-            dataVecOutForce[i]->endEdit(mparams);
+            dataVecOutForce[i]->endEdit();
 
     }
 
@@ -279,7 +294,7 @@ protected:
     DistanceMultiMapping();
     virtual ~DistanceMultiMapping();
 
-    topology::EdgeSetTopologyContainer* edgeContainer;  ///< where the edges are defined
+    topology::EdgeSetTopologyContainer* m_edgeContainer;  ///< where the edges are defined
     helper::vector<defaulttype::BaseMatrix*> baseMatrices;      ///< Jacobian of the mapping, in a vector
     helper::vector<Direction> directions;                         ///< Unit vectors in the directions of the lines
     helper::vector< Real > invlengths;                          ///< inverse of current distances. Null represents the infinity (null distance)

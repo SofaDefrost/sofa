@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -53,8 +53,7 @@ int TriangleModelInRegularGridClass = core::RegisterObject ( "collision model us
         .add< TriangleModelInRegularGrid >()
         ;
 
-TriangleModelInRegularGrid::TriangleModelInRegularGrid()
-    :TriangleModel()
+TriangleModelInRegularGrid::TriangleModelInRegularGrid() : TriangleCollisionModel<sofa::defaulttype::Vec3Types>()
 {
 
 }
@@ -68,16 +67,16 @@ TriangleModelInRegularGrid::~TriangleModelInRegularGrid()
 
 void TriangleModelInRegularGrid::init()
 {
-    TriangleModel::init();
+    TriangleCollisionModel<sofa::defaulttype::Vec3Types>::init();
 
     _topology = this->getContext()->getMeshTopology();
     m_mstate = dynamic_cast< core::behavior::MechanicalState<Vec3Types>* > (getContext()->getMechanicalState());
 
-    if( !m_mstate) { serr << "TriangleModelInRegularGrid requires a Vec3 Mechanical Model" << sendl; return;}
-    if (!m_topology) { serr << "TriangleModelInRegularGrid requires a BaseMeshTopology" << sendl; return;}
+    if (!m_mstate) { msg_error() << "TriangleModelInRegularGrid requires a Vec3 Mechanical Model"; return; }
+    if (!m_topology) { msg_error() << "TriangleModelInRegularGrid requires a BaseMeshTopology"; return; }
 
     // Test if _topology depend on an higher topology (to compute Bounding Tree faster) and get it
-    TopologicalMapping* _topoMapping = NULL;
+    TopologicalMapping* _topoMapping = nullptr;
     vector<TopologicalMapping*> topoVec;
     getContext()->get<TopologicalMapping> ( &topoVec, core::objectmodel::BaseContext::SearchRoot );
     _higher_topo = m_topology;
@@ -99,14 +98,21 @@ void TriangleModelInRegularGrid::init()
             }
         }
     }
-    if ( _topoMapping && !_higher_topo ) { serr << "Topological Mapping " << _topoMapping->getName() << " returns a from topology pointer equal to NULL." << sendl; return;}
-    else if ( _higher_topo != _topology ) sout << "Using the " << _higher_topo->getClassName() << " \"" << _higher_topo->getName() << "\" to compute the bounding trees." << sendl;
-    else sout << "Keeping the TriangleModel to compute the bounding trees." << sendl;
+    if ( _topoMapping && !_higher_topo ) { 
+        msg_error() << "Topological Mapping " << _topoMapping->getName() << " returns a from topology pointer equal to nullptr.";
+        return;
+    }
+    else if (_higher_topo != _topology) {
+        msg_info() << "Using the " << _higher_topo->getClassName() << " \"" << _higher_topo->getName() << "\" to compute the bounding trees.";
+    }
+    else {
+        msg_info() << "Keeping the TriangleCollisionModel<sofa::defaulttype::Vec3Types> to compute the bounding trees.";
+    }
 }
 
 void TriangleModelInRegularGrid::computeBoundingTree ( int )
 {
-    CubeModel* cubeModel = createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = createPrevious<CubeCollisionModel>();
     updateFromTopology();
     if ( m_needsUpdate && !cubeModel->empty() ) cubeModel->resize ( 0 );
     if ( !isMoving() && !cubeModel->empty() && !m_needsUpdate ) return; // No need to recompute BBox if immobile

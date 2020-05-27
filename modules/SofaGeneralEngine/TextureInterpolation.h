@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -54,7 +54,7 @@ public:
     typedef sofa::defaulttype::Vec<1,Real>                       Coord1D;
     typedef sofa::defaulttype::Vec<2,Real>                       Coord2D;
     typedef sofa::defaulttype::Vec<3,Real>                       Coord3D;
-    typedef sofa::defaulttype::ResizableExtVector <Coord2D>      ResizableExtVector2D;
+    typedef helper::vector <Coord2D>          VecCoord2D;
     typedef sofa::helper::vector <Coord3D>    VecCoord3D;
 
 
@@ -72,16 +72,6 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-    virtual std::string getTemplateName() const override
-    {
-        return templateName(this);
-    }
-
-    static std::string templateName(const TextureInterpolation<DataTypes>* = NULL)
-    {
-        return DataTypes::Name();
-    }
-
 protected:
 
     /// input state vector
@@ -91,7 +81,7 @@ protected:
     Data <VecCoord3D> _inputCoords;
 
     /// output texture coordinate vector
-    Data <ResizableExtVector2D> _outputCoord;
+    Data <VecCoord2D> _outputCoord;
 
     /// bool used to specify scalar input field (if higher template is needed)
     Data<bool> _scalarField;
@@ -118,7 +108,6 @@ protected:
 extern template class SOFA_GENERAL_ENGINE_API TextureInterpolation<defaulttype::Vec1Types>;
 extern template class SOFA_GENERAL_ENGINE_API TextureInterpolation<defaulttype::Vec2Types>;
 extern template class SOFA_GENERAL_ENGINE_API TextureInterpolation<defaulttype::Vec3Types>;
- 
 #endif
 
 } // namespace engine

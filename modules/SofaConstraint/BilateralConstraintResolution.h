@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -48,7 +48,7 @@ using sofa::core::behavior::ConstraintResolution ;
 class BilateralConstraintResolution : public ConstraintResolution
 {
 public:
-    BilateralConstraintResolution(double* initF=NULL) 
+    BilateralConstraintResolution(double* initF=nullptr) 
         : ConstraintResolution(1)
         , _f(initF) {}
     void resolution(int line, double** w, double* d, double* force, double *dfree) override
@@ -80,7 +80,7 @@ class BilateralConstraintResolution3Dof : public ConstraintResolution
 {
 public:
 
-    BilateralConstraintResolution3Dof(sofa::defaulttype::Vec3d* vec = NULL)
+    BilateralConstraintResolution3Dof(sofa::defaulttype::Vec3d* vec = nullptr)
         : ConstraintResolution(3)
         , _f(vec)
     {

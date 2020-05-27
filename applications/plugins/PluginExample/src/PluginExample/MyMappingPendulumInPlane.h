@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,19 +19,16 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef PLUGINEXAMPLE_MYMAPPINGPENDULUMINPLANE_H
-#define PLUGINEXAMPLE_MYMAPPINGPENDULUMINPLANE_H
+#pragma once
+
+#include <PluginExample/config.h>
 
 #include <sofa/core/Mapping.h>
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/helper/OptionsGroup.h>
 
 
-namespace sofa
-{
-namespace component
-{
-namespace mapping
+namespace sofa::component::mapping
 {
 
 using helper::vector;
@@ -68,27 +65,24 @@ public:
 
 protected:
     MyMappingPendulumInPlane();
-    ~MyMappingPendulumInPlane();
+    virtual ~MyMappingPendulumInPlane();
 
 public:
-    Data<vector<OutReal> > f_length; ///< distances from the fixed point to the end of the pendulum
+    Data<vector<OutReal> > d_length; ///< distances from the fixed point to the end of the pendulum
 
-    virtual void init();
-    virtual void draw(const core::visual::VisualParams*);
+    virtual void init() override;
+    virtual void draw(const core::visual::VisualParams*) override;
 
-    virtual void apply(const core::MechanicalParams* mparams, OutDataVecCoord& out, const InDataVecCoord& in);
-    virtual void applyJ(const core::MechanicalParams* mparams, OutDataVecDeriv& out, const InDataVecDeriv& in);
-    virtual void applyJT(const core::MechanicalParams* mparams, InDataVecDeriv& out, const OutDataVecDeriv& in);
-    virtual void applyJT(const core::ConstraintParams* mparams, InDataMatrixDeriv& out, const OutDataMatrixDeriv& in);
-    virtual void applyDJT(const core::MechanicalParams* mparams, core::MultiVecDerivId parentForceChange, core::ConstMultiVecDerivId);
+    virtual void apply(const core::MechanicalParams* mparams, OutDataVecCoord& out, const InDataVecCoord& in) override;
+    virtual void applyJ(const core::MechanicalParams* mparams, OutDataVecDeriv& out, const InDataVecDeriv& in) override;
+    virtual void applyJT(const core::MechanicalParams* mparams, InDataVecDeriv& out, const OutDataVecDeriv& in) override;
+    virtual void applyJT(const core::ConstraintParams* mparams, InDataMatrixDeriv& out, const OutDataMatrixDeriv& in) override;
+    virtual void applyDJT(const core::MechanicalParams* mparams, core::MultiVecDerivId parentForceChange, core::ConstMultiVecDerivId) override;
 
 protected:
     typedef Vec<2, OutReal> Vec2;
     vector<Vec2> gap;
 };
 
-} // namespace mapping
-} // namespace component
-} // namespace sofa
+} // namespace sofa::component::mapping
 
-#endif // PLUGINEXAMPLE_MYMAPPINGPENDULUMINPLANE_H

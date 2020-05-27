@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -22,6 +22,8 @@
 #ifndef SOFA_GUI_QGLVIEWER_QTVIEWER_H
 #define SOFA_GUI_QGLVIEWER_QTVIEWER_H
 
+#include <sofa/gui/qt/SofaGuiQt.h>
+
 #include <sofa/helper/system/gl.h>
 #include <qgl.h>
 #include <qtimer.h>
@@ -31,7 +33,7 @@
 #include <cstring>
 #include <fstream>
 
-#include <sofa/gui/qt/viewer/SofaViewer.h>
+#include <sofa/gui/qt/viewer/OglModelPolicy.h>
 #include <sofa/gui/ViewerFactory.h>
 #include <sofa/defaulttype/Vec.h>
 #include <sofa/defaulttype/Quat.h>
@@ -136,11 +138,11 @@ protected:
 public:
 
     //void			reshape(int width, int height);
-    int GetWidth()
+    int getWidth() override
     {
         return _W;
     }
-    int GetHeight()
+    int getHeight() override
     {
         return _H;
     }

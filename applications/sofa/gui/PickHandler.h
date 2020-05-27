@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -27,7 +27,6 @@
 
 #include <sofa/gui/ColourPickingVisitor.h>
 #include <SofaBaseMechanics/MechanicalObject.h>
-#include <sofa/helper/gl/FrameBufferObject.h>
 
 namespace sofa
 {
@@ -36,7 +35,7 @@ namespace component
 namespace collision
 {
     class ComponentMouseInteraction;
-    class RayModel;
+    class RayCollisionModel;
 }
 namespace configurationsetting
 {
@@ -66,13 +65,9 @@ public:
     virtual void render(ColourPickingVisitor::ColourCode code ) = 0;
 };
 
-
-
-
-
 class SOFA_SOFAGUI_API PickHandler
 {
-    typedef sofa::component::collision::RayModel MouseCollisionModel;
+    typedef sofa::component::collision::RayCollisionModel MouseCollisionModel;
     typedef sofa::component::container::MechanicalObject< defaulttype::Vec3Types > MouseContainer;
 
 public:
@@ -83,14 +78,13 @@ public:
     };
 
     PickHandler(double defaultLength = 1000000);
-    ~PickHandler();
+    virtual ~PickHandler();
 
     void activateRay(int width, int height, core::objectmodel::BaseNode* root);
     void deactivateRay();
 
-    void allocateSelectionBuffer(int width, int height);
-    void destroySelectionBuffer();
-
+    virtual void allocateSelectionBuffer(int width, int height);
+    virtual void destroySelectionBuffer();
 
     void setPickingMethod(PickingMethod method) { pickingMethod = method; }
     bool useSelectionBufferMethod() const { return (pickingMethod == SELECTION_BUFFER); }
@@ -121,7 +115,7 @@ public:
     void clearCallBacks() {for (unsigned int i=0; i<callbacks.size(); ++i) callbacks.clear();}
 
     static BodyPicked findCollisionUsingBruteForce(const defaulttype::Vector3& origin, const defaulttype::Vector3& direction, double maxLength, core::objectmodel::BaseNode* root);
-    BodyPicked findCollisionUsingColourCoding(const defaulttype::Vector3& origin, const defaulttype::Vector3& direction);
+    virtual BodyPicked findCollisionUsingColourCoding(const defaulttype::Vector3& origin, const defaulttype::Vector3& direction);
 
     ComponentMouseInteraction           *getInteraction();
     BodyPicked                          *getLastPicked() {return &lastPicked;}
@@ -137,11 +131,6 @@ protected:
     MouseCollisionModel::SPtr mouseCollision;
 
     MousePosition             mousePosition;
-
-#ifndef SOFA_NO_OPENGL
-    sofa::helper::gl::FrameBufferObject _fbo;
-    sofa::helper::gl::fboParameters     _fboParams;
-#endif /* SOFA_NO_OPENGL */
 
     ComponentMouseInteraction *interaction;
     std::vector< ComponentMouseInteraction *> instanceComponents;
@@ -162,10 +151,8 @@ protected:
 
     PickingMethod pickingMethod;
 
-    bool _fboAllocated;
 
-
-    BodyPicked findCollision();
+    virtual BodyPicked findCollision();
     BodyPicked findCollisionUsingPipeline();
     BodyPicked findCollisionUsingBruteForce();
     BodyPicked findCollisionUsingColourCoding();

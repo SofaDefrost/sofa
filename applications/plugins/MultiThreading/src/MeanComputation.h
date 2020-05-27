@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -53,8 +53,8 @@ namespace sofa
                 //typedef sofa::defaulttype::Vec<1, Real>                       Coord1D;
                 //typedef sofa::defaulttype::Vec<2, Real>                       Coord2D;
                 //typedef sofa::defaulttype::Vec<3, Real>                       Coord3D;
-                typedef sofa::defaulttype::ResizableExtVector <Coord>       ResizableExtVectorCoord;
-                typedef sofa::defaulttype::ResizableExtVector <VecCoord>    ResizableExtVectorVecCoord;
+                typedef sofa::helper::vector <Coord>       VectorCoord;
+                typedef sofa::helper::vector <VecCoord>    VectorVecCoord;
                 //typedef sofa::helper::vector <Coord3D>    VecCoord3D;
 
             public:

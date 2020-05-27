@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -60,7 +60,7 @@ protected:
     class TrianglePressureInformation
     {
     public:
-        Real area;
+        Real area {0.0};
 
         TrianglePressureInformation() {}
         TrianglePressureInformation(const TrianglePressureInformation &e)
@@ -83,8 +83,7 @@ protected:
     std::ofstream file;
 
 public:
-    sofa::component::topology::TriangleSparseData<sofa::helper::vector <TrianglePressureInformation> > trianglePressureMap; ///< map between edge indices and their pressure
-    sofa::core::topology::BaseMeshTopology* _topology;
+    sofa::component::topology::TriangleSparseData<sofa::helper::vector <TrianglePressureInformation> > trianglePressureMap; ///< map between edge indices and their pressure    
 
     Data<Real> moment;   ///< total moment/torque applied
     Data<sofa::helper::vector<unsigned int> > triangleList; ///< Indices of triangles separated with commas where a pressure is applied
@@ -96,6 +95,9 @@ public:
     Data<Real> dmax;     ///< coordinates max of the plane for the vertex selection
     Data<bool> p_showForces; ///< draw triangles which have a given pressure
 
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<OscillatingTorsionPressureForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
     void init() override;
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& d_f, const DataVecCoord& d_x, const DataVecDeriv& d_v) override;
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& /* d_df */, const DataVecDeriv& /* d_dx */) override;
@@ -104,7 +106,8 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-    void setDminAndDmax(const SReal _dmin, const SReal _dmax){dmin.setValue((Real)_dmin); dmax.setValue((Real)_dmax);}
+    void setDminAndDmax(const SReal _dmin, const SReal _dmax){dmin.setValue(static_cast<Real>(_dmin));
+                                                              dmax.setValue(static_cast<Real>(_dmax));}
     void setAxis(const Coord n) { axis.setValue(n);}
     void setMoment(Real x) { moment.setValue( x ); }
 
@@ -134,6 +137,8 @@ protected :
     std::vector<Coord> origVecFromCenter; // vector from rotation axis for all points in original state
     std::vector<Coord> origCenter;        // center of rotation for original points
     SReal rotationAngle;
+
+    sofa::core::topology::BaseMeshTopology* m_topology; ///< Pointer to the current topology
 };
 
 #if  !defined(SOFA_COMPONENT_FORCEFIELD_OSCILLATINGTORSIONPRESSUREFORCEFIELD_CPP)

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,14 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/*
- * CompositingVisualLoop.cpp
- *
- *  Created on: 16 janv. 2012
- *      Author: Jeremy Ringard
- */
-
-
 #include <SofaOpenglVisual/CompositingVisualLoop.h>
 #include <sofa/core/ObjectFactory.h>
 #include <SofaBaseVisual/VisualStyle.h>
@@ -43,7 +35,7 @@ namespace component
 namespace visualmodel
 {
 
-static int CompositingVisualLoopClass = core::RegisterObject("Visual loop enabling multipass rendering. Needs multiple fbo data and a compositing shader")
+int CompositingVisualLoopClass = core::RegisterObject("Visual loop enabling multipass rendering. Needs multiple fbo data and a compositing shader")
         .add< CompositingVisualLoop >()
         ;
 
@@ -84,7 +76,7 @@ void CompositingVisualLoop::drawStep(sofa::core::visual::VisualParams* vparams)
 
     sofa::core::visual::tristate renderingState;
     //vparams->displayFlags().setShowRendering(false);
-    component::visualmodel::VisualStyle::SPtr visualStyle = NULL;
+    component::visualmodel::VisualStyle::SPtr visualStyle = nullptr;
     gRoot->get(visualStyle);
     const sofa::core::visual::DisplayFlags &backupFlags = vparams->displayFlags();
     const sofa::core::visual::DisplayFlags &currentFlags = visualStyle->displayFlags.getValue();
@@ -104,7 +96,7 @@ void CompositingVisualLoop::drawStep(sofa::core::visual::VisualParams* vparams)
     //should not happen: the compositing loop relies on one or more rendered passes done by the VisualManagerPass component
     if (gRoot->visualManager.empty())
     {
-        serr << "CompositingVisualLoop: no VisualManagerPass found. Disable multipass rendering." << sendl;
+        msg_error() << "CompositingVisualLoop: no VisualManagerPass found. Disable multipass rendering.";
         defaultRendering(vparams);
     }
 
@@ -120,7 +112,7 @@ void CompositingVisualLoop::drawStep(sofa::core::visual::VisualParams* vparams)
         {
             (*it)->preDrawScene(vparams);
             VisualManagerPass* currentVMP=dynamic_cast<VisualManagerPass*>(*it);
-            if( currentVMP!=NULL && !currentVMP->isPrerendered())
+            if( currentVMP!=nullptr && !currentVMP->isPrerendered())
             {
                 msg_info() << "final pass is "<<currentVMP->getName()<< "end of predraw loop"  ;
                 break;

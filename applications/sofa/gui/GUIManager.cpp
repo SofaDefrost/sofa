@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -23,11 +23,10 @@
 
 #include "GUIManager.h"
 #include "BaseGUI.h"
-#include <SofaComponentBase/initComponentBase.h>
-#include <SofaComponentCommon/initComponentCommon.h>
-#include <SofaComponentGeneral/initComponentGeneral.h>
-#include <SofaComponentAdvanced/initComponentAdvanced.h>
-#include <SofaComponentMisc/initComponentMisc.h>
+#include <SofaBase/initSofaBase.h>
+#include <SofaCommon/initSofaCommon.h>
+#include <SofaGeneral/initSofaGeneral.h>
+#include <SofaMisc/initSofaMisc.h>
 #include <SofaSimulationCommon/init.h>
 #include <sofa/helper/system/FileSystem.h>
 #include <sofa/helper/Utils.h>
@@ -46,7 +45,7 @@ namespace gui
 /*STATIC FIELD DEFINITIONS */
 BaseGUI* GUIManager::currentGUI = nullptr;
 std::list<GUIManager::GUICreator> GUIManager::guiCreators;
-const char* GUIManager::valid_guiname = nullptr;
+std::string GUIManager::valid_guiname = "";
 ArgumentParser* GUIManager::currentArgumentParser = nullptr;
 
 
@@ -197,11 +196,10 @@ int GUIManager::Init(const char* argv0, const char* name)
     static bool first = true;
     if (first)
     {
-        sofa::component::initComponentBase();
-        sofa::component::initComponentCommon();
-        sofa::component::initComponentGeneral();
-        sofa::component::initComponentAdvanced();
-        sofa::component::initComponentMisc();
+        sofa::component::initSofaBase();
+        sofa::component::initSofaCommon();
+        sofa::component::initSofaGeneral();
+        sofa::component::initSofaMisc();
 
         first = false;
     }
@@ -215,7 +213,7 @@ int GUIManager::Init(const char* argv0, const char* name)
         return 1;
     }
 
-    if( name == NULL || strcmp(name,"") == 0 )
+    if( name == nullptr || strcmp(name,"") == 0 )
     {
         name = GetValidGUIName(); // get the default gui name
     }
@@ -234,12 +232,12 @@ int GUIManager::createGUI(sofa::simulation::Node::SPtr groot, const char* filena
 {
     if (!currentGUI)
     {
-        GUICreator* creator = GetGUICreator(valid_guiname);
+        GUICreator* creator = GetGUICreator(valid_guiname.c_str());
         if (!creator)
         {
             return 1;
         }
-        currentGUI = (*creator->creator)(valid_guiname, groot, filename);
+        currentGUI = (*creator->creator)(valid_guiname.c_str(), groot, filename);
         if (!currentGUI)
         {
             msg_error("GUIManager") << "GUI '"<<valid_guiname<<"' creation failed." ;
@@ -272,7 +270,7 @@ sofa::simulation::Node* GUIManager::CurrentSimulation()
         return nullptr;
 }
 
-void GUIManager::SetScene(sofa::simulation::Node::SPtr groot, const char* filename /*=NULL*/, bool temporaryFile /*=false*/ )
+void GUIManager::SetScene(sofa::simulation::Node::SPtr groot, const char* filename /*=nullptr*/, bool temporaryFile /*=false*/ )
 {
     if (currentGUI)
     {

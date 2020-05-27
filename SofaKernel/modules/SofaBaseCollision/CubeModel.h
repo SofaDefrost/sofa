@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,8 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_COLLISION_CUBEMODEL_H
-#define SOFA_COMPONENT_COLLISION_CUBEMODEL_H
+#ifndef SOFA_COMPONENT_COLLISION_CUBECOLLISIONMODEL_H
+#define SOFA_COMPONENT_COLLISION_CUBECOLLISIONMODEL_H
 #include "config.h"
 
 #include <sofa/core/CollisionModel.h>
@@ -36,12 +36,12 @@ namespace component
 namespace collision
 {
 
-class CubeModel;
+class CubeCollisionModel;
 
-class Cube : public core::TCollisionElementIterator<CubeModel>
+class Cube : public core::TCollisionElementIterator<CubeCollisionModel>
 {
 public:
-    Cube(CubeModel* model=nullptr, int index=0);
+    Cube(CubeCollisionModel* model=nullptr, int index=0);
 
     explicit Cube(const core::CollisionElementIterator& i);
 
@@ -52,10 +52,10 @@ public:
     const std::pair<Cube,Cube>& subcells() const;
 };
 
-class SOFA_BASE_COLLISION_API CubeModel : public core::CollisionModel
+class SOFA_BASE_COLLISION_API CubeCollisionModel : public core::CollisionModel
 {
 public:
-    SOFA_CLASS(CubeModel,sofa::core::CollisionModel);
+    SOFA_CLASS(CubeCollisionModel,sofa::core::CollisionModel);
 
     struct CubeData
     {
@@ -75,21 +75,6 @@ public:
             SReal v2 = c2.minBBox[axis]+c2.maxBBox[axis];
             return v1 < v2;
         }
-        template<int Axis>
-        static int sortCube(const void* p1, const void* p2)
-        {
-            const CubeModel::CubeData* c1 = (const CubeModel::CubeData*)p1;
-            const CubeModel::CubeData* c2 = (const CubeModel::CubeData*)p2;
-            SReal v1 = c1->minBBox[Axis] + c1->maxBBox[Axis];
-            SReal v2 = c2->minBBox[Axis] + c2->maxBBox[Axis];
-
-            if (v1 < v2)
-                return -1;
-            else if (v1 > v2)
-                return 1;
-            else
-                return 0;
-        }
     };
 
 protected:
@@ -102,7 +87,7 @@ public:
     typedef Cube Element;
     friend class Cube;
 protected:
-    CubeModel();
+    CubeCollisionModel();
 public:
     void resize(int size) override;
 
@@ -160,12 +145,12 @@ public:
     void updateCubes();
 };
 
-inline Cube::Cube(CubeModel* model, int index)
-    : core::TCollisionElementIterator<CubeModel>(model, index)
+inline Cube::Cube(CubeCollisionModel* model, int index)
+    : core::TCollisionElementIterator<CubeCollisionModel>(model, index)
 {}
 
 inline Cube::Cube(const core::CollisionElementIterator& i)
-    : core::TCollisionElementIterator<CubeModel>(static_cast<CubeModel*>(i.getCollisionModel()), i.getIndex())
+    : core::TCollisionElementIterator<CubeCollisionModel>(static_cast<CubeCollisionModel*>(i.getCollisionModel()), i.getIndex())
 {
 }
 
@@ -184,6 +169,8 @@ inline const std::pair<Cube,Cube>& Cube::subcells() const
 {
     return model->elems[index].subcells;
 }
+
+using CubeModel [[deprecated("The CubeModel is now deprecated, please use CubeCollisionModel instead. Compatibility stops at v20.06")]] = CubeCollisionModel;
 
 } // namespace collision
 

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,13 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/*
- * OglShaderVisualModel.cpp
- *
- *  Created on: 9 févr. 2009
- *      Author: froy
- */
-
 #include <SofaOpenglVisual/OglShaderVisualModel.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
@@ -48,16 +41,16 @@ namespace visualmodel
 using namespace sofa::core::topology;
 using namespace sofa::core::behavior;
 
-static int OglShaderVisualModelClass = core::RegisterObject("Visual model for OpenGL display using Glew extensions")
+int OglShaderVisualModelClass = core::RegisterObject("Visual model for OpenGL display using Glew extensions")
         .add< OglShaderVisualModel >()
         ;
 
 OglShaderVisualModel::OglShaderVisualModel()
-    : shader(NULL)
+    : shader(nullptr)
     , restPosition_lastUpdate(-1)
-    , vrestpositions(NULL)
-    , vrestnormals(NULL)
-    , modelMatrixUniform(NULL)
+    , vrestpositions(nullptr)
+    , vrestnormals(nullptr)
+    , modelMatrixUniform(nullptr)
 {
 }
 
@@ -130,24 +123,7 @@ void OglShaderVisualModel::init()
             vrestnormals->setIndexShader(0);
             vrestnormals->init();
         }
-        /*
-            ResizableExtVector<Coord>& vrestpos = * ( vrestpositions.beginEdit() );
-            const ResizableExtVector<Coord>& vertices = m_vertices.getValue();
-            vrestpos.resize (vertices.size() );
-            for ( unsigned int i = 0; i < vertices.size(); i++ )
-            {
-              vrestpos[i] = vertices[i];
-            }
-            vrestpositions.endEdit();
 
-            //add restNormal as Attribute
-            vrestnormals.setContext( this->getContext());
-            vrestnormals.setID( std::string("restNormal") );
-            vrestnormals.setIndexShader( 0);
-            vrestnormals.init();
-
-            computeRestNormals();
-        */
         computeRestPositions();
         //
         //    //add Model Matrix as Uniform
@@ -182,8 +158,8 @@ void OglShaderVisualModel::computeRestPositions()
     //    if (counter == restPosition_lastUpdate) return;
     //    restPosition_lastUpdate = counter;
 
-    helper::ReadAccessor< Data<sofa::defaulttype::ResizableExtVector<Coord> > > positions = m_positions;
-    helper::ReadAccessor< Data<sofa::defaulttype::ResizableExtVector<Coord> > > restpositions = m_restPositions;
+    helper::ReadAccessor< Data<VecCoord > > positions = m_positions;
+    helper::ReadAccessor< Data<VecCoord > > restpositions = m_restPositions;
 
     //Get the position of the new point (should be the rest position to avoid artefact !
     if (restpositions.size()!=positions.size()) {

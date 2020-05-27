@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -76,8 +76,6 @@ public:
     virtual void computeElementMass( ElementMass &Mass, const helper::fixed_array<Coord,8> &nodes, const int elementIndice, SReal stiffnessFactor=1.0); ///< compute the mass matrix of an element
     Real integrateMass( int signx, int signy, int signz, Real l0, Real l1, Real l2 );
 
-    virtual std::string getTemplateName() const override;
-
     // -- Mass interface
      void addMDx(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecDeriv& dx, SReal factor) override;
 
@@ -96,19 +94,19 @@ public:
 
     SReal getKineticEnergy(const core::MechanicalParams*, const DataVecDeriv& /*v*/ ) const override ///< vMv/2 using dof->getV() override
     {
-        serr << "HexahedronFEMForceFieldAndMass::getKineticEnergy() not implemented" << sendl;
+        msg_warning() << "HexahedronFEMForceFieldAndMass::getKineticEnergy() not implemented" << msgendl;
         return 0.0;
     }
 
     SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override
     {
-        serr << "HexahedronFEMForceFieldAndMass::getPotentialEnergy() not implemented" << sendl;
+        msg_warning() << "Method getPotentialEnergy not implemented yet.";
         return 0.0;
     }
 
     SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/) const override
     {
-        serr << "HexahedronFEMForceFieldAndMass::getPotentialEnergy() not implemented" << sendl;
+        msg_warning() << "Method getPotentialEnergy not implemented yet.";
         return 0.0;
     }
 
@@ -127,16 +125,16 @@ public:
 
 
 
-    void setDensity(Real d) {_density.setValue( d );}
-    Real getDensity() {return _density.getValue();}
+    void setDensity(Real d) {d_density.setValue( d );}
+    Real getDensity() {return d_density.getValue();}
 
 
 
 protected :
 
-    Data<VecElementMass> _elementMasses; ///< mass matrices per element
-    Data<Real> _density; ///< density == volumetric mass in english (kg.m-3)
-    Data<bool> _lumpedMass; ///< Does it use lumped masses?
+    Data<VecElementMass> d_elementMasses; ///< mass matrices per element
+    Data<Real> d_density; ///< density == volumetric mass in english (kg.m-3)
+    Data<bool> d_lumpedMass; ///< Does it use lumped masses?
 
     MassVector _particleMasses; ///< masses per particle in order to compute gravity
     helper::vector<Coord> _lumpedMasses; ///< masses per particle computed by lumping mass matrices

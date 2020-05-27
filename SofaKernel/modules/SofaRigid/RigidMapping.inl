@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -37,6 +37,8 @@
 #include <sofa/helper/decompose.h>
 
 #include <sofa/simulation/Simulation.h>
+
+#include <Eigen/Dense>
 
 #include <cstring>
 #include <iostream>
@@ -107,7 +109,7 @@ void RigidMapping<TIn, TOut>::load(const char *filename)
     {
         // Default to mesh loader
         helper::io::Mesh* mesh = helper::io::Mesh::Create(filename);
-        if (mesh != NULL)
+        if (mesh != nullptr)
         {
             helper::WriteAccessor<Data<VecCoord> > points = this->points;
 
@@ -188,7 +190,7 @@ int RigidMapping<TIn, TOut>::addPoint(const Coord& c, unsigned int indexFrom)
 template <class TIn, class TOut>
 void RigidMapping<TIn, TOut>::reinit()
 {
-    if (this->points.getValue().empty() && this->toModel != NULL && !useX0.getValue())
+    if (this->points.getValue().empty() && this->toModel != nullptr && !useX0.getValue())
     {
         const VecCoord& xTo =this->toModel->read(core::ConstVecCoordId::position())->getValue();
         helper::WriteOnlyAccessor<Data<VecCoord> > points = this->points;
@@ -652,7 +654,7 @@ template <class TIn, class TOut>
 const sofa::defaulttype::BaseMatrix* RigidMapping<TIn, TOut>::getK()
 {
     if( geometricStiffnessMatrix.compressedMatrix.nonZeros() ) return &geometricStiffnessMatrix;
-    else return NULL;
+    else return nullptr;
 }
 
 
@@ -731,7 +733,7 @@ void RigidMapping<TIn, TOut>::setJMatrixBlock(unsigned outIdx, unsigned inIdx)
 template <class TIn, class TOut>
 void RigidMapping<TIn, TOut>::draw(const core::visual::VisualParams* vparams)
 {
-    if (!vparams->displayFlags().getShowMappings() || this->toModel==NULL )
+    if (!vparams->displayFlags().getShowMappings() || this->toModel==nullptr )
         return;
     std::vector<defaulttype::Vector3> points;
     defaulttype::Vector3 point;
@@ -755,7 +757,7 @@ void RigidMapping<TIn, TOut>::parse(core::objectmodel::BaseObjectDescription* ar
     const char* repartitionChar = arg->getAttribute("repartition");
     if( repartitionChar )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data 'repartition', please use the new structure data rigidIndexPerPoint"<<sendl;
+        msg_deprecated() << "parse: You are using a deprecated Data 'repartition', please use the new structure data rigidIndexPerPoint";
 
         helper::vector< unsigned int > repartition;
         std::istringstream ss( repartitionChar );

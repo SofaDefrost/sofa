@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -22,9 +22,9 @@
 #include <sofa/helper/system/config.h>
 #include <SofaMiscCollision/initMiscCollision.h>
 
-#ifdef SOFA_HAVE_SOFASPHFLUID
+#if SOFAMISCCOLLISION_HAVE_SOFASPHFLUID
 #include "SpatialGridPointModel.h"
-#endif // SOFA_HAVE_SOFASPHFLUID
+#endif // SOFAMISCCOLLISION_HAVE_SOFASPHFLUID
 
 namespace sofa
 {

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -22,7 +22,7 @@
 #ifndef SOFA_GUI_QT_QSOFALISTVIEW_H
 #define SOFA_GUI_QT_QSOFALISTVIEW_H
 
-#include "SofaGUIQt.h"
+#include <sofa/gui/qt/SofaGuiQt.h>
 
 #include <QWidget>
 #include <QTreeWidget>
@@ -31,7 +31,7 @@
 #include <QPushButton>
 
 
-#include <sofa/gui/qt/SofaGUIQt.h>
+#include <sofa/gui/qt/SofaGuiQt.h>
 #include <sofa/simulation/Node.h>
 #include <sofa/core/objectmodel/BaseData.h>
 #include <sofa/core/objectmodel/BaseObject.h>

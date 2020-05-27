@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -56,15 +56,14 @@ class OglTetrahedralModel : public core::visual::VisualModel
 public:
     SOFA_CLASS(OglTetrahedralModel, core::visual::VisualModel);
 
-    //typedef ExtVec3fTypes DataTypes;
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::Real Real;
     typedef sofa::core::topology::Tetrahedron Tetrahedron;
     typedef sofa::core::topology::BaseMeshTopology::SeqTetrahedra SeqTetrahedra;
     core::topology::BaseMeshTopology* m_topology;
 
-    topology::PointData< sofa::defaulttype::ResizableExtVector<Coord> > m_positions; ///< Vertices coordinates
-    Data< sofa::defaulttype::ResizableExtVector<Tetrahedron> > m_tetrahedrons;
+    topology::PointData< sofa::helper::vector<Coord> > m_positions; ///< Vertices coordinates
+    Data< sofa::helper::vector<Tetrahedron> > m_tetrahedrons;
     Data<bool> depthTest; ///< Set Depth Test
     Data<bool> blending; ///< Set Blending
 

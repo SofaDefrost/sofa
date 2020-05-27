@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -21,7 +21,7 @@
 ******************************************************************************/
 #ifndef SOFA_COMPONENT_MISC_TOPOLOGICALCHANGEPROCESSOR_H
 #define SOFA_COMPONENT_MISC_TOPOLOGICALCHANGEPROCESSOR_H
-#include "config.h"
+#include <SofaMiscTopology/config.h>
 
 
 #include <sofa/simulation/AnimateBeginEvent.h>
@@ -30,7 +30,7 @@
 
 #include <SofaBaseTopology/TriangleSetGeometryAlgorithms.h>
 
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAMISCTOPOLOGY_HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -82,6 +82,8 @@ public:
 
     Data<bool>  m_draw; ///< draw information
 
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<TopologicalChangeProcessor, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 protected:
     TopologicalChangeProcessor();
@@ -91,7 +93,7 @@ protected:
     core::topology::BaseMeshTopology* m_topology;
 
     std::ifstream* infile;
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAMISCTOPOLOGY_HAVE_ZLIB
     gzFile gzfile;
 #endif
     double nextTime;
@@ -125,8 +127,10 @@ public:
     template<class T>
     static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
     {
-        if (context->getMeshTopology() == NULL)
+        if (context->getMeshTopology() == nullptr) {
+            arg->logError("No mesh topology found in the context node.");
             return false;
+        }
 
         return BaseObject::canCreate(obj, context, arg);
     }

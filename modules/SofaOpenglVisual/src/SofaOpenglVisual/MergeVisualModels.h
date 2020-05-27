@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -49,7 +49,8 @@ namespace visualmodel
 class SOFA_OPENGL_VISUAL_API MergeVisualModels : public OglModel
 {
 public:
-    SOFA_CLASS(MergeVisualModels,OglModel);
+    using Inherit = OglModel;
+    SOFA_CLASS(MergeVisualModels,Inherit);
 
 
     Data<unsigned int> d_nbInput; ///< number of input visual models to merge
@@ -72,25 +73,26 @@ protected:
     {
         unsigned int nb = d_nbInput.getValue();
 
-        unsigned int nbpos = 0, nbvert = 0, nbedges = 0, nbtris = 0, nbquads = 0;
+        unsigned int nbpos = 0, nbvert = 0, nbedges = 0, nbtris = 0, nbquads = 0, nbrTexC = 0;
         for (unsigned int i=0; i<nb; ++i)
         {
             nbpos += (*vl_input[i])->m_positions.getValue().size();
             nbvert += (*vl_input[i])->m_vertices2.getValue().size();
+            nbrTexC += (*vl_input[i])->m_vtexcoords.getValue().size();
             nbedges += (*vl_input[i])->m_edges.getValue().size();
             nbtris += (*vl_input[i])->m_triangles.getValue().size();
             nbquads += (*vl_input[i])->m_quads.getValue().size();
         }
 
 
-        sofa::defaulttype::ResizableExtVector<Coord>& pos = *this->m_positions.beginWriteOnly();
+        VecCoord& pos = *this->m_positions.beginWriteOnly();
         pos.resize( nbpos );
 
         {
             unsigned offset = 0;
             for (unsigned int i=0; i<nb; ++i)
             {
-                const sofa::defaulttype::ResizableExtVector<Coord>& in = (*vl_input[i])->m_positions.getValue();
+                const VecCoord& in = (*vl_input[i])->m_positions.getValue();
                 std::copy( in.begin(), in.end(), pos.begin()+offset );
                 offset += in.size();
             }
@@ -101,13 +103,13 @@ protected:
 
 
         {
-            sofa::defaulttype::ResizableExtVector<Coord>& vert = *this->m_vertices2.beginWriteOnly();
+            VecCoord& vert = *this->m_vertices2.beginWriteOnly();
             vert.resize( nbvert );
 
             unsigned offset = 0;
             for (unsigned int i=0; i<nb; ++i)
             {
-                const sofa::defaulttype::ResizableExtVector<Coord>& in = (*vl_input[i])->m_vertices2.getValue();
+                const VecCoord& in = (*vl_input[i])->m_vertices2.getValue();
                 std::copy( in.begin(), in.end(), vert.begin()+offset );
                 offset += in.size();
             }
@@ -117,14 +119,14 @@ protected:
 
 
         {
-            sofa::defaulttype::ResizableExtVector<int>& vertIdx = *this->m_vertPosIdx.beginWriteOnly();
+            helper::vector<int>& vertIdx = *this->m_vertPosIdx.beginWriteOnly();
             vertIdx.resize( nbvert );
 
             unsigned offset = 0;
             unsigned offsetIdx = 0;
             for (unsigned int i=0; i<nb; ++i)
             {
-                const sofa::defaulttype::ResizableExtVector<int>& in = (*vl_input[i])->m_vertPosIdx.getValue();
+                const helper::vector<int>& in = (*vl_input[i])->m_vertPosIdx.getValue();
 
                 for( size_t j=0;j<in.size();++j)
                 {
@@ -140,14 +142,14 @@ protected:
         }
 
         {
-            sofa::defaulttype::ResizableExtVector<int>& vertIdx = *this->m_vertNormIdx.beginWriteOnly();
+            helper::vector<int>& vertIdx = *this->m_vertNormIdx.beginWriteOnly();
             vertIdx.resize( nbvert );
 
             unsigned offset = 0;
             unsigned offsetIdx = 0;
             for (unsigned int i=0; i<nb; ++i)
             {
-                const sofa::defaulttype::ResizableExtVector<int>& in = (*vl_input[i])->m_vertNormIdx.getValue();
+                const helper::vector<int>& in = (*vl_input[i])->m_vertNormIdx.getValue();
 
                 for( size_t j=0;j<in.size();++j)
                 {
@@ -166,7 +168,7 @@ protected:
 
         {
             VecTexCoord& vert = *this->m_vtexcoords.beginWriteOnly();
-            vert.resize( nbvert );
+            vert.resize(nbrTexC);
 
             unsigned offset = 0;
             for (unsigned int i=0; i<nb; ++i)
@@ -185,13 +187,13 @@ protected:
 
 
 
-        sofa::defaulttype::ResizableExtVector<Edge>& edges = *this->m_edges.beginWriteOnly();
+        Inherit::VecEdge& edges = *this->m_edges.beginWriteOnly();
         edges.resize( nbedges );
 
         unsigned offsetEdge = 0;
         for (unsigned int i=0; i<nb; ++i)
         {
-            const sofa::defaulttype::ResizableExtVector<Edge>& in = (*vl_input[i])->m_edges.getValue();
+            const Inherit::VecEdge& in = (*vl_input[i])->m_edges.getValue();
 
             for( size_t j=0;j<in.size();++j)
             {
@@ -210,14 +212,14 @@ protected:
 
 
 
-        sofa::defaulttype::ResizableExtVector<Triangle>& tris = *this->m_triangles.beginWriteOnly();
+        Inherit::VecTriangle& tris = *this->m_triangles.beginWriteOnly();
         tris.resize( nbtris );
 
         offsetPoint = 0;
         unsigned offsetTri = 0;
         for (unsigned int i=0; i<nb; ++i)
         {
-            const sofa::defaulttype::ResizableExtVector<Triangle>& in = (*vl_input[i])->m_triangles.getValue();
+            const Inherit::VecTriangle& in = (*vl_input[i])->m_triangles.getValue();
 
             for( size_t j=0;j<in.size();++j)
             {
@@ -235,14 +237,14 @@ protected:
 
 
 
-        sofa::defaulttype::ResizableExtVector<Quad>& quads = *this->m_quads.beginWriteOnly();
+        Inherit::VecQuad& quads = *this->m_quads.beginWriteOnly();
         quads.resize( nbquads );
 
         offsetPoint = 0;
         unsigned offsetQuad = 0;
         for (unsigned int i=0; i<nb; ++i)
         {
-            const sofa::defaulttype::ResizableExtVector<Quad>& in = (*vl_input[i])->m_quads.getValue();
+            const Inherit::VecQuad& in = (*vl_input[i])->m_quads.getValue();
 
             for( size_t j=0;j<in.size();++j)
             {

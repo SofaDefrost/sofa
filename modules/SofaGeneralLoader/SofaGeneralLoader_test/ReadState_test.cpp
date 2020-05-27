@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -35,7 +35,7 @@ public:
     bool testDefaultBehavior()
     {
         double dt = 0.01;
-        sofa::simpleapi::importPlugin("SofaAllCommonComponents") ;
+        sofa::simpleapi::importPlugin("SofaComponentAll") ;
         auto simulation = sofa::simpleapi::createSimulation();
         Node::SPtr root = sofa::simpleapi::createRootNode(simulation, "root");
 
@@ -65,7 +65,7 @@ public:
     /// Run seven steps of simulation then check results
     bool testLoadFailure()
     {
-        sofa::simpleapi::importPlugin("SofaAllCommonComponents") ;
+        sofa::simpleapi::importPlugin("SofaComponentAll") ;
         auto simulation = sofa::simpleapi::createSimulation();
         Node::SPtr root = sofa::simpleapi::createRootNode(simulation, "root");
 

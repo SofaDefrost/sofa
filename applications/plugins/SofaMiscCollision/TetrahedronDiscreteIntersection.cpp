@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -47,8 +47,8 @@ IntersectorCreator<DiscreteIntersection, TetrahedronDiscreteIntersection> Tetrah
 TetrahedronDiscreteIntersection::TetrahedronDiscreteIntersection(DiscreteIntersection* object)
     : intersection(object)
 {
-    intersection->intersectors.add<TetrahedronModel, PointModel,       TetrahedronDiscreteIntersection>  (this);
-    intersection->intersectors.add<RayModel, TetrahedronModel,         TetrahedronDiscreteIntersection>  (this);
+    intersection->intersectors.add<TetrahedronCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>,       TetrahedronDiscreteIntersection>  (this);
+    intersection->intersectors.add<RayCollisionModel, TetrahedronCollisionModel,         TetrahedronDiscreteIntersection>  (this);
 }
 
 bool TetrahedronDiscreteIntersection::testIntersection(Tetrahedron&, Point&)
@@ -76,7 +76,7 @@ int TetrahedronDiscreteIntersection::computeIntersection(Tetrahedron& e1, Point&
 
     // Find the point on the surface of the tetrahedron in the direction of -n
     Vector3 bdir = e1.getDBary(-n);
-    //sout << "b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
+    //msg_info() << "b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
     double l1 = 1.0e10;
     for (int c=0; c<3; ++c)
     {
@@ -122,7 +122,7 @@ int TetrahedronDiscreteIntersection::computeIntersection(Ray& e1, Tetrahedron& e
     Vector3 PQ = e1.direction();
     Vector3 b0 = e2.getBary(P);
     Vector3 bdir = e2.getDBary(PQ);
-    //sout << "b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
+    //msg_info() << "b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
     double l0 = 0;
     double l1 = e1.l();
     for (int c=0; c<3; ++c)
@@ -158,9 +158,9 @@ int TetrahedronDiscreteIntersection::computeIntersection(Ray& e1, Tetrahedron& e
     double l = l0; //(l0+l1)/2;
     Vector3 X = P+PQ*l;
 
-    //sout << "tetra "<<e2.getIndex()<<": b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
-    //sout << "l0 = "<<l0<<" \tl1 = "<<l1<<" \tX = "<<X<<" \tbX = "<<e2.getBary(X)<<" \t?=? "<<(b0+bdir*l)<<sendl;
-    //sout << "b1 = "<<e2.getBary(e2.p1())<<" \nb2 = "<<e2.getBary(e2.p2())<<" \nb3 = "<<e2.getBary(e2.p3())<<" \nb4 = "<<e2.getBary(e2.p4())<<sendl;
+    //msg_info() << "tetra "<<e2.getIndex()<<": b0 = "<<b0<<" \tbdir = "<<bdir<<sendl;
+    //msg_info() << "l0 = "<<l0<<" \tl1 = "<<l1<<" \tX = "<<X<<" \tbX = "<<e2.getBary(X)<<" \t?=? "<<(b0+bdir*l)<<sendl;
+    //msg_info() << "b1 = "<<e2.getBary(e2.p1())<<" \nb2 = "<<e2.getBary(e2.p2())<<" \nb3 = "<<e2.getBary(e2.p3())<<" \nb4 = "<<e2.getBary(e2.p4())<<sendl;
 
     contacts->resize(contacts->size()+1);
     DetectionOutput *detection = &*(contacts->end()-1);

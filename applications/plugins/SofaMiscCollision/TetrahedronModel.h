@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,9 +19,9 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_COLLISION_TETRAHEDRONMODEL_H
-#define SOFA_COMPONENT_COLLISION_TETRAHEDRONMODEL_H
-#include "config.h"
+#ifndef SOFA_COMPONENT_COLLISION_TETRAHEDRONCOLLISIONMODEL_H
+#define SOFA_COMPONENT_COLLISION_TETRAHEDRONCOLLISIONMODEL_H
+#include <SofaMiscCollision/config.h>
 
 #include <SofaMeshCollision/BarycentricContactMapper.h>
 #include <sofa/core/CollisionModel.h>
@@ -40,12 +40,12 @@ namespace component
 namespace collision
 {
 
-class TetrahedronModel;
+class TetrahedronCollisionModel;
 
-class Tetrahedron : public core::TCollisionElementIterator<TetrahedronModel>
+class Tetrahedron : public core::TCollisionElementIterator<TetrahedronCollisionModel>
 {
 public:
-    Tetrahedron(TetrahedronModel* model, int index);
+    Tetrahedron(TetrahedronCollisionModel* model, int index);
     Tetrahedron() {};
     explicit Tetrahedron(const core::CollisionElementIterator& i);
 
@@ -76,10 +76,10 @@ public:
 
 };
 
-class SOFA_MISC_COLLISION_API TetrahedronModel : public core::CollisionModel
+class SOFA_MISC_COLLISION_API TetrahedronCollisionModel : public core::CollisionModel
 {
 public:
-    SOFA_CLASS(TetrahedronModel, core::CollisionModel);
+    SOFA_CLASS(TetrahedronCollisionModel, core::CollisionModel);
 
     typedef defaulttype::Vec3Types InDataTypes;
     typedef defaulttype::Vec3Types DataTypes;
@@ -103,11 +103,15 @@ protected:
 
     core::behavior::MechanicalState<defaulttype::Vec3Types>* mstate;
 
-    sofa::core::topology::BaseMeshTopology* _topology;
+    sofa::core::topology::BaseMeshTopology* m_topology;
+
+    int m_topologyRevision; ///< internal revision number to check if topology has changed.
 
 protected:
 
-    TetrahedronModel();
+    TetrahedronCollisionModel();
+
+    virtual void updateFromTopology();
     void addTetraToDraw(const Tetrahedron& t, std::vector<sofa::defaulttype::Vector3>& tetraVertices, std::vector<sofa::defaulttype::Vector3>& normalVertices);
 public:
     void init() override;
@@ -124,18 +128,19 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-    void handleTopologyChange() override;
-
     core::behavior::MechanicalState<defaulttype::Vec3Types>* getMechanicalState() { return mstate; }
+
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<TetrahedronCollisionModel, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 };
 
-inline Tetrahedron::Tetrahedron(TetrahedronModel* model, int index)
-    : core::TCollisionElementIterator<TetrahedronModel>(model, index)
+inline Tetrahedron::Tetrahedron(TetrahedronCollisionModel* model, int index)
+    : core::TCollisionElementIterator<TetrahedronCollisionModel>(model, index)
 {}
 
 inline Tetrahedron::Tetrahedron(const core::CollisionElementIterator& i)
-    : core::TCollisionElementIterator<TetrahedronModel>(static_cast<TetrahedronModel*>(i.getCollisionModel()), i.getIndex())
+    : core::TCollisionElementIterator<TetrahedronCollisionModel>(static_cast<TetrahedronCollisionModel*>(i.getCollisionModel()), i.getIndex())
 {}
 
 inline const defaulttype::Vector3& Tetrahedron::p1() const { return model->mstate->read(core::ConstVecCoordId::position())->getValue()[(*(model->tetra))[index][0]]; }
@@ -163,9 +168,9 @@ inline defaulttype::Vector3 Tetrahedron::getDBary(const defaulttype::Vector3& v)
 inline defaulttype::Vector3 Tetrahedron::getCoord(const defaulttype::Vector3& b) const { return model->elems[index].bary2coord*b + model->elems[index].coord0; }
 inline defaulttype::Vector3 Tetrahedron::getDCoord(const defaulttype::Vector3& b) const { return model->elems[index].bary2coord*b; }
 
-/// Mapper for TetrahedronModel
+/// Mapper for TetrahedronCollisionModel
 template<class DataTypes>
-class ContactMapper<TetrahedronModel, DataTypes> : public BarycentricContactMapper<TetrahedronModel, DataTypes>
+class ContactMapper<TetrahedronCollisionModel, DataTypes> : public BarycentricContactMapper<TetrahedronCollisionModel, DataTypes>
 {
 public:
     typedef typename DataTypes::Real Real;
@@ -178,17 +183,17 @@ public:
     }
 };
 
-#if  !defined(SOFA_COMPONENT_COLLISION_TETRAHEDRONMODEL_CPP)
-extern template class SOFA_MISC_COLLISION_API ContactMapper<TetrahedronModel, sofa::defaulttype::Vec3Types>;
+#if  !defined(SOFA_COMPONENT_COLLISION_TETRAHEDRONCOLLISIONMODEL_CPP)
+extern template class SOFA_MISC_COLLISION_API ContactMapper<TetrahedronCollisionModel, sofa::defaulttype::Vec3Types>;
 
 #  ifdef _MSC_VER
 // Manual declaration of non-specialized members, to avoid warnings from MSVC.
-extern template SOFA_MISC_COLLISION_API void BarycentricContactMapper<TetrahedronModel, defaulttype::Vec3Types>::cleanup();
-extern template SOFA_MISC_COLLISION_API core::behavior::MechanicalState<defaulttype::Vec3Types>* BarycentricContactMapper<TetrahedronModel, defaulttype::Vec3Types>::createMapping(const char*);
+extern template SOFA_MISC_COLLISION_API void BarycentricContactMapper<TetrahedronCollisionModel, defaulttype::Vec3Types>::cleanup();
+extern template SOFA_MISC_COLLISION_API core::behavior::MechanicalState<defaulttype::Vec3Types>* BarycentricContactMapper<TetrahedronCollisionModel, defaulttype::Vec3Types>::createMapping(const char*);
 #  endif
 #endif
 
-
+using TetrahedronModel [[deprecated("The TetrahedronModel is now deprecated, please use TetrahedronCollisionModel instead. Compatibility stops at v20.06")]] = TetrahedronCollisionModel;
 
 } // namespace collision
 

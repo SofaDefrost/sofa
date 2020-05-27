@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -21,7 +21,7 @@
 ******************************************************************************/
 #ifndef SOFA_COMPONENT_MISC_WRITESTATE_H
 #define SOFA_COMPONENT_MISC_WRITESTATE_H
-#include "config.h"
+#include <SofaExporter/config.h>
 
 #include <sofa/core/State.h>
 #include <sofa/core/objectmodel/BaseObject.h>
@@ -31,7 +31,7 @@
 #include <sofa/defaulttype/DataTypeInfo.h>
 #include <sofa/simulation/Visitor.h>
 
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAEXPORTER_HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -91,16 +91,6 @@ namespace sofa
 
                 static const char* Name(){return "Blender exporter";}
 
-                virtual std::string getTemplateName() const override
-                {
-                    return templateName(this);
-                }
-
-                static std::string templateName(const BlenderExporter<T>* = NULL)
-                {
-                    return T::Name();
-                }
-
                 void init() override;
 
                 void reset() override;
@@ -112,8 +102,12 @@ namespace sofa
                 template<class T2>
                 static bool canCreate(T2*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
                 {
-                    if (dynamic_cast<DataType*>(context->getState()) == NULL)
+                    if (dynamic_cast<DataType*>(context->getState()) == nullptr)
+                    {
+                        arg->logError(std::string("No mechanical state with the datatype '") + T::Name() +
+                                      "' found in the context node.");
                         return false;
+                    }
                     return BaseObject::canCreate(obj, context, arg);
                 }
 

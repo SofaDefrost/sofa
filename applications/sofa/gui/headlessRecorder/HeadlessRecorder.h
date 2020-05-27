@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -70,15 +70,15 @@ public:
     HeadlessRecorder();
     ~HeadlessRecorder();
 
-    int mainLoop();
+    int mainLoop() override;
 
     void step();
-    void redraw();
+    void redraw() override;
     void resetView();
     void saveView();
     void initializeGL();
     void paintGL();
-    void setScene(sofa::simulation::Node::SPtr scene, const char* filename=NULL, bool temporaryFile=false);
+    void setScene(sofa::simulation::Node::SPtr scene, const char* filename=NULL, bool temporaryFile=false) override;
     void newView();
 
     // Virtual from BaseGUI

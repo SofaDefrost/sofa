@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -108,7 +108,7 @@ public:
         if(dataVecOutPos.empty() || dataVecInPos.empty())
             return;
 
-        const InRootVecCoord* inroot = NULL;
+        const InRootVecCoord* inroot = nullptr;
 
         //We need only one input In model and input Root model (if present)
         OutVecCoord& out = *dataVecOutPos[0]->beginEdit();
@@ -132,7 +132,7 @@ public:
         if(dataVecOutVel.empty() || dataVecInVel.empty())
             return;
 
-        const InRootVecDeriv* inroot = NULL;
+        const InRootVecDeriv* inroot = nullptr;
 
         //We need only one input In model and input Root model (if present)
         OutVecDeriv& out = *dataVecOutVel[0]->beginEdit();
@@ -156,7 +156,7 @@ public:
         if(dataVecOutForce.empty() || dataVecInForce.empty())
             return;
 
-        InRootVecDeriv* outroot = NULL;
+        InRootVecDeriv* outroot = nullptr;
 
         //We need only one input In model and input Root model (if present)
         InVecDeriv& out = *dataVecOutForce[0]->beginEdit();
@@ -168,13 +168,13 @@ public:
         applyJT(out,in, outroot);
 
         dataVecOutForce[0]->endEdit();
-        if (outroot != NULL)
+        if (outroot != nullptr)
             dataVecOutRootForce[0]->endEdit();
     }
 
     void applyDJT(const core::MechanicalParams* /*mparams*/, core::MultiVecDerivId /*inForce*/, core::ConstMultiVecDerivId /*outForce*/) override
     {
-//                     serr<<"Warning ! ArticulatedSystemMapping::applyDJT(const MechanicalParams* mparams, MultiVecDerivId inForce, ConstMultiVecDerivId outForce)  not implemented !"<< sendl;
+
     }
 
 
@@ -189,7 +189,7 @@ public:
         if(dataMatOutConst.empty() || dataMatInConst.empty())
             return;
 
-        InRootMatrixDeriv* outroot = NULL;
+        InRootMatrixDeriv* outroot = nullptr;
 
         //We need only one input In model and input Root model (if present)
         InMatrixDeriv& out = *dataMatOutConst[0]->beginEdit();
@@ -201,11 +201,11 @@ public:
         applyJT(out,in, outroot);
 
         dataMatOutConst[0]->endEdit();
-        if (outroot != NULL)
+        if (outroot != nullptr)
             dataMatOutRootConst[0]->endEdit();
     }
 
-    const sofa::defaulttype::BaseMatrix* getJ() override { return NULL; }
+    const sofa::defaulttype::BaseMatrix* getJ() override { return nullptr; }
 
     void draw(const core::visual::VisualParams* vparams) override;
 

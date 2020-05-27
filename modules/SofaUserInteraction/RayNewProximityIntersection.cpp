@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -51,13 +51,13 @@ RayNewProximityIntersection::RayNewProximityIntersection(NewProximityIntersectio
 {
     if (addSelf)
     {
-        intersection->intersectors.ignore<RayModel, PointModel>();
-        intersection->intersectors.ignore<RayModel, LineModel>();
+        intersection->intersectors.ignore<RayCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>>();
+        intersection->intersectors.ignore<RayCollisionModel, LineCollisionModel<sofa::defaulttype::Vec3Types>>();
 
         // why rigidsphere has a different collision detection compared to RayDiscreteIntersection?
-        intersection->intersectors.add<RayModel, RigidSphereModel, RayNewProximityIntersection>(this);
+        intersection->intersectors.add<RayCollisionModel, RigidSphereModel, RayNewProximityIntersection>(this);
 
-        intersection->intersectors.add<RayModel, TriangleModel, RayNewProximityIntersection>(this);
+        intersection->intersectors.add<RayCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>, RayNewProximityIntersection>(this);
     }
 }
 
@@ -78,7 +78,6 @@ bool RayNewProximityIntersection::testIntersection(Ray &t1,Triangle &t2)
 
     if (PQ.norm2() < alarmDist*alarmDist)
     {
-        //sout<<"Collision between Line - Triangle"<<sendl;
         return true;
     }
     else
@@ -112,7 +111,7 @@ int RayNewProximityIntersection::computeIntersection(Ray &t1, Triangle &t2, Outp
     detection->elem = std::pair<core::CollisionElementIterator, core::CollisionElementIterator>(t1, t2);
     detection->point[1]=P;
     detection->point[0]=Q;
-#ifdef DETECTIONOUTPUT_FREEMOTION
+#ifdef SOFA_DETECTIONOUTPUT_FREEMOTION
     detection->freePoint[1] = P;
     detection->freePoint[0] = Q;
 #endif

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -29,6 +29,7 @@ using std::string;
 #include <vector>
 using std::vector;
 
+#include <runSofaValidation.h>
 
 #include <sofa/helper/ArgumentParser.h>
 #include <SofaSimulationCommon/common.h>
@@ -47,14 +48,12 @@ using sofa::simulation::Node;
 #include <SofaGraphComponent/SceneCheckerListener.h>
 using sofa::simulation::scenechecking::SceneCheckerListener;
 
-#include <SofaComponentCommon/initComponentCommon.h>
-#include <SofaComponentBase/initComponentBase.h>
-#include <SofaComponentGeneral/initComponentGeneral.h>
-#include <SofaComponentAdvanced/initComponentAdvanced.h>
-#include <SofaComponentMisc/initComponentMisc.h>
+#include <SofaCommon/initSofaCommon.h>
+#include <SofaBase/initSofaBase.h>
+#include <SofaGeneral/initSofaGeneral.h>
+#include <SofaMisc/initSofaMisc.h>
 
 #include <SofaGeneralLoader/ReadState.h>
-#include <SofaValidation/CompareState.h>
 #include <sofa/helper/Factory.h>
 #include <sofa/helper/cast.h>
 #include <sofa/helper/BackTrace.h>
@@ -75,7 +74,6 @@ using sofa::core::ExecParams ;
 #include <sofa/helper/system/console.h>
 using sofa::helper::Utils;
 
-using sofa::component::misc::CompareStateCreator;
 using sofa::component::misc::ReadStateActivator;
 using sofa::simulation::tree::TreeSimulation;
 using sofa::simulation::graph::DAGSimulation;
@@ -117,30 +115,12 @@ using sofa::helper::logging::ClangMessageHandler ;
 #include <sofa/helper/logging/ExceptionMessageHandler.h>
 using sofa::helper::logging::ExceptionMessageHandler;
 
+#include <boost/program_options.hpp>
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 
-void loadVerificationData(string& directory, string& filename, Node* node)
-{
-    msg_info("") << "loadVerificationData from " << directory << " and file " << filename ;
-
-    string refFile;
-
-    refFile += directory;
-    refFile += '/';
-    refFile += SetDirectory::GetFileName(filename.c_str());
-
-    msg_info("") << "loadVerificationData " << refFile ;
-
-    CompareStateCreator compareVisitor(ExecParams::defaultInstance());
-    compareVisitor.setCreateInMapping(true);
-    compareVisitor.setSceneName(refFile);
-    compareVisitor.execute(node);
-
-    ReadStateActivator v_read(ExecParams::defaultInstance(), true);
-    v_read.execute(node);
-}
 
 void addGUIParameters(ArgumentParser* argumentParser)
 {
@@ -165,15 +145,13 @@ int main(int argc, char** argv)
         }
     }
 
-    // Add plugins and modules dirs to PluginRepository
+    // Add plugins dir to PluginRepository
     if ( FileSystem::isDirectory(Utils::getSofaPathPrefix()+"/plugins") )
     {
         PluginRepository.addFirstPath(Utils::getSofaPathPrefix()+"/plugins");
     }
 
     sofa::helper::BackTrace::autodump();
-
-    ExecParams::defaultInstance()->setAspectID(0);
 
 #ifdef WIN32
     {
@@ -223,11 +201,7 @@ int main(int argc, char** argv)
 
     vector<string> plugins;
     vector<string> files;
-#ifdef SOFA_SMP
-    string nProcs="";
-    bool        disableStealing = false;
-    bool        affinity = false;
-#endif
+
     string colorsStatus = "unset";
     string messageHandler = "auto";
     bool enableInteraction = false ;
@@ -239,41 +213,138 @@ int main(int argc, char** argv)
     gui_help += ")";
 
     ArgumentParser* argParser = new ArgumentParser(argc, argv);
-    argParser->addArgument(po::value<bool>(&showHelp)->default_value(false)->implicit_value(true),                  "help,h", "Display this help message");
-    argParser->addArgument(po::value<bool>(&startAnim)->default_value(false)->implicit_value(true),                 "start,a", "start the animation loop");
-    argParser->addArgument(po::value<bool>(&computationTimeAtBegin)->default_value(false)->implicit_value(true),    "computationTimeAtBegin,b", "Output computation time statistics of the init (at the begin of the simulation)");
-    argParser->addArgument(po::value<unsigned int>(&computationTimeSampling)->default_value(0),                     "computationTimeSampling", "Frequency of display of the computation time statistics, in number of animation steps. 0 means never.");
-    argParser->addArgument(po::value<std::string>(&computationTimeOutputType)->default_value("stdout"),             "computationTimeOutputType,o", "Output type for the computation time statistics: either stdout, json or ljson");
-    argParser->addArgument(po::value<std::string>(&gui)->default_value(""),                                         "gui,g", gui_help.c_str());
-    argParser->addArgument(po::value<std::vector<std::string>>(&plugins),                                           "load,l", "load given plugins");
-    argParser->addArgument(po::value<bool>(&noAutoloadPlugins)->default_value(false)->implicit_value(true),         "noautoload", "disable plugins autoloading");
-    argParser->addArgument(po::value<bool>(&noSceneCheck)->default_value(false)->implicit_value(true),              "noscenecheck", "disable scene checking for each scene loading");
+    argParser->addArgument(
+        boost::program_options::value<bool>(&showHelp)
+        ->default_value(false)
+        ->implicit_value(true),
+        "help,h",
+        "Display this help message"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&startAnim)
+        ->default_value(false)
+        ->implicit_value(true),
+        "start,a",
+        "start the animation loop"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&computationTimeAtBegin)
+        ->default_value(false)
+        ->implicit_value(true),
+        "computationTimeAtBegin,b",
+        "Output computation time statistics of the init (at the begin of the simulation)"
+    );
+    argParser->addArgument(
+        boost::program_options::value<unsigned int>(&computationTimeSampling)
+        ->default_value(0),
+        "computationTimeSampling",
+        "Frequency of display of the computation time statistics, in number of animation steps. 0 means never."
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&computationTimeOutputType)
+        ->default_value("stdout"),
+        "computationTimeOutputType,o",
+        "Output type for the computation time statistics: either stdout, json or ljson"
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&gui)->default_value(""),
+        "gui,g",
+        gui_help.c_str()
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::vector<std::string>>(&plugins),
+        "load,l",
+        "load given plugins"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&noAutoloadPlugins)
+        ->default_value(false)
+        ->implicit_value(true),
+        "noautoload",
+        "disable plugins autoloading"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&noSceneCheck)
+        ->default_value(false)
+        ->implicit_value(true),
+        "noscenecheck",
+        "disable scene checking for each scene loading"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&printFactory)
+        ->default_value(false)
+        ->implicit_value(true),
+        "factory,p",
+        "print factory logs"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&loadRecent)
+        ->default_value(false)->implicit_value(true),
+        "recent,r",
+        "load most recently opened file"
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&simulationType),
+        "simu,s", "select the type of simulation (bgl, dag, tree)"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&temporaryFile)
+        ->default_value(false)->implicit_value(true),
+        "tmp",
+        "the loaded scene won't appear in history of opened files"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&testMode)
+        ->default_value(false)->implicit_value(true),
+        "test",
+        "select test mode with xml output after N iteration"
+     );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&verif)
+        ->default_value(""),
+        "verification,v",
+        "load verification data for the scene"
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&colorsStatus)
+        ->default_value("unset", "auto")
+        ->implicit_value("yes"),
+        "colors,c",
+        "use colors on stdout and stderr (yes, no, auto)"
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::string>(&messageHandler)
+        ->default_value("auto"),
+        "formatting,f",
+        "select the message formatting to use (auto, clang, sofa, rich, test)"
+    );
+    argParser->addArgument(
+        boost::program_options::value<bool>(&enableInteraction)
+        ->default_value(false)
+        ->implicit_value(true),
+        "interactive,i",
+        "enable interactive mode for the GUI which includes idle and mouse events (EXPERIMENTAL)"
+    );
+    argParser->addArgument(
+        boost::program_options::value<std::vector<std::string> >()
+        ->multitoken(),
+        "argv",
+        "forward extra args to the python interpreter"
+    );
 
     // example of an option using lambda function which ensure the value passed is > 0
-    argParser->addArgument(po::value<unsigned int>(&nbMSSASamples)->default_value(1)->notifier([](unsigned int value)
-    {
-        if (value < 1) {
-            std::cerr << "msaa sample cannot be lower than 1" << std::endl;
-            exit( EXIT_FAILURE );
-        }
-    }),                                                                                                             "msaa,m", "number of samples for MSAA (Multi Sampling Anti Aliasing ; value < 2 means disabled");
-
-    argParser->addArgument(po::value<bool>(&printFactory)->default_value(false)->implicit_value(true),              "factory,p", "print factory logs");
-    argParser->addArgument(po::value<bool>(&loadRecent)->default_value(false)->implicit_value(true),                "recent,r", "load most recently opened file");
-    argParser->addArgument(po::value<std::string>(&simulationType),                                                 "simu,s", "select the type of simulation (bgl, dag, tree)");
-    argParser->addArgument(po::value<bool>(&temporaryFile)->default_value(false)->implicit_value(true),             "tmp", "the loaded scene won't appear in history of opened files");
-    argParser->addArgument(po::value<bool>(&testMode)->default_value(false)->implicit_value(true),                  "test", "select test mode with xml output after N iteration");
-    argParser->addArgument(po::value<std::string>(&verif)->default_value(""), "verification,v",                     "load verification data for the scene");
-    argParser->addArgument(po::value<std::string>(&colorsStatus)->default_value("unset", "auto")->implicit_value("yes"),     "colors,c", "use colors on stdout and stderr (yes, no, auto)");
-    argParser->addArgument(po::value<std::string>(&messageHandler)->default_value("auto"), "formatting,f",          "select the message formatting to use (auto, clang, sofa, rich, test)");
-    argParser->addArgument(po::value<bool>(&enableInteraction)->default_value(false)->implicit_value(true),         "interactive,i", "enable interactive mode for the GUI which includes idle and mouse events (EXPERIMENTAL)");
-    argParser->addArgument(po::value<std::vector<std::string> >()->multitoken(), "argv",                            "forward extra args to the python interpreter");
-
-#ifdef SOFA_SMP
-    argParser->addArgument(po::value<bool>(&disableStealing)->default_value(false)->implicit_value(true),           "disableStealing,w", "Disable Work Stealing")
-    argParser->addArgument(po::value<std::string>(&nProcs)->default_value(""),                                      "nprocs", "Number of processor")
-    argParser->addArgument(po::value<bool>(&affinity)->default_value(false)->implicit_value(true),                  "affinity", "Enable aFfinity base Work Stealing")
-#endif
+    argParser->addArgument(
+        boost::program_options::value<unsigned int>(&nbMSSASamples)
+        ->default_value(1)
+        ->notifier([](unsigned int value) {
+            if (value < 1) {
+                msg_error("runSofa") << "msaa sample cannot be lower than 1";
+                exit( EXIT_FAILURE );
+            }
+        }),
+        "msaa,m",
+        "number of samples for MSAA (Multi Sampling Anti Aliasing ; value < 2 means disabled"
+    );
 
     addGUIParameters(argParser);
     argParser->parse();
@@ -291,11 +362,10 @@ int main(int argc, char** argv)
 #ifdef SOFA_HAVE_DAG
     sofa::simulation::graph::init();
 #endif
-    sofa::component::initComponentBase();
-    sofa::component::initComponentCommon();
-    sofa::component::initComponentGeneral();
-    sofa::component::initComponentAdvanced();
-    sofa::component::initComponentMisc();
+    sofa::component::initSofaBase();
+    sofa::component::initSofaCommon();
+    sofa::component::initSofaGeneral();
+    sofa::component::initSofaMisc();
 
 #ifdef SOFA_HAVE_DAG
     if (simulationType == "tree")
@@ -423,13 +493,14 @@ int main(int argc, char** argv)
         sofa::simulation::SceneLoader::addListener( SceneCheckerListener::getInstance() );
     }
 
-    Node::SPtr groot = sofa::simulation::getSimulation()->load(fileName.c_str());
+    const std::vector<std::string> sceneArgs = sofa::helper::ArgumentParser::extra_args();
+    Node::SPtr groot = sofa::simulation::getSimulation()->load(fileName, false, sceneArgs);
     if( !groot )
         groot = sofa::simulation::getSimulation()->createNewGraph("");
 
     if (!verif.empty())
     {
-        loadVerificationData(verif, fileName, groot.get());
+        runSofa::Validation::execute(verif, fileName, groot.get());
     }
 
     if( computationTimeAtBegin )
@@ -483,7 +554,7 @@ int main(int argc, char** argv)
         sofa::simulation::getSimulation()->exportXML(groot.get(), xmlname.c_str());
     }
 
-    if (groot!=NULL)
+    if (groot!=nullptr)
         sofa::simulation::getSimulation()->unload(groot);
 
 

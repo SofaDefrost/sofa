@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -23,6 +23,20 @@
 #include <SofaExporter/config.h>
 
 #include <sofa/core/ObjectFactory.h>
+
+#if SOFAEXPORTER_HAVE_SOFAPYTHON
+#include <SofaPython/PythonEnvironment.h>
+#include <SofaPython/PythonFactory.h>
+
+using sofa::simulation::PythonEnvironment ;
+using sofa::PythonFactory ;
+
+#include <SofaExporter/bindings/Binding_OBJExporter.h>
+#include <SofaExporter/bindings/Binding_STLExporter.h>
+
+#endif // SOFAEXPORTER_HAVE_SOFAPYTHON
+
+
 using sofa::core::ObjectFactory;
 
 namespace sofa
@@ -46,6 +60,10 @@ void initExternalModule()
     if (first)
     {
         first = false;
+#if SOFAEXPORTER_HAVE_SOFAPYTHON
+        SP_ADD_CLASS_IN_FACTORY(OBJExporter,sofa::component::misc::OBJExporter)
+        SP_ADD_CLASS_IN_FACTORY(STLExporter,sofa::component::misc::STLExporter)
+#endif // SOFAEXPORTER_HAVE_SOFAPYTHON
     }
 }
 

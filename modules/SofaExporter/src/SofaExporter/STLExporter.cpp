@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -89,9 +89,9 @@ void STLExporter::doReInit()
     // Test if the position has not been modified
     if(!d_position.isSet())
     {
-        BaseData* pos = NULL;
-        BaseData* tri = NULL;
-        BaseData* qua = NULL;
+        BaseData* pos = nullptr;
+        BaseData* tri = nullptr;
+        BaseData* qua = nullptr;
         if(m_inputvmodel)
         {
             pos = m_inputvmodel->findData("position");

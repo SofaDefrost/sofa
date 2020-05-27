@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -26,6 +26,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/topology/TopologyChange.h>
 #include <sofa/core/ObjectFactory.h>
+#include <SofaBaseTopology/TopologyData.inl>
 
 namespace sofa
 {
@@ -45,13 +46,13 @@ OglAttribute< size, type, DataTypes>::OglAttribute() :
     , handleDynamicTopology( initData(&handleDynamicTopology, true, "handleDynamicTopology",
         "Activate handling of topological changes on the values of this attribute (resizes only)"))
 {
-    _topology = NULL;
+    _topology = nullptr;
 }
 
 template < int size, unsigned int type, class DataTypes>
 int OglAttribute< size, type, DataTypes >::getSETotalSize()
 {
-    const sofa::defaulttype::ResizableExtVector<DataTypes>& data = value.getValue();
+    const helper::vector<DataTypes>& data = value.getValue();
     unsigned int totalSize = data.size() *sizeof ( data[0] );
     return totalSize;
 }
@@ -69,25 +70,31 @@ void OglAttribute< size, type, DataTypes>::init()
     OglShaderElement::init();
     getContext()->get( _topology);
     value.getValue(); // make sure the data is updated
+
+    if (_topology!= nullptr && handleDynamicTopology.getValue())
+    {
+        value.createTopologicalEngine(_topology);
+        value.registerTopologicalData();
+    }
 }
 
 template < int size, unsigned int type, class DataTypes>
 void OglAttribute< size, type, DataTypes>::initVisual ()
 {
     if ( _abo == GLuint(-1) ) glGenBuffers ( 1, &_abo );
-    const sofa::defaulttype::ResizableExtVector<DataTypes>& data = value.getValue();
+    const helper::vector<DataTypes>& data = value.getValue();
     unsigned int totalSize = data.size() *sizeof ( data[0] );
     _aboSize = totalSize;
     glBindBufferARB ( GL_ARRAY_BUFFER, _abo );
     glBufferDataARB ( GL_ARRAY_BUFFER,
             totalSize,
-            NULL,
+            nullptr,
             _usage );
     // Fill the buffer
     glBufferSubDataARB ( GL_ARRAY_BUFFER,
             0,
             totalSize,
-            data.getData() );
+            data.data() );
     _needUpdate = false;
     _lastUpdateDataCounter = value.getCounter();
 
@@ -97,11 +104,11 @@ void OglAttribute< size, type, DataTypes>::initVisual ()
     _index =  (*shaders.begin())->getAttribute ( indexShader.getValue(), id.getValue().c_str() ); //shader->getAttribute ( indexShader.getValue(), id.getValue().c_str() );
     if (_index == GLuint(-1) )
     {
-        serr << "Variable \""<<id.getValue()<<"\" NOT FOUND in shader \"" << (*shaders.begin())->vertFilename.getValue() << "\""<< sendl;
+        msg_error() << "Variable \"" << id.getValue() << "\" NOT FOUND in shader \"" << (*shaders.begin())->vertFilename.getValue() << "\"";
     }
     else
     {
-        sout << "Variable \""<<id.getValue()<<"\" in shader \"" << (*shaders.begin())->vertFilename.getValue() << "\" with index: " << _index << sendl;
+        msg_info() << "Variable \"" << id.getValue() << "\" in shader \"" << (*shaders.begin())->vertFilename.getValue() << "\" with index: " << _index;
     }
     glBindBufferARB(GL_ARRAY_BUFFER,0);
 }
@@ -111,7 +118,7 @@ void OglAttribute< size, type, DataTypes>::updateVisual()
 {
      if ( _abo == GLuint(-1) )
          return; // initVisual not yet called
-    const sofa::defaulttype::ResizableExtVector<DataTypes>& data = value.getValue();
+    const helper::vector<DataTypes>& data = value.getValue();
     unsigned int totalSize = data.size() *sizeof ( data[0] );
     int dataCounter = value.getCounter();
     if (!_needUpdate && totalSize == _aboSize && dataCounter == _lastUpdateDataCounter)
@@ -122,7 +129,7 @@ void OglAttribute< size, type, DataTypes>::updateVisual()
     {
         glBufferDataARB ( GL_ARRAY_BUFFER,
                 totalSize,
-                NULL,
+                nullptr,
                 _usage );
         _aboSize = totalSize;
     }
@@ -130,14 +137,14 @@ void OglAttribute< size, type, DataTypes>::updateVisual()
     glBufferSubDataARB ( GL_ARRAY_BUFFER,
             0,
             totalSize,
-            (char*)data.getData() );
+            (char*)data.data() );
     _needUpdate = false;
     _lastUpdateDataCounter = dataCounter;
     glBindBufferARB(GL_ARRAY_BUFFER,0);
 }
 
 template < int size, unsigned int type, class DataTypes>
-sofa::defaulttype::ResizableExtVector<DataTypes>* OglAttribute< size, type, DataTypes>::beginEdit()
+helper::vector<DataTypes>* OglAttribute< size, type, DataTypes>::beginEdit()
 {
     return value.beginEdit();
 }
@@ -151,16 +158,16 @@ void OglAttribute< size, type, DataTypes>::endEdit()
 
 
 template < int size, unsigned int type, class DataTypes>
-const sofa::defaulttype::ResizableExtVector<DataTypes>& OglAttribute< size, type, DataTypes>::getValue() const
+const helper::vector<DataTypes>& OglAttribute< size, type, DataTypes>::getValue() const
 {
     return value.getValue();
 }
 
 
 template < int size, unsigned int type, class DataTypes>
-void OglAttribute< size, type, DataTypes>::setValue ( const sofa::defaulttype::ResizableExtVector<DataTypes>& value )
+void OglAttribute< size, type, DataTypes>::setValue ( const helper::vector<DataTypes>& value )
 {
-    sofa::defaulttype::ResizableExtVector<DataTypes>& val = * ( this->value.beginEdit() );
+    helper::vector<DataTypes>& val = * ( this->value.beginEdit() );
     val = value;
     this->value.endEdit();
 }
@@ -186,17 +193,17 @@ void OglAttribute< size, type, DataTypes>::enable()
     case GL_UNSIGNED_BYTE:
     case GL_SHORT:
     case GL_UNSIGNED_SHORT:
-        glVertexAttribIPointer(_index, size, type, 0, (char*)NULL + 0);
+        glVertexAttribIPointer(_index, size, type, 0, (char*)nullptr + 0);
         break;
     case GL_DOUBLE:
-        glVertexAttribLPointer(_index, size, type, 0, (char*)NULL + 0);
+        glVertexAttribLPointer(_index, size, type, 0, (char*)nullptr + 0);
         break;
     default:
-        glVertexAttribPointer(_index, size, type, GL_FALSE, 0, (char*)NULL + 0);
+        glVertexAttribPointer(_index, size, type, GL_FALSE, 0, (char*)nullptr + 0);
     }
 #else
 
-    glVertexAttribPointerARB(_index, size, type, GL_FALSE, 0, (char*)NULL + 0);
+    glVertexAttribPointerARB(_index, size, type, GL_FALSE, 0, (char*)nullptr + 0);
 
 #endif // __APPLE__
 
@@ -229,101 +236,6 @@ template < int size, unsigned int type, class DataTypes>
 void OglAttribute< size, type, DataTypes>::reinit()
 {
     _needUpdate = true;
-}
-
-// Only resizing and renumbering is done. 'value' has to be set by external components.
-template < int size, unsigned int type, class DataTypes>
-void OglAttribute< size, type, DataTypes>::handleTopologyChange()
-{
-    if( _topology && handleDynamicTopology.getValue())
-    {
-        std::list<const sofa::core::topology::TopologyChange *>::const_iterator itBegin=_topology->beginChange();
-        std::list<const sofa::core::topology::TopologyChange *>::const_iterator itEnd=_topology->endChange();
-
-        while( itBegin != itEnd )
-        {
-            core::topology::TopologyChangeType changeType = (*itBegin)->getChangeType();
-
-            switch( changeType )
-            {
-            case core::topology::ENDING_EVENT:
-            {
-                //sout << "INFO_print : Vis - ENDING_EVENT" << sendl;
-                _needUpdate = true;
-                break;
-            }
-
-            case core::topology::TRIANGLESADDED:
-            {
-               break;
-            }
-
-            case core::topology::QUADSADDED:
-            {
-                break;
-            }
-
-            case core::topology::TRIANGLESREMOVED:
-            {
-                break;
-            }
-
-            case core::topology::QUADSREMOVED:
-            {
-                break;
-            }
-
-            case core::topology::POINTSADDED:
-            {
-                unsigned int nbPoints = ( static_cast< const sofa::core::topology::PointsAdded * >( *itBegin ) )->getNbAddedVertices();
-                sofa::defaulttype::ResizableExtVector<DataTypes>& data = *value.beginEdit();
-                data.resize( data.size() + nbPoints);
-                value.endEdit();
-                break;
-            }
-
-            case core::topology::POINTSREMOVED:
-            {
-                const sofa::helper::vector<unsigned int> tab = ( static_cast< const sofa::core::topology::PointsRemoved * >( *itBegin ) )->getArray();
-                sofa::defaulttype::ResizableExtVector<DataTypes>& data = *value.beginEdit();
-                unsigned int last = data.size();
-
-                for ( unsigned int i = 0; i < tab.size(); ++i)
-                {
-                    last--;
-                    data[tab[i]] = data[last];
-                }
-                data.resize( last);
-                value.endEdit();
-
-                break;
-            }
-
-            case core::topology::POINTSRENUMBERING:
-            {
-                const sofa::helper::vector<unsigned int> tab = ( static_cast< const sofa::core::topology::PointsRenumbering * >( *itBegin ) )->getinv_IndexArray();
-                sofa::defaulttype::ResizableExtVector<DataTypes>& data = *value.beginEdit();
-                helper::vector<DataTypes> tmp;
-                for ( unsigned int i = 0; i < tab.size(); ++i)
-                {
-                    tmp.push_back( data[tab[i]]);
-                }
-                for ( unsigned int i = 0; i < tab.size(); ++i)
-                {
-                    data[i] = tmp[i];
-                }
-                value.endEdit();
-
-                break;
-            }
-
-            default:
-                // Ignore events that are not Triangle  related.
-                break;
-            };
-            ++itBegin;
-        }
-    }
 }
 
 } // namespace visual

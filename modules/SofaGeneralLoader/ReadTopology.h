@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -21,13 +21,13 @@
 ******************************************************************************/
 #ifndef SOFA_COMPONENT_MISC_READTOPOLOGY_H
 #define SOFA_COMPONENT_MISC_READTOPOLOGY_H
-#include "config.h"
+#include <SofaGeneralLoader/config.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/Visitor.h>
 
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAGENERALLOADER_HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -54,10 +54,13 @@ public:
     Data < double > f_shift; ///< shift between times in the file and times when they will be read
     Data < bool > f_loop; ///< set to 'true' to re-read the file when reaching the end
 
+    /// Link to be set to the topology container in the component graph.
+    SingleLink <ReadTopology, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
 protected:
     core::topology::BaseMeshTopology* m_topology;
     std::ifstream* infile;
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAGENERALLOADER_HAVE_ZLIB
     gzFile gzfile;
 #endif
     double nextTime;
@@ -87,8 +90,11 @@ public:
     template<class T>
     static bool canCreate(T* obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
     {
-        if (context->getMeshTopology() == NULL)
+        if (context->getMeshTopologyLink() == nullptr) {
+            arg->logError("No mesh topology found in the context node.");
             return false;
+        }
+
         return BaseObject::canCreate(obj, context, arg);
     }
 

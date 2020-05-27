@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -95,9 +95,9 @@ public:
                              const char* name,
                              Data< helper::vector<Material> >* data):
         TDataWidget< helper::vector<Material> >(parent,name,data),
-        _materialDataWidget(NULL),
+        _materialDataWidget(nullptr),
         _currentMaterial(0,data->isDisplayed(),data->isReadOnly()),
-        _comboBox(NULL)
+        _comboBox(nullptr)
     {
 
     }

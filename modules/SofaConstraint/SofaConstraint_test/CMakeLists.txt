@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1)
 
 project(SofaConstraint_test)
 
+find_package(SofaGeneral REQUIRED)
+
 set(SOURCE_FILES ../../empty.cpp)
 
 list(APPEND SOURCE_FILES
@@ -12,6 +14,6 @@ list(APPEND SOURCE_FILES
 
 add_definitions("-DSOFATEST_SCENES_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/scenes_test\"")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} SofaGTestMain SofaComponentGeneral)
+target_link_libraries(${PROJECT_NAME} SofaGTestMain SofaGeneral)
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -64,9 +64,6 @@ public:
     void solve (Matrix& M, Vector& x, Vector& b) override;
     Data<Real> f_conditionNumber; ///< Condition number of the matrix: ratio between the largest and smallest singular values. Computed in method solve.
 
-#ifdef DISPLAY_TIME
-    double timeStamp;
-#endif
 };
 
 } // namespace linearsolver

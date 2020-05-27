@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -21,7 +21,7 @@
 ******************************************************************************/
 #ifndef SOFA_COMPONENT_COLLISION_TRIANGLEMODELINREGULARGRID_H
 #define SOFA_COMPONENT_COLLISION_TRIANGLEMODELINREGULARGRID_H
-#include "config.h"
+#include <SofaMiscCollision/config.h>
 
 #include <SofaMeshCollision/TriangleModel.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
@@ -36,10 +36,10 @@ namespace collision
 {
 
 
-class TriangleModelInRegularGrid : public TriangleModel
+class TriangleModelInRegularGrid : public TriangleCollisionModel<sofa::defaulttype::Vec3Types>
 {
 public:
-    SOFA_CLASS(TriangleModelInRegularGrid, TriangleModel);
+    SOFA_CLASS(TriangleModelInRegularGrid, TriangleCollisionModel<sofa::defaulttype::Vec3Types>);
 
     void init() override;
     void computeBoundingTree ( int maxDepth=0 ) override;

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -34,7 +34,6 @@ namespace sofa
 {
 
 using namespace core::objectmodel;
-using namespace sofa::component::misc;
 
 namespace gui
 {
@@ -62,7 +61,7 @@ QDisplayLinkWidget::QDisplayLinkWidget(QWidget* parent,
     parent->layout()->addWidget(this);
     parent->setContentsMargins(0,0,0,0);
 
-    setToolTip(link->getHelp());
+    setToolTip(QString::fromStdString(link->getHelp()));
 
     LinkWidget::CreatorArgument dwarg;
     dwarg.name =  link_->getName();
@@ -77,7 +76,7 @@ QDisplayLinkWidget::QDisplayLinkWidget(QWidget* parent,
         linkwidget_ = new QLinkSimpleEdit(this,dwarg.link->getName().c_str(), dwarg.link);
         linkwidget_->createWidgets();
         linkwidget_->setEnabled(!(dwarg.readOnly));
-        assert(linkwidget_ != NULL);
+        assert(linkwidget_ != nullptr);
     }
 
     if(linkwidget_->layout())
@@ -91,7 +90,7 @@ QDisplayLinkWidget::QDisplayLinkWidget(QWidget* parent,
 
     const std::string valuetype = link_->getValueTypeString();
     if (!valuetype.empty())
-        linkwidget_->setToolTip(valuetype.c_str());
+        linkwidget_->setToolTip(QString::fromStdString(valuetype));
 
     numWidgets_ += linkwidget_->sizeWidget();
     connect(linkwidget_,SIGNAL(WidgetDirty(bool)), this, SIGNAL ( WidgetDirty(bool) ) );
@@ -123,7 +122,7 @@ QDisplayLinkWidget::QDisplayLinkWidget(QWidget* parent,
     }
     else
     {
-        setTitle(link_->getName().c_str());
+        setTitle(QString::fromStdString(link_->getName()));
         setContentsMargins(2,2,4,4);
     }
     gridLayout_->addWidget(linkwidget_);
@@ -146,7 +145,7 @@ QLinkSimpleEdit::QLinkSimpleEdit(QWidget* parent, const char* name, BaseLink* li
 
 bool QLinkSimpleEdit::createWidgets()
 {
-    QString str  = QString( getBaseLink()->getValueString().c_str() );
+    QString str  = QString::fromStdString(getBaseLink()->getValueString());
     QLayout* layout = new QHBoxLayout(this);
     if( str.length() > TEXTSIZE_THRESHOLD )
     {
@@ -179,7 +178,7 @@ bool QLinkSimpleEdit::createWidgets()
 
 void QLinkSimpleEdit::readFromLink()
 {
-    QString str = QString( getBaseLink()->getValueString().c_str() );
+    QString str = QString::fromStdString(getBaseLink()->getValueString());
     if(innerWidget_.type == TEXTEDIT)
     {
         innerWidget_.widget.textEdit->setText(str);

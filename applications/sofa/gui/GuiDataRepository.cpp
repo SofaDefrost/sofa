@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -19,11 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/******************************************************************************
-* Contributors:
-*   - damien.marchal@univ-lille1.fr
-*******************************************************************************/
-
 #include "GuiDataRepository.h"
 #include <sofa/helper/Utils.h>
 
@@ -35,7 +30,9 @@ namespace sofa
 namespace gui
 {
 
-FileRepository GuiDataRepository("GUI_DATA_PATH", 0, Utils::getSofaPathTo("etc/SofaGuiQt.ini").c_str());
+FileRepository GuiDataRepository("GUI_DATA_PATH", 0, {
+                                     { Utils::getSofaPathTo("etc/SofaGuiQt.ini").c_str(), {"RESOURCES_DIR"} }
+                                 });
 
 }
 }

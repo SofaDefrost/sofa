@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,8 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef PLUGINEXAMPLE_MYPROJECTIVECONSTRAINTSET_H
-#define PLUGINEXAMPLE_MYPROJECTIVECONSTRAINTSET_H
+#pragma once
 
 #include <PluginExample/config.h>
 
@@ -29,15 +28,8 @@
 #include <sofa/defaulttype/VecTypes.h>
 
 
-namespace sofa
+namespace sofa::component::projectiveconstraintset
 {
-
-namespace component
-{
-
-namespace projectiveconstraintset
-{
-
 
 template <class DataTypes>
 class MyProjectiveConstraintSet: public core::behavior::ProjectiveConstraintSet<DataTypes>
@@ -55,24 +47,18 @@ public:
 
 protected:
     MyProjectiveConstraintSet();
-    ~MyProjectiveConstraintSet();
+    virtual ~MyProjectiveConstraintSet();
 
 public:
-    void init();
+    void init() override;
 
-    void reinit();
+    void reinit() override;
 
-    void projectResponse(const core::MechanicalParams* /* mparams */, DataVecDeriv& /* dx */) {};
-    void projectVelocity(const core::MechanicalParams* /* mparams */, DataVecDeriv& /* v */) {};
-    void projectPosition(const core::MechanicalParams* /* mparams */, DataVecCoord& /* x */) {};
-    void projectJacobianMatrix(const core::MechanicalParams* /* mparams */, DataMatrixDeriv& /* cData */) {};
+    void projectResponse(const core::MechanicalParams* /* mparams */, DataVecDeriv& /* dx */) override {}
+    void projectVelocity(const core::MechanicalParams* /* mparams */, DataVecDeriv& /* v */) override {}
+    void projectPosition(const core::MechanicalParams* /* mparams */, DataVecCoord& /* x */) override {}
+    void projectJacobianMatrix(const core::MechanicalParams* /* mparams */, DataMatrixDeriv& /* cData */) override {}
 };
 
 
-} // namespace projectiveconstraintset
-
-} // namespace component
-
-} // namespace sofa
-
-#endif // PLUGINEXAMPLE_MYPROJECTIVECONSTRAINTSET_H
+} // namespace sofa::component::projectiveconstraintset

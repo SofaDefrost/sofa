@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -57,9 +57,9 @@ public:
     /// Returns the type of shader element (texture, macro, variable, or attribute)
     ShaderElementType getSEType() const override { return core::visual::ShaderElement::SE_MACRO; }
     // Returns the value of the shader element
-    const core::objectmodel::BaseData* getSEValue() const override { return NULL; }
+    const core::objectmodel::BaseData* getSEValue() const override { return nullptr; }
     // Returns the value of the shader element
-    core::objectmodel::BaseData* getSEValue() override { return NULL; }
+    core::objectmodel::BaseData* getSEValue() override { return nullptr; }
 };
 
 

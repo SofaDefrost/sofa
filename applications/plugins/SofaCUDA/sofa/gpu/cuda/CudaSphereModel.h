@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -35,8 +35,8 @@ namespace gpu
 namespace cuda
 {
 
-typedef sofa::component::collision::SphereCollisionModel<gpu::cuda::CudaVec3Types> CudaSphereModel;
-typedef sofa::component::collision::TSphere<gpu::cuda::CudaVec3Types> CudaSphere;
+using CudaSphereModel [[deprecated("The CudaSphereModel is now deprecated, please use sofa::component::collision::SphereCollisionModel<gpu::cuda::CudaVec3Types> instead. Compatibility stops at v20.06")]] = sofa::component::collision::SphereCollisionModel<gpu::cuda::CudaVec3Types>;
+using CudaSphere = sofa::component::collision::TSphere<gpu::cuda::CudaVec3Types>;
 
 
 } // namespace cuda

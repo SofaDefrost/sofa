@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -86,7 +86,9 @@ public:
     Data<bool> f_fixAll;    ///< to project all the points, rather than those listed in f_indices
     Data<SReal> f_drawSize; ///< 0 -> point based rendering, >0 -> radius of spheres
 
-
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<ProjectToPointConstraint<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+    
 protected:
     ProjectToPointConstraintInternalData<DataTypes>* data;
     friend class ProjectToPointConstraintInternalData<DataTypes>;
@@ -141,11 +143,8 @@ public:
     };
 
 protected :
-    /// Pointer to the current topology
-    sofa::core::topology::BaseMeshTopology* topology;
-
     /// Handler for subset Data
-    FCPointHandler* pointHandler;
+    FCPointHandler* m_pointHandler;
 
     /// Matrix used in getJ
 //    linearsolver::EigenBaseSparseMatrix<SReal> jacobian;

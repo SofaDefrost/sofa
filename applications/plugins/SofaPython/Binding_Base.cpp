@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -28,7 +28,6 @@
 #include <sofa/core/DataEngine.h>
 #include <sofa/defaulttype/VecTypes.h>
 
-
 #include <sofa/helper/logging/Messaging.h>
 
 #include "PythonFactory.h"
@@ -55,7 +54,7 @@ PSDEDataFactory* getFactoryInstance(){
     if (s_localfactory == nullptr)
     {
         // helper vector style containers
-        std::string containers[] = {"vector", "ResizableExtVector"};
+        std::string containers[] = {"vector"};
 
         s_localfactory = new PSDEDataFactory();
         // Scalars
@@ -241,7 +240,7 @@ BaseData* helper_addNewData(PyObject *args, PyObject * kw, Base * obj) {
 
     char* dataRawType = new char;
     char* dataClass = new char;
-    char* dataHelp = new char;
+    char* dataHelp = "missing help";
     char * dataName = new char;
     std::string val = "";
     
@@ -275,7 +274,9 @@ BaseData* helper_addNewData(PyObject *args, PyObject * kw, Base * obj) {
     {
         return nullptr;
     }
+
     BaseData* bd = nullptr;
+
     if(KwargsOrArgs) // parse kwargs
     {
         if(kw==nullptr || !PyDict_Check(kw) )
@@ -361,7 +362,7 @@ BaseData* helper_addNewData(PyObject *args, PyObject * kw, Base * obj) {
             {
                 if(!bd->setParent(tmp.str()))
                 {
-                    msg_warning(obj) << "Could not setup link for Data, initialzing empty.";
+                    msg_warning(obj) << "Could not setup link for Data, initializing empty " << tmp.str() ;
                 }
             }
             else
@@ -514,6 +515,35 @@ static PyObject* Base_GetAttr(PyObject *o, PyObject *attr_name) {
 
     return PyObject_GenericGetAttr(o,attr_name);
 }
+
+static PyObject* Base_setInstanciationSourceFilePos(PyObject *self, PyObject *args)
+{
+        Base* obj = get_base(self);
+        const char *fileName="";
+        int filePos=-1;
+        if (!PyArg_ParseTuple(args, "si", &fileName, &filePos))
+        {
+            return nullptr;
+        }
+        obj->setInstanciationSourceFileName(fileName);
+        obj->setInstanciationSourceFilePos(filePos);
+        Py_RETURN_NONE;
+}
+
+static PyObject* Base_setDefinitionSourceFilePos(PyObject *self, PyObject *args)
+{
+        Base* obj = get_base(self);
+        const char *fileName="";
+        int filePos=-1;
+        if (!PyArg_ParseTuple(args, "si", &fileName, &filePos))
+        {
+            return nullptr;
+        }
+        obj->setDefinitionSourceFileName(fileName);
+        obj->setDefinitionSourceFilePos(filePos);
+        Py_RETURN_NONE;
+}
+
 
 static int Base_SetAttr(PyObject *o, PyObject *attr_name, PyObject *v) {
     /// attribute does not exist: see if a Data field has this name...
@@ -692,6 +722,8 @@ SP_CLASS_METHOD_DOC(Base,getLink, "Returns the link field if there is one associ
                                   "Returns None is there is no field with this name.")
 SP_CLASS_METHOD(Base,getClassName)
 SP_CLASS_METHOD(Base,getTemplateName)
+SP_CLASS_METHOD_DOC(Base,setDefinitionSourceFilePos, "Set the filename & line number where the object has been defined.")
+SP_CLASS_METHOD_DOC(Base,setInstanciationSourceFilePos, "Set the filename & line number where the object has been defined.")
 SP_CLASS_METHOD(Base,getName)
 SP_CLASS_METHOD(Base,__dir__)
 SP_CLASS_METHOD_DOC(Base,getDataFields, "Returns a list with the *content* of all the data fields converted in python"

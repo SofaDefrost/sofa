@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -140,10 +140,10 @@ protected:
 
     std::set<unsigned int> pointsToRemove;
 
-    size_t addInputPoint(unsigned int i, PointSetTopologyModifier* toPointMod=NULL); ///< Returns the number of points added inside the output topology. 
-    void addInputEdge(unsigned int i, PointSetTopologyModifier* toPointMod=NULL);
-    void addInputTriangle(unsigned int i, PointSetTopologyModifier* toPointMod=NULL);
-    void addInputTetrahedron(unsigned int i, PointSetTopologyModifier* toPointMod=NULL);
+    size_t addInputPoint(unsigned int i, PointSetTopologyModifier* toPointMod=nullptr); ///< Returns the number of points added inside the output topology. 
+    void addInputEdge(unsigned int i, PointSetTopologyModifier* toPointMod=nullptr);
+    void addInputTriangle(unsigned int i, PointSetTopologyModifier* toPointMod=nullptr);
+    void addInputTetrahedron(unsigned int i, PointSetTopologyModifier* toPointMod=nullptr);
 
     void swapInput(Element elem, int i1, int i2);
     void removeInput(Element elem, const sofa::helper::vector<unsigned int>& tab );

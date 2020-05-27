@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -34,7 +34,7 @@ namespace component
 namespace visualmodel
 {
 
-static int OglGridClass = core::RegisterObject("Display a simple grid")
+int OglGridClass = core::RegisterObject("Display a simple grid")
         .add< component::visualmodel::OglGrid>()
         ;
 
@@ -90,7 +90,7 @@ void OglGrid::updateVisual()
     }
     else
     {
-        serr << "Plane parameter " << plane.getValue() << " not recognized. Set to z instead" << sendl;
+        msg_error() << "Plane parameter " << plane.getValue() << " not recognized. Set to z instead";
         plane.setValue("z");
         internalPlane = PLANE_Z;
     }
@@ -98,7 +98,7 @@ void OglGrid::updateVisual()
     int nb = nbSubdiv.getValue();
     if (nb < 2)
     {
-        serr << "nbSubdiv should be > 2" << sendl;
+        msg_error() << "nbSubdiv should be > 2";
         nbSubdiv.setValue(2);
     }
 

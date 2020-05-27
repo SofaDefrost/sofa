@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -195,6 +195,9 @@ void PythonEnvironment::Init()
                 SP_MESSAGE_WARNING("no such directory: '" + path + "'");
         }
     }
+
+    // Add the directories listed in SofaPython.so/../../python
+    addPythonModulePathsForPluginsByName("SofaPython");
 
     // python livecoding related
     PyRun_SimpleString("from SofaPython.livecoding import onReimpAFile");

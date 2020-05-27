@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -90,7 +90,7 @@ public:
 
     void applyJT( const sofa::core::ConstraintParams* /*cparams*/, InDataMatrixDeriv& /*out*/, const OutDataMatrixDeriv& /*in*/) override
     {
-        serr << "applyJT(constraint ) not implemented" << sendl;
+        msg_warning() << "This object only support Direct Solving but an Indirect Solver in the scene is calling method applyJT(constraint) which is not implemented. This will produce un-expected behavior.";
     }
 
     //void applyJT( typename In::MatrixDeriv& out, const typename Out::MatrixDeriv& in );
@@ -117,7 +117,6 @@ protected :
 #if  !defined(SOFA_COMPONENT_MAPPING_CENTEROFMASSMAPPING_CPP)
 extern template class SOFA_MISC_MAPPING_API CenterOfMassMapping< sofa::defaulttype::Rigid3Types, sofa::defaulttype::Vec3dTypes >;
 extern template class SOFA_MISC_MAPPING_API CenterOfMassMapping< sofa::defaulttype::Rigid2Types, sofa::defaulttype::Vec2Types >;
-extern template class SOFA_MISC_MAPPING_API CenterOfMassMapping< sofa::defaulttype::Rigid3Types, sofa::defaulttype::ExtVec3Types >;
 #endif
 
 } // namespace mapping

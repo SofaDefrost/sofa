@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -43,7 +43,6 @@ namespace collision
 template<class T>
 bool RayDiscreteIntersection::testIntersection(Ray& ray1, TSphere<T>& sph2)
 {
-    //sout<<"intersectionSphereRay: Collision between Sphere - Ray"<<sendl;
     // Center of the sphere
     const defaulttype::Vector3 sph2Pos(sph2.center());
     // Radius of the sphere

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -37,7 +37,6 @@ namespace component
 
 namespace linearsolver
 {
-//#define DISPLAY_TIME
 
 /// Linear system solver using the MINRES iterative algorithm
 /// @author Matthieu Nesme
@@ -55,11 +54,7 @@ public:
     Data<double> f_tolerance; ///< desired precision of the Conjugate Gradient Solution (ratio of current residual norm over initial residual norm)
     Data<bool> f_verbose; ///< Dump system state at each iteration
     Data<std::map < std::string, sofa::helper::vector<SReal> > > f_graph; ///< Graph of residuals at each iteration
-#ifdef DISPLAY_TIME
-    double time1;
-    double time2;
-    double timeStamp;
-#endif
+
 protected:
     MinResLinearSolver();
 

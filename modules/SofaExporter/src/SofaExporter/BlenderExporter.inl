@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -50,7 +50,7 @@ namespace sofa
             void BlenderExporter<T>::init()
             {
                 mmodel = Inherit::searchLocal<DataType>();
-                if(mmodel == NULL)
+                if(mmodel == nullptr)
                     msg_error()<<"Initialization failed!";
                 Inherit::init();
                 // if hair type simulation, create an additional information frame 
@@ -160,10 +160,7 @@ namespace sofa
                                    defaulttype::Vector3  x1 = T::getCPos(posData[i+1]);
 
                                     x1 = x1-x0;
-                                   // sout<<"tangeant direction: "<<x1<<sendl;
                                     x1.normalize();
-
-                                   // sout<<"tangeant direction normalized: "<<x1<<sendl;
 
                                     x0 = x0+x1;
 

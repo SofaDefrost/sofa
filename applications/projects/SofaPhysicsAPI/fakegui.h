@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -37,13 +37,13 @@ public:
     int mainLoop() override {return 0;}
     void redraw() override {}
     int closeGUI() override {return 0;}
-    virtual void setScene(sofa::simulation::Node::SPtr /*groot*/, const char* /*filename*/=nullptr, bool /*temporaryFile*/=false) {}
+    virtual void setScene(sofa::simulation::Node::SPtr /*groot*/, const char* /*filename*/=nullptr, bool /*temporaryFile*/=false) override {}
     sofa::simulation::Node* currentSimulation() override {return nullptr;}
     /// @}
 
     /// @name methods to communicate with the GUI
     /// @{
-    virtual void sendMessage(const std::string & /*msgType*/,const std::string & /*msgValue*/);
+    virtual void sendMessage(const std::string & /*msgType*/,const std::string & /*msgValue*/) override;
     /// @}
 
     static void Create();

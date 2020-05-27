@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -106,26 +106,6 @@ Creator<DataWidgetFactory, TableDataWidget< std::vector<fixed_array<unsigned int
 Creator<DataWidgetFactory, TableDataWidget< std::vector<fixed_array<int,8> > > > DWClass_stdvectorA8i("default",true);
 Creator<DataWidgetFactory, TableDataWidget< std::vector<fixed_array<unsigned int,8> > > > DWClass_stdvectorA8u("default",true);
 #endif
-
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<int>, TABLE_HORIZONTAL > > DWClass_ResizableExtVectori("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<unsigned int>, TABLE_HORIZONTAL > > DWClass_ResizableExtVectoru("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<float>, TABLE_HORIZONTAL > > DWClass_ResizableExtVectorf("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<double>, TABLE_HORIZONTAL > > DWClass_ResizableExtVectord("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<std::string> > > DWClass_ResizableExtVectorstring("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<fixed_array<int,3> > > > DWClass_ResizableExtVectorA3i("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<fixed_array<int,4> > > > DWClass_ResizableExtVectorA4i("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<fixed_array<unsigned int,3> > > > DWClass_ResizableExtVectorA3u("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<fixed_array<unsigned int,4> > > > DWClass_ResizableExtVectorA4u("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<Vec<2, float> > > > DWClass_ResizableExtVectorVec2f("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<Vec<2, double> > > > DWClass_ResizableExtVectorVec2d("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<Vec<3, float> > > > DWClass_ResizableExtVectorVec3f("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<Vec<3, double> > > > DWClass_ResizableExtVectorVec3d("default",true);
-
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<sofa::core::topology::Topology::Edge > > > DWClass_ResizableExtVectorEdge("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<sofa::core::topology::Topology::Triangle > > > DWClass_ResizableExtVectorTriangle("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<sofa::core::topology::Topology::Quad > > > DWClass_ResizableExtVectorQuad("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<sofa::core::topology::Topology::Tetrahedron > > > DWClass_ResizableExtVectorTetrahedron("default",true);
-Creator<DataWidgetFactory, TableDataWidget< sofa::defaulttype::ResizableExtVector<sofa::core::topology::Topology::Hexahedron > > > DWClass_ResizableExtVectorHexahedron("default",true);
 
 Creator<DataWidgetFactory, TableDataWidget< sofa::helper::vector<sofa::helper::Quater<float> > > > DWClass_vectorQuatf("default",true);
 Creator<DataWidgetFactory, TableDataWidget< sofa::helper::vector<sofa::helper::Quater<double> > > > DWClass_vectorQuatd("default",true);

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -22,6 +22,8 @@
 #ifndef SOFA_GUI_QT_QTVIEWER_H
 #define SOFA_GUI_QT_QTVIEWER_H
 
+#include <sofa/gui/qt/SofaGuiQt.h>
+
 #include <sofa/helper/system/config.h>
 #include <sofa/helper/system/gl.h>
 #include <sofa/helper/system/glu.h>
@@ -41,7 +43,7 @@
 #include <QOpenGLContext>
 #endif // defined(QT_VERSION) && QT_VERSION >= 0x050400
 
-#include <sofa/gui/qt/viewer/SofaViewer.h>
+#include <sofa/gui/qt/viewer/OglModelPolicy.h>
 
 #include "../../../ViewerFactory.h"
 
@@ -85,7 +87,7 @@ typedef QOpenGLWidget QOpenGLWidget;
 typedef QGLWidget QOpenGLWidget;
 #endif // defined(QT_VERSION) && QT_VERSION >= 0x050400
 
-class QtViewer
+class SOFA_SOFAGUIQT_API QtViewer
         : public QOpenGLWidget
         , public sofa::gui::qt::viewer::OglModelSofaViewer
 {
@@ -225,11 +227,11 @@ public:
     }
 
     //void			reshape(int width, int height);
-    int GetWidth()
+    int getWidth() override
     {
         return _W;
     }
-    int GetHeight()
+    int getHeight() override
     {
         return _H;
     }

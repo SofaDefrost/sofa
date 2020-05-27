@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,17 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-//
-// C++ Interface: TriangularBendingSprings
-//
-// Description:
-//
-//
-// Author: The SOFA team </www.sofa-framework.org>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef SOFA_COMPONENT_FORCEFIELD_TRIANGULARBENDINGSPRINGS_H
 #define SOFA_COMPONENT_FORCEFIELD_TRIANGULARBENDINGSPRINGS_H
 #include "config.h"
@@ -82,6 +71,13 @@ public:
 
     enum { N=DataTypes::spatial_dimensions };
     typedef defaulttype::Mat<N,N,Real> Mat;
+
+
+    Data<double> f_ks; ///< uniform stiffness for the all springs
+    Data<double> f_kd; ///< uniform damping for the all springs
+
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<TriangularBendingSprings<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 protected:
 
@@ -159,19 +155,11 @@ protected:
 
     protected:
         TriangularBendingSprings<DataTypes>* ff;
-    };
-
-    sofa::core::topology::BaseMeshTopology* _topology;
+    };    
 
     bool updateMatrix;
-
-    Data<double> f_ks; ///< uniform stiffness for the all springs
-    Data<double> f_kd; ///< uniform damping for the all springs
-
-
-
     TriangularBendingSprings(/*double _ks, double _kd*/);
-    //TriangularBendingSprings(); //MechanicalState<DataTypes> *mm1 = NULL, MechanicalState<DataTypes> *mm2 = NULL);
+    //TriangularBendingSprings(); //MechanicalState<DataTypes> *mm1 = nullptr, MechanicalState<DataTypes> *mm2 = nullptr);
 
     virtual ~TriangularBendingSprings();
 public:
@@ -205,6 +193,8 @@ protected:
     TriangularBSEdgeHandler* edgeHandler;
 
     SReal m_potentialEnergy;
+
+    sofa::core::topology::BaseMeshTopology* m_topology;
 
     //public:
     //Data<double> ks;

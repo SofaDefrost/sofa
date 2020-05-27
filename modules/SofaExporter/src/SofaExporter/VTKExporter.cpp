@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,13 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-/*
- * VTKExporter.cpp
- *
- *  Created on: 9 sept. 2009
- *      Author: froy
- */
-
 #include "VTKExporter.h"
 
 #include <sstream>
@@ -52,7 +45,7 @@ int VTKExporterClass = core::RegisterObject("Save State vectors from file at eac
         .add< VTKExporter >();
 
 VTKExporter::VTKExporter()
-    : stepCounter(0), outfile(NULL)
+    : stepCounter(0), outfile(nullptr)
     , vtkFilename( initData(&vtkFilename, "filename", "output VTK file name"))
     , fileFormat( initData(&fileFormat, (bool) true, "XMLformat", "Set to true to use XML format"))
     , position( initData(&position, "position", "points position (will use points from topology or mechanical state if this is empty)"))
@@ -152,7 +145,7 @@ void VTKExporter::writeData(const helper::vector<std::string>& objects, const he
     for (unsigned int i=0 ; i<objects.size() ; i++)
     {
         core::objectmodel::BaseObject* obj = context->get<core::objectmodel::BaseObject> (objects[i]);
-        core::objectmodel::BaseData* field = NULL;
+        core::objectmodel::BaseData* field = nullptr;
         if (obj)
         {
             field = obj->findData(fields[i]);
@@ -234,7 +227,7 @@ void VTKExporter::writeDataArray(const helper::vector<std::string>& objects, con
     for (unsigned int i=0 ; i<objects.size() ; i++)
     {
         core::objectmodel::BaseObject* obj = context->get<core::objectmodel::BaseObject> (objects[i]);
-        core::objectmodel::BaseData* field = NULL;
+        core::objectmodel::BaseData* field = nullptr;
         if (obj)
         {
             field = obj->findData(fields[i]);
@@ -396,7 +389,7 @@ void VTKExporter::writeVTKSimple()
     {
         msg_error() << "Error creating file "<<filename;
         delete outfile;
-        outfile = NULL;
+        outfile = nullptr;
         return;
     }
 
@@ -569,7 +562,7 @@ void VTKExporter::writeVTKXML()
     {
         msg_error() << "Error creating file "<<filename;
         delete outfile;
-        outfile = NULL;
+        outfile = nullptr;
         return;
     }
     const helper::vector<std::string>& pointsData = dPointsDataFields.getValue();
@@ -773,7 +766,7 @@ void VTKExporter::writeParallelFile()
     {
         msg_error() << "Error creating file "<<filename;
         delete outfile;
-        outfile = NULL;
+        outfile = nullptr;
         return;
     }
 
@@ -790,7 +783,7 @@ void VTKExporter::writeParallelFile()
         for (unsigned int i=0 ; i<pointsDataObject.size() ; i++)
         {
             core::objectmodel::BaseObject* obj = context->get<core::objectmodel::BaseObject> (pointsDataObject[i]);
-            core::objectmodel::BaseData* field = NULL;
+            core::objectmodel::BaseData* field = nullptr;
             if (obj)
             {
                 field = obj->findData(pointsDataField[i]);
@@ -863,7 +856,7 @@ void VTKExporter::writeParallelFile()
         for (unsigned int i=0 ; i<cellsDataObject.size() ; i++)
         {
             core::objectmodel::BaseObject* obj = context->get<core::objectmodel::BaseObject> (cellsDataObject[i]);
-            core::objectmodel::BaseData* field = NULL;
+            core::objectmodel::BaseData* field = nullptr;
             if (obj)
             {
                 field = obj->findData(cellsDataField[i]);

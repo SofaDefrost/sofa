@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -40,10 +40,10 @@ namespace component
 namespace visualmodel
 {
 
-class SOFA_OPENGL_VISUAL_API DataDisplay : public core::visual::VisualModel, public ExtVec3State
+class SOFA_OPENGL_VISUAL_API DataDisplay : public core::visual::VisualModel, public Vec3State
 {
 public:
-    SOFA_CLASS2(DataDisplay, core::visual::VisualModel, ExtVec3State);
+    SOFA_CLASS2(DataDisplay, core::visual::VisualModel, Vec3State);
 
     typedef core::topology::BaseMeshTopology::Triangle Triangle;
     typedef core::topology::BaseMeshTopology::Quad     Quad;
@@ -66,7 +66,11 @@ public:
 
     visualmodel::OglColorMap *colorMap;
     core::State<DataTypes> *state;
-    core::topology::BaseMeshTopology* topology;
+    core::topology::BaseMeshTopology* m_topology;
+
+    /// Link to be set to the topology container in the component graph.
+    SingleLink <DataDisplay, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
     Real oldMin, oldMax;
 
     void init() override;

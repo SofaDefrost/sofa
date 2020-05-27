@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -39,7 +39,7 @@ namespace topology
 
 enum class Grid_dimension
 {
-    GRID_NULL = 0,
+    GRID_nullptr = 0,
     GRID_1D,
     GRID_2D,
     GRID_3D
@@ -60,7 +60,7 @@ using MeshTopology::getHexahedron;
     typedef sofa::defaulttype::Vec3i Vec3i;
     typedef sofa::defaulttype::Vector2 Vector2;
     typedef sofa::defaulttype::Vector3 Vector3;
-    typedef sofa::defaulttype::ResizableExtVector<Vector2> TextCoords2D;
+    typedef Vector2 TextCoords2D;
     friend class GridUpdate;
 
 
@@ -80,7 +80,7 @@ private:
         void updateTriangles();
         void updateHexas();
     private:
-        GridTopology* topology;
+        GridTopology* m_topology;
     };
 
 protected:
@@ -184,8 +184,9 @@ public:
     /// Get Cube index, similar to \sa hexa method
     int cube(int x, int y, int z) const { return hexa(x,y,z); }
 
-	/// Get the actual dimension of this grid using Enum @sa Grid_dimension
-	Grid_dimension getDimensions() const;
+    /// Get the actual dimension of this grid using Enum @sa Grid_dimension
+    Grid_dimension getDimensions() const;
+
 public:
     /// Data storing the size of the grid in the 3 directions
     Data<Vec3i> d_n;
@@ -193,6 +194,7 @@ public:
     /// Data bool to set option to compute topological elements
     Data<bool> d_computeHexaList;
     Data<bool> d_computeQuadList; ///< put true if the list of Quad is needed during init (default=true)
+    Data<bool> d_computeTriangleList; ///< put true if the list of Triangles is needed during init (default=true)
     Data<bool> d_computeEdgeList; ///< put true if the list of Lines is needed during init (default=true)
     Data<bool> d_computePointList; ///< put true if the list of Points is needed during init (default=true)
     /// Data bool to set option to compute texcoords

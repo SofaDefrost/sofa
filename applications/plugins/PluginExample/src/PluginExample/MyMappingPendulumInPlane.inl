@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,8 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#pragma once
 
-#include "MyMappingPendulumInPlane.h"
+#include <PluginExample/MyMappingPendulumInPlane.h>
+
 #include <sofa/simulation/Simulation.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <iostream>
@@ -29,13 +31,7 @@ using std::cerr;
 using std::endl;
 
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace mapping
+namespace sofa::component::mapping
 {
 
 using helper::ReadAccessor;
@@ -47,7 +43,7 @@ using defaulttype::Vector3;
 template <class In, class Out>
 MyMappingPendulumInPlane<In, Out>::MyMappingPendulumInPlane():
     Inherit(),
-    f_length(initData(&f_length, "lengths", "distances from the fixed point to the end of the pendulum"))
+    d_length(initData(&d_length, "lengths", "distances from the fixed point to the end of the pendulum"))
 {
 }
 
@@ -62,7 +58,7 @@ void MyMappingPendulumInPlane<In, Out>::init()
 {
     ReadAccessor<Data<VecOutCoord> > out (*this->toModel->read(core::ConstVecCoordId::position()));
     WriteAccessor<Data<VecInCoord> > in (*this->fromModel->write(core::VecCoordId::position()));
-    WriteAccessor<Data<vector<OutReal> > > distances (f_length);
+    WriteAccessor<Data<vector<OutReal> > > distances (d_length);
     if (distances.size() != out.size()) // values not read from file
     {
         in.resize(out.size());
@@ -108,10 +104,12 @@ void MyMappingPendulumInPlane<In, Out>::apply(const core::MechanicalParams* mpar
                                              OutDataVecCoord& out,
                                              const InDataVecCoord& in)
 {
-    VecOutCoord& childPos = *out.beginEdit(mparams);
-    const VecInCoord& parentPos = in.getValue(mparams);
+    SOFA_UNUSED(mparams);
 
-    ReadAccessor<Data<vector<OutReal> > > distances (f_length);
+    VecOutCoord& childPos = *out.beginEdit();
+    const VecInCoord& parentPos = in.getValue();
+
+    ReadAccessor<Data<vector<OutReal> > > distances (d_length);
     for(unsigned i=0; i<childPos.size(); i++)
     {
         gap[i] = Vec2(distances[i] * cos(parentPos[i][0]),
@@ -120,7 +118,7 @@ void MyMappingPendulumInPlane<In, Out>::apply(const core::MechanicalParams* mpar
         childPos[i][1] = gap[i][1];
     }
 
-    out.endEdit(mparams);
+    out.endEdit();
 }
 
 template <class In, class Out>
@@ -128,8 +126,10 @@ void MyMappingPendulumInPlane<In, Out>::applyJ(const core::MechanicalParams* mpa
                                               OutDataVecDeriv& out,
                                               const InDataVecDeriv& in)
 {
-    VecOutDeriv& childVel = *out.beginEdit(mparams);
-    const VecInDeriv& parentVel = in.getValue(mparams);
+    SOFA_UNUSED(mparams);
+
+    VecOutDeriv& childVel = *out.beginEdit();
+    const VecInDeriv& parentVel = in.getValue();
 
     for(unsigned i=0; i<childVel.size(); i++)
     {
@@ -140,7 +140,7 @@ void MyMappingPendulumInPlane<In, Out>::applyJ(const core::MechanicalParams* mpa
                  (OutReal)0);
     }
 
-    out.endEdit(mparams);
+    out.endEdit();
 }
 
 template <class In, class Out>
@@ -148,8 +148,10 @@ void MyMappingPendulumInPlane<In, Out>::applyJT(const core::MechanicalParams* mp
                                                InDataVecDeriv& out,
                                                const OutDataVecDeriv& in)
 {
-    VecInDeriv& parentForce = *out.beginEdit(mparams);
-    const VecOutDeriv& childForce = in.getValue(mparams);
+    SOFA_UNUSED(mparams);
+
+    VecInDeriv& parentForce = *out.beginEdit();
+    const VecOutDeriv& childForce = in.getValue();
 
     for(unsigned i=0; i<parentForce.size(); i++)
     {
@@ -157,16 +159,18 @@ void MyMappingPendulumInPlane<In, Out>::applyJT(const core::MechanicalParams* mp
         parentForce[i][0] += -gap[i][1] * childForce[i][0] + gap[i][0] * childForce[i][1] ;
     }
 
-    out.endEdit(mparams);
+    out.endEdit();
 }
 
 template <class In, class Out>
-void MyMappingPendulumInPlane<In, Out>::applyJT(const core::ConstraintParams* mparams,
+void MyMappingPendulumInPlane<In, Out>::applyJT(const core::ConstraintParams* cparams,
                                                InDataMatrixDeriv& out,
                                                const OutDataMatrixDeriv& in)
 {
-    MatrixInDeriv& parentJacobians = *out.beginEdit(mparams);
-    const MatrixOutDeriv& childJacobians = in.getValue(mparams);
+    SOFA_UNUSED(cparams);
+
+    MatrixInDeriv& parentJacobians = *out.beginEdit();
+    const MatrixOutDeriv& childJacobians = in.getValue();
 
     for (typename Out::MatrixDeriv::RowConstIterator childJacobian = childJacobians.begin(); childJacobian != childJacobians.end(); ++childJacobian)
     {
@@ -181,7 +185,7 @@ void MyMappingPendulumInPlane<In, Out>::applyJT(const core::ConstraintParams* mp
         }
     }
 
-    out.endEdit(mparams);
+    out.endEdit();
 }
 
 template <class In, class Out>
@@ -194,20 +198,11 @@ void MyMappingPendulumInPlane<In, Out>::applyDJT(const core::MechanicalParams* m
     ReadAccessor<Data<VecInDeriv> > parentDx (*mparams->readDx(this->fromModel));
     InReal kfactor = (InReal)mparams->kFactor();
 
-//    serr<<"MyMappingPendulumInPlane2<In, Out>::applyDJT"<< sendl;
     for(unsigned i=0; i<parentForce.size(); i++)
     {
         parentForce[i][0] -= (gap[i][0] * childForce[i][0] +  gap[i][1] * childForce[i][1]) * parentDx[i][0] * kfactor;
-//        serr<<"MyMappingPendulumInPlane2<In, Out>::applyDJT, gap[i] = "<< gap[i] << sendl;
-//        serr<<"MyMappingPendulumInPlane2<In, Out>::applyDJT, childForce[i] = "<< childForce[i] << sendl;
-//        serr<<"MyMappingPendulumInPlane2<In, Out>::applyDJT, parent displacement = "<< parentDx[i][0] << sendl;
-//        serr<<"MyMappingPendulumInPlane2<In, Out>::applyDJT, parent force -= "<< (gap[i][0] * childForce[i][0] +  gap[i][1] * childForce[i][1]) * parentDx[i][0] << sendl;
     }
 }
 
 
-}	//mapping
-
-}	//component
-
-}	//sofa
+}	// namespace sofa::component::mapping 

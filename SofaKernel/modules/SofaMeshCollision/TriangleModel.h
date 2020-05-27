@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,8 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_COLLISION_TRIANGLEMODEL_H
-#define SOFA_COMPONENT_COLLISION_TRIANGLEMODEL_H
+#ifndef SOFA_COMPONENT_COLLISION_TRIANGLECOLLISIONMODEL_H
+#define SOFA_COMPONENT_COLLISION_TRIANGLECOLLISIONMODEL_H
 #include "config.h"
 
 #include <sofa/core/CollisionModel.h>
@@ -140,6 +140,9 @@ public:
 
     Data<bool> d_bothSide; ///< to activate collision on both side of the triangle model
     Data<bool> d_computeNormals; ///< set to false to disable computation of triangles normal
+    
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<TriangleCollisionModel<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 protected:
     core::behavior::MechanicalState<DataTypes>* m_mstate; ///< Pointer to the corresponding MechanicalState
@@ -159,7 +162,7 @@ protected:
     bool m_needsUpdate; ///< parameter storing the info boundingTree has to be recomputed.
     int m_topologyRevision; ///< internal revision number to check if topology has changed.
 
-    PointModel* m_pointModels;
+    PointCollisionModel<sofa::defaulttype::Vec3Types>* m_pointModels;
 
     TriangleLocalMinDistanceFilter *m_lmdFilter;
 
@@ -168,7 +171,6 @@ protected:
     TriangleCollisionModel();
 
     virtual void updateFromTopology();
-    virtual void updateFlags(int ntri=-1);
     virtual void updateNormals();
 
 public:
@@ -208,25 +210,22 @@ public:
     template<class T>
     static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
     {
-        if (dynamic_cast<core::behavior::MechanicalState<DataTypes>*>(context->getMechanicalState()) == NULL)
+        if (dynamic_cast<core::behavior::MechanicalState<DataTypes>*>(context->getMechanicalState()) == nullptr)
+        {
+            arg->logError(std::string("No mechanical state with the datatype '") + DataTypes::Name() +
+                          "' found in the context node.");
             return false;
+        }
         return BaseObject::canCreate(obj, context, arg);
     }
 
-    virtual std::string getTemplateName() const override
-    {
-        return templateName(this);
-    }
-
-    static std::string templateName(const TriangleCollisionModel<DataTypes>* = NULL)
-    {
-        return DataTypes::Name();
-    }
-
     void computeBBox(const core::ExecParams* params, bool onlyVisible=false) override;
-};
 
-template <class TDataTypes> using TTriangleModel [[deprecated("The TTriangleModel is now deprecated please use TriangleCollisionModel instead.")]] = TriangleCollisionModel<TDataTypes>;
+    sofa::core::topology::BaseMeshTopology* getCollisionTopology() override
+    {
+        return l_topology.get();
+    }
+};
 
 template<class DataTypes>
 inline TTriangle<DataTypes>::TTriangle(ParentModel* model, int index)
@@ -297,10 +296,12 @@ inline bool TTriangle<DataTypes>::hasFreePosition() const { return this->model->
 template<class DataTypes>
 inline typename DataTypes::Deriv TriangleCollisionModel<DataTypes>::velocity(int index) const { return (m_mstate->read(core::ConstVecDerivId::velocity())->getValue()[(*(m_triangles))[index][0]] + m_mstate->read(core::ConstVecDerivId::velocity())->getValue()[(*(m_triangles))[index][1]] +
                                                                                                 m_mstate->read(core::ConstVecDerivId::velocity())->getValue()[(*(m_triangles))[index][2]])/((Real)(3.0)); }
-typedef TriangleCollisionModel<sofa::defaulttype::Vec3Types> TriangleModel;
-typedef TTriangle<sofa::defaulttype::Vec3Types> Triangle;
 
-#if  !defined(SOFA_COMPONENT_COLLISION_TRIANGLEMODEL_CPP)
+template <class TDataTypes> using TTriangleModel [[deprecated("The TTriangleModel is now deprecated, please use TriangleCollisionModel instead. Compatibility stops at v20.06")]] = TriangleCollisionModel<TDataTypes>;
+using TriangleModel [[deprecated("The TriangleModel is now deprecated, please use TriangleCollisionModel<sofa::defaulttype::Vec3Types> instead. Compatibility stops at v20.06")]] = TriangleCollisionModel<sofa::defaulttype::Vec3Types>;
+using Triangle = TTriangle<sofa::defaulttype::Vec3Types>;
+
+#if  !defined(SOFA_COMPONENT_COLLISION_TRIANGLECOLLISIONMODEL_CPP)
 extern template class SOFA_MESH_COLLISION_API TriangleCollisionModel<defaulttype::Vec3Types>;
 #endif
 

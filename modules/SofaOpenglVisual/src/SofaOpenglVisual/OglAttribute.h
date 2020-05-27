@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -28,7 +28,7 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <SofaOpenglVisual/OglModel.h>
 #include <SofaOpenglVisual/OglShader.h>
-
+#include <SofaBaseTopology/TopologyData.h>
 
 namespace sofa
 {
@@ -59,19 +59,16 @@ public:
     /// if attributes are not static, update the buffer
     void updateVisual() override;
 
-    sofa::defaulttype::ResizableExtVector<TDataTypes>* beginEdit();
+    helper::vector<TDataTypes>* beginEdit();
     void endEdit();
-    const sofa::defaulttype::ResizableExtVector<TDataTypes>& getValue() const;
-    void setValue( const sofa::defaulttype::ResizableExtVector<TDataTypes>& value);
+    const helper::vector<TDataTypes>& getValue() const;
+    void setValue( const helper::vector<TDataTypes>& value);
     void enable();
     void disable();
     void bwdDraw(core::visual::VisualParams* ) override;
     void fwdDraw(core::visual::VisualParams* ) override;
 
     void setUsage(unsigned int usage) { _usage = usage; }
-
-    // handle topological changes
-    void handleTopologyChange() override;
 
     /// Returns the type of shader element (texture, macro, variable, or attribute)
     ShaderElementType getSEType() const override { return core::visual::ShaderElement::SE_ATTRIBUTE; }
@@ -96,7 +93,7 @@ protected:
 
     unsigned int _usage;
 
-    Data<sofa::defaulttype::ResizableExtVector<TDataTypes> > value; ///< internal Data
+    topology::PointData<helper::vector<TDataTypes> > value; ///< internal Data
     Data<bool> handleDynamicTopology;
 
     sofa::core::topology::BaseMeshTopology* _topology;

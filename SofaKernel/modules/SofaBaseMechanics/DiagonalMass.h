@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -42,7 +42,6 @@
 #include <SofaBaseTopology/HexahedronSetGeometryAlgorithms.h>
 
 #include <sofa/core/objectmodel/DataFileName.h>
-#include <sofa/core/DataTracker.h>
 
 namespace sofa
 {
@@ -118,6 +117,12 @@ public:
 
         using topology::TopologyDataHandler<Point,MassVector>::ApplyTopologyChange;
 
+        ///////////////////////// Functions on Points //////////////////////////////////////
+        /// Apply removing points.
+        void applyPointDestruction(const sofa::helper::vector<unsigned int> & /*indices*/);
+        /// Callback to remove points.
+        virtual void ApplyTopologyChange(const core::topology::PointsRemoved* /*event*/);
+
         ///////////////////////// Functions on Edges //////////////////////////////////////
         /// Apply adding edges elements.
         void applyEdgeCreation(const sofa::helper::vector< unsigned int >& /*indices*/,
@@ -179,11 +184,11 @@ public:
     /// the mass density used to compute the mass from a mesh topology and geometry
     Data< Real > d_massDensity;
 
-    /// if true, the mass of every element is computed based on the rest position rather than the position
-    Data< bool > d_computeMassOnRest;
-
     /// total mass of the object
     Data< Real > d_totalMass;
+
+    /// if true, the mass of every element is computed based on the rest position rather than the position
+    Data< bool > d_computeMassOnRest;
 
     /// to display the center of gravity of the system
     Data< bool > d_showCenterOfGravity;
@@ -196,10 +201,8 @@ public:
     /// value defining the initialization process of the mass (0 : totalMass, 1 : massDensity, 2 : vertexMass)
     int m_initializationProcess;
 
-    /// Data tracker
-    sofa::core::DataTracker m_dataTrackerVertex;
-    sofa::core::DataTracker m_dataTrackerDensity;
-    sofa::core::DataTracker m_dataTrackerTotal;
+    /// Link to be set to the topology container in the component graph. 
+    SingleLink<DiagonalMass<DataTypes, TMassType>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 protected:
     ////////////////////////// Inherited attributes ////////////////////////////
@@ -217,10 +220,10 @@ protected:
     /// The type of topology to build the mass from the topology
     TopologyType m_topologyType;
 
+    /// Pointer to the topology container. Will be set by link @sa l_topology
+    sofa::core::topology::BaseMeshTopology* m_topology;
 
 public:
-    sofa::core::topology::BaseMeshTopology* _topology;
-
     sofa::component::topology::EdgeSetGeometryAlgorithms<GeometricalTypes>* edgeGeo;
     sofa::component::topology::TriangleSetGeometryAlgorithms<GeometricalTypes>* triangleGeo;
     sofa::component::topology::QuadSetGeometryAlgorithms<GeometricalTypes>* quadGeo;
@@ -240,7 +243,7 @@ public:
     void init() override;
     void handleEvent(sofa::core::objectmodel::Event* ) override;
 
-    bool update();
+    void doUpdateInternal() override;
 
     TopologyType getMassTopologyType() const
     {
@@ -323,17 +326,6 @@ public:
     bool isDiagonal() override {return true;}
 
     void draw(const core::visual::VisualParams* vparams) override;
-
-
-    virtual std::string getTemplateName() const override
-    {
-        return templateName(this);
-    }
-
-    static std::string templateName(const DiagonalMass<DataTypes, TMassType>* = NULL)
-    {
-        return DataTypes::Name();
-    }
 
     //Temporary function to warn the user when old attribute names are used
     void parse( sofa::core::objectmodel::BaseObjectDescription* arg ) override

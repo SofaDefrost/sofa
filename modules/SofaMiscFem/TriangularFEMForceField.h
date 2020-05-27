@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -222,7 +222,7 @@ public:
     };
 
 
-    sofa::core::topology::BaseMeshTopology* _topology;
+    sofa::core::topology::BaseMeshTopology* m_topology;
 
     /// Get/Set methods
     Real getPoisson() { return (f_poisson.getValue())[0]; }
@@ -322,6 +322,9 @@ public:
     Data<bool> f_computePrincipalStress; ///< Compute principal stress for each triangle
 
     TRQSTriangleHandler* triangleHandler;
+
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<TriangularFEMForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 #ifdef PLOT_CURVE
     //structures to save values for each element along time

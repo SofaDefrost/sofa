@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -211,9 +211,9 @@ void DistanceLMContactConstraint<DataTypes>::writeConstraintEquations(unsigned i
                 this->getContext()->get(intersection);
 
             if (intersection)
-                minDistance=intersection->getContactDistance();
+                minDistance = intersection->getContactDistance();
             else
-                serr << "No intersection component found!!" << sendl;
+                msg_error() << "No intersection component found!!";
 
             const VecCoord &x1 = this->constrainedObject1->read(core::ConstVecCoordId(id.getId(this->constrainedObject1)))->getValue();
             const VecCoord &x2 = this->constrainedObject2->read(core::ConstVecCoordId(id.getId(this->constrainedObject2)))->getValue();
@@ -286,7 +286,7 @@ void DistanceLMContactConstraint<DataTypes>::LagrangeMultiplierEvaluation(const 
 
             if (value == 0)
             {
-                serr << "ERROR DIVISION BY ZERO AVOIDED: w=[" << W[0]  << "," << W[1] << "," << W[2]  << "] " << " DIRECTION CONE: " << directionCone << " BARY COEFF: " << contact.coeff[0] << ", " <<  contact.coeff[1] << ", " <<  contact.coeff[2] << std::endl;
+                msg_error() << "DIVISION BY ZERO AVOIDED: w=[" << W[0] << "," << W[1] << "," << W[2] << "] " << " DIRECTION CONE: " << directionCone << " BARY COEFF: " << contact.coeff[0] << ", " << contact.coeff[1] << ", " << contact.coeff[2];
                 group->setActive(false);
                 out.contactForce=Deriv();
                 return;

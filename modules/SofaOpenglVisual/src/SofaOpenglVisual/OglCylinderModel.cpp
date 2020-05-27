@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -45,7 +45,7 @@ namespace component
 namespace visualmodel
 {
 
-static int OglCylinderModelClass = core::RegisterObject("A simple visualization for set of cylinder.")
+int OglCylinderModelClass = core::RegisterObject("A simple visualization for set of cylinder.")
         .add< OglCylinderModel >()
         ;
 
@@ -154,7 +154,7 @@ void OglCylinderModel::setColor(std::string color)
     else if (color == "gray")     { r = 0.5f; g = 0.5f; b = 0.5f; }
     else
     {
-        serr << "Unknown color "<<color<<sendl;
+        msg_error() << "Unknown color " << color;
         return;
     }
     setColor(r,g,b,a);

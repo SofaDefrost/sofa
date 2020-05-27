@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -62,22 +62,22 @@ NewProximityIntersection::NewProximityIntersection()
 
 void NewProximityIntersection::init()
 {
-    intersectors.add<CubeModel, CubeModel, NewProximityIntersection>(this);
-    intersectors.add<SphereModel, SphereModel, NewProximityIntersection>(this);
-    intersectors.add<CapsuleModel,CapsuleModel, NewProximityIntersection> (this);
-    intersectors.add<CapsuleModel,SphereModel, NewProximityIntersection> (this);
-    intersectors.add<OBBModel,OBBModel, NewProximityIntersection> (this);
-    intersectors.add<CapsuleModel,OBBModel, NewProximityIntersection> (this);
-    intersectors.add<SphereModel,OBBModel, NewProximityIntersection> (this);
+    intersectors.add<CubeCollisionModel, CubeCollisionModel, NewProximityIntersection>(this);
+    intersectors.add<SphereCollisionModel<sofa::defaulttype::Vec3Types>, SphereCollisionModel<sofa::defaulttype::Vec3Types>, NewProximityIntersection>(this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>,CapsuleCollisionModel<sofa::defaulttype::Vec3Types>, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>,SphereCollisionModel<sofa::defaulttype::Vec3Types>, NewProximityIntersection> (this);
+    intersectors.add<OBBCollisionModel<sofa::defaulttype::Rigid3Types>,OBBCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>,OBBCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
+    intersectors.add<SphereCollisionModel<sofa::defaulttype::Vec3Types>,OBBCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
     intersectors.add<RigidSphereModel,RigidSphereModel, NewProximityIntersection> (this);
-    intersectors.add<SphereModel,RigidSphereModel, NewProximityIntersection> (this);
-    intersectors.add<CapsuleModel,RigidSphereModel, NewProximityIntersection> (this);
-    intersectors.add<RigidSphereModel,OBBModel, NewProximityIntersection> (this);
+    intersectors.add<SphereCollisionModel<sofa::defaulttype::Vec3Types>,RigidSphereModel, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>,RigidSphereModel, NewProximityIntersection> (this);
+    intersectors.add<RigidSphereModel,OBBCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
 
-    intersectors.add<CapsuleModel,RigidCapsuleModel, NewProximityIntersection> (this);
-    intersectors.add<RigidCapsuleModel,SphereModel, NewProximityIntersection> (this);
-    intersectors.add<RigidCapsuleModel,OBBModel, NewProximityIntersection> (this);
-    intersectors.add<RigidCapsuleModel,RigidSphereModel, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Vec3Types>,CapsuleCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Rigid3Types>,SphereCollisionModel<sofa::defaulttype::Vec3Types>, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Rigid3Types>,OBBCollisionModel<sofa::defaulttype::Rigid3Types>, NewProximityIntersection> (this);
+    intersectors.add<CapsuleCollisionModel<sofa::defaulttype::Rigid3Types>,RigidSphereModel, NewProximityIntersection> (this);
 
     IntersectorFactory::getInstance()->addIntersectors(this);
 

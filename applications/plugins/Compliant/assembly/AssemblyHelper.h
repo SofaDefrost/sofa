@@ -169,7 +169,8 @@ static Eigen::SparseMatrix<real, Eigen::RowMajor> shifted_matrix( const Eigen::S
         res.innerIndexPtr()[i] += off; // where the shifting occurs
     }
 
-    memcpy(res.outerIndexPtr(), m.outerIndexPtr(), (m.outerSize()+1)*sizeof(typename Eigen::SparseMatrix<real, Eigen::RowMajor>::Index));
+    using IndexType = typename std::remove_pointer<decltype(res.outerIndexPtr())>::type;
+    memcpy(res.outerIndexPtr(), m.outerIndexPtr(), (m.outerSize()+1)*sizeof(IndexType));
 
     assert( !res.innerNonZeroPtr() ); // should be NULL because compressed // *res.innerNonZeroPtr() = *m.innerNonZeroPtr();
 
@@ -267,7 +268,7 @@ public:
     /// Return a class name for this visitor
     /// Only used for debugging / profiling purposes
     const char* getClassName() const override {return "MechanicalAddComplianceForce";}
-    virtual std::string getInfos() const
+    virtual std::string getInfos() const override
     {
         std::string name=std::string("[")+res.getName()+","+lambdas.getName()+std::string("]");
         return name;

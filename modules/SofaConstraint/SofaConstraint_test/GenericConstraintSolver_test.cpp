@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -34,7 +34,7 @@ struct GenericConstraintSolver_test : BaseSimulationTest
 {
     void SetUp() override
     {
-        sofa::simpleapi::importPlugin("SofaAllCommonComponents");
+        sofa::simpleapi::importPlugin("SofaComponentAll");
         sofa::simpleapi::importPlugin("SofaMiscCollision");
     }
 
@@ -42,13 +42,13 @@ struct GenericConstraintSolver_test : BaseSimulationTest
     {
         SceneInstance sceneinstance("xml",
                     "<Node>\n"
-                    "   <RequiredPlugin name='SofaAllCommonComponents'/>"
+                    "   <RequiredPlugin name='SofaComponentAll'/>"
                     "   <RequiredPlugin name='SofaMiscCollision'/>"
                     "   <FreeMotionAnimationLoop />\n"
                     "   <GenericConstraintSolver name='solver' constraintForces='-1 -1 -1' computeConstraintForces='True' maxIt='1000' tolerance='0.001' />\n"
                     "   <Node name='collision'>\n"
                     "         <MechanicalObject />\n"
-                    "         <UncoupledConstraintCorrection />\n"
+                    "         <UncoupledConstraintCorrection useOdeSolverIntegrationFactors='0' />\n"
                     "   </Node>\n"
                     "</Node>\n"
                     );

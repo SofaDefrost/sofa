@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -78,12 +78,11 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::clean
     {
         msg_warning() << "plop!";
         m_constraint->cleanup();
-        msg_warning() << "plip!";
-        if (parent != NULL){
-            msg_warning() << "Really Cleaning up frictionContact!!!";
-            parent->removeObject(m_constraint);}
-        msg_warning() << "plap!";
-        parent = NULL;
+
+        if (parent != nullptr)
+            parent->removeObject(m_constraint);
+
+        parent = nullptr;
         m_constraint.reset();
         msg_warning() << "plup!";
         mapper1.cleanup();
@@ -110,7 +109,7 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::setDe
 
     if (model1->getContactStiffness(0) == 0 || model2->getContactStiffness(0) == 0)
     {
-        serr << "Disabled FrictionContact with " << (outputs.size()) << " collision points." << sendl;
+        msg_error() << "Disabled FrictionContact with " << (outputs.size()) << " collision points.";
         return;
     }
 
@@ -243,7 +242,7 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::creat
     const double mu_ = this->mu.getValue();
     // Checks if friction is considered
     if ( mu_ < 0.0 )
-        serr << sendl << "Error: mu has to take positive values" << sendl;
+        msg_error() << "mu has to take positive values";
 
     int i=0;
     if (m_constraint)
@@ -262,14 +261,14 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::creat
             m_constraint->addContact(mu_, o->normal, distance, index1, index2, index, o->id);
         }
 
-        if (parent!=NULL)
+        if (parent!=nullptr)
         {
             parent->removeObject(this);
             parent->removeObject(m_constraint);
         }
 
         parent = group;
-        if (parent!=NULL)
+        if (parent!=nullptr)
         {
             parent->addObject(this);
             parent->addObject(m_constraint);
@@ -284,12 +283,12 @@ void FrictionContact<TCollisionModel1,TCollisionModel2,ResponseDataTypes>::remov
     {
         mapper1.resize(0);
         mapper2.resize(0);
-        if (parent!=NULL)
+        if (parent!=nullptr)
         {
             parent->removeObject(this);
             parent->removeObject(m_constraint);
         }
-        parent = NULL;
+        parent = nullptr;
     }
 }
 

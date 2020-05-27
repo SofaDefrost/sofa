@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -114,18 +114,6 @@ public:
     void setConstraintDForce(double *df, int begin, int end, bool update) override;
 
     void getBlockDiagonalCompliance(defaulttype::BaseMatrix* W, int begin, int end) override;
-
-    /// Pre-construction check method called by ObjectFactory.
-#if 0
-    template<class T>
-    static bool canCreate(T*& obj, sofa::core::objectmodel::BaseContext* context, sofa::core::objectmodel::BaseObjectDescription* arg)
-    {
-        /*if (getOdeSolver(context) == NULL)
-            return false;
-        */
-        return Inherit::canCreate(obj, context, arg);
-    }
-#endif //
 
 protected:
 

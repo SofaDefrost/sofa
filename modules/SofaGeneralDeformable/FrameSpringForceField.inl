@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -97,11 +97,6 @@ void FrameSpringForceField<DataTypes>::addSpringForce ( SReal& /*potentialEnergy
 
     f1[a] += Deriv ( fT, C1);
     f2[b] -= Deriv ( fT, C2);
-
-    /*serr << "f1: " << fT1 << ", " << fR1 << sendl;
-    serr << "f2: " << fT2 << ", " << fR2 << sendl;
-    serr << "sum: " << fT2 + fT1 << ", " << fR2 + fR1 << sendl;
-    serr << "diff: " << fT2 - fT1 << ", " << fR2 - fR1 << sendl;*/
 }
 
 template<class DataTypes>

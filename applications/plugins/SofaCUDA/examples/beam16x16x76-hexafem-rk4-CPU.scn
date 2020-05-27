@@ -5,10 +5,10 @@
 	<BruteForceDetection name="N2" />
 	<MinProximityIntersection name="Proximity" alarmDistance="0.5" contactDistance="0.3" />
 	<DefaultContactManager name="Response" response="default" />
-	<CollisionGroup name="Group" />
+	<DefaultCollisionGroupManager name="Group" />
 	
 	<Node name="M1" processor="0">
-    <RungeKutta4 />
+    <RungeKutta4Solver />
 		<MechanicalObject template="Vec3f"/>
 		<UniformMass totalMass="200" />
 		<RegularGridTopology

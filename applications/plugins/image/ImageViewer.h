@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -139,10 +139,7 @@ public:
     Data <bool> display; ///< Boolean to activate/desactivate the display of the image
 
     typedef component::visualmodel::VisualModelImpl VisuModelType;
-    
-    std::string getTemplateName() const  override {	return templateName(this);	}
-    static std::string templateName(const ImageViewer<ImageTypes>* = NULL)	{ return ImageTypes::Name(); }
-    
+
     ImageViewer() : Inherited()
       , image(initData(&image,ImageTypes(),"image","input image"))
       , showSlicedModels(initData(&showSlicedModels, false, "slicedModels", "display visual models on cutPlanes"))
@@ -423,9 +420,12 @@ public:
         for(unsigned int i=0;i<p.size();i++) c[i]=rtransform->fromImage(p[i]);
     }
 
-    void computeBBox(const core::ExecParams*  params, bool /*onlyVisible=false*/ ) override
+    void computeBBox(const core::ExecParams*  params, bool onlyVisible=false ) override
     {
-        //        if( onlyVisible) return;
+        SOFA_UNUSED(params);
+        SOFA_UNUSED(onlyVisible);
+        //if( onlyVisible) return;
+
         defaulttype::Vec<8,defaulttype::Vector3> c;
         getCorners(c);
 
@@ -436,7 +436,7 @@ public:
                 if(bbmin[j]>c[i][j]) bbmin[j]=c[i][j];
                 if(bbmax[j]<c[i][j]) bbmax[j]=c[i][j];
             }
-        this->f_bbox.setValue(params,sofa::defaulttype::TBoundingBox<Real>(bbmin,bbmax));
+        this->f_bbox.setValue(sofa::defaulttype::TBoundingBox<Real>(bbmin,bbmax));
     }
     
     

@@ -4,11 +4,11 @@
     <RequiredPlugin name="Flexible"/>
     <RequiredPlugin name="SofaHighOrderTopology"/>
     <VisualStyle displayFlags="showBehaviorModels showForceFields showCollisionModels showVisual" />
-<!--     <CollisionPipeline verbose="0" name="CollisionPipeline" /> -->
+<!--     <DefaultPipeline verbose="0" name="CollisionPipeline" /> -->
 <!--     <BruteForceDetection name="N2" /> -->
-<!--     <CollisionResponse response="default" name="collision response" /> -->
+<!--     <DefaultContactManager response="default" name="collision response" /> -->
     <Node name="MeshTopology">
-        <EulerImplicit name="cg_odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
+        <EulerImplicitSolver name="cg_odesolver" printLog="false"  rayleighStiffness="0.1" rayleighMass="0.1" />
         <CGLinearSolver iterations="25" name="linear solver" tolerance="1.0e-9" threshold="1.0e-9" />
         <MeshGmshLoader name="meshLoader0" filename="mesh/liver.msh" />
         <TetrahedronSetTopologyContainer name="Container1" src="@meshLoader0" />
@@ -46,11 +46,11 @@
 			<LinearMapping template="Vec3d,ExtVec3f"/> 
 		</Node>
 
-<!--            <SphereModel radius="0.05" />-->
+<!--            <SphereCollisionModel radius="0.05" />-->
 
 <!--		 <Node name="col">-->
 <!--			<MeshObjLoader name="loader" filename="mesh/liver-smooth.obj" />-->
-<!--			<Mesh src="@loader" />-->
+<!--			<MeshTopology src="@loader" />-->
 <!--			<MechanicalObject showObject="1" showObjectScale="2"/>-->
 <!--			<LinearMapping />-->
 <!--	        </Node>-->

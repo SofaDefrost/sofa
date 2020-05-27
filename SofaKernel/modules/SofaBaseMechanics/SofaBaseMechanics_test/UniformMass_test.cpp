@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -84,7 +84,7 @@ struct UniformMassTest :  public BaseTest
 
     virtual void SetUp()
     {
-        sofa::simpleapi::importPlugin("SofaAllCommonComponents") ;
+        sofa::simpleapi::importPlugin("SofaComponentAll") ;
 
         todo = true ;
         initBaseMechanics();
@@ -94,7 +94,7 @@ struct UniformMassTest :  public BaseTest
 
     void TearDown()
     {
-        if (m_root != NULL){
+        if (m_root != nullptr){
             m_simu->unload(m_root);
         }
     }
@@ -117,7 +117,7 @@ struct UniformMassTest :  public BaseTest
         EXPECT_TRUE( m_mass->findData("showInitialCenterOfGravity") != nullptr ) ;
 
         EXPECT_TRUE( m_mass->findData("indices") != nullptr ) ;
-        EXPECT_TRUE( m_mass->findData("handleTopoChange") != nullptr ) ;
+        EXPECT_TRUE( m_mass->findData("handleTopologicalChanges") != nullptr ) ;
         EXPECT_TRUE( m_mass->findData("preserveTotalMass") != nullptr ) ;
 
         EXPECT_TRUE( m_mass->findData("compute_mapping_inertia") != nullptr ) ;

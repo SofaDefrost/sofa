@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -35,11 +35,11 @@ namespace component
 namespace collision
 {
 
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronModel, SphereModel> > TetrahedronSphereDistanceLMConstraintContactClass("distanceLMConstraint",true);
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronModel, PointModel> > TetrahedronPointDistanceLMConstraintContactClass("distanceLMConstraint",true);
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronModel, LineModel> > TetrahedronLineDistanceLMConstraintContactClass("distanceLMConstraint",true);
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronModel, TriangleModel> > TetrahedronTriangleDistanceLMConstraintContactClass("distanceLMConstraint",true);
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronModel, TetrahedronModel> > TetrahedronTetrahedronDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronCollisionModel, SphereCollisionModel<sofa::defaulttype::Vec3Types>> > TetrahedronSphereDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > TetrahedronPointDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronCollisionModel, LineCollisionModel<sofa::defaulttype::Vec3Types>> > TetrahedronLineDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>> > TetrahedronTriangleDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<TetrahedronCollisionModel, TetrahedronCollisionModel> > TetrahedronTetrahedronDistanceLMConstraintContactClass("distanceLMConstraint",true);
 
 } // namespace collision
 

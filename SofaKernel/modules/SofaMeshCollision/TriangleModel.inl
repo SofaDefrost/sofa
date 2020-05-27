@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -51,6 +51,7 @@ template<class DataTypes>
 TriangleCollisionModel<DataTypes>::TriangleCollisionModel()
     : d_bothSide(initData(&d_bothSide, false, "bothSide", "activate collision on both side of the triangle model") )
     , d_computeNormals(initData(&d_computeNormals, true, "computeNormals", "set to false to disable computation of triangles normal"))
+    , l_topology(initLink("topology", "link to the topology container"))
     , m_mstate(nullptr)
     , m_topology(nullptr)
     , m_needsUpdate(true)
@@ -72,7 +73,21 @@ void TriangleCollisionModel<DataTypes>::resize(int size)
 template<class DataTypes>
 void TriangleCollisionModel<DataTypes>::init()
 {
-    m_topology = this->getContext()->getMeshTopology();
+    if (l_topology.empty())
+    {
+        msg_info() << "link to Topology container should be set to ensure right behavior. First Topology found in current context will be used.";
+        l_topology.set(this->getContext()->getMeshTopologyLink());
+    }
+
+    m_topology = l_topology.get();
+    msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
+
+    if (!m_topology)
+    {
+        msg_error() << "No topology component found at path: " << l_topology.getLinkedPath() << ", nor in current context: " << this->getContext()->name << ". TriangleCollisionModel<sofa::defaulttype::Vec3Types> requires a Triangular Topology";
+        sofa::core::objectmodel::BaseObject::d_componentstate.setValue(sofa::core::objectmodel::ComponentState::Invalid);
+        return;
+    }
 
     // TODO epernod 2019-01-21: Check if this call super is needed.
     this->CollisionModel::init();
@@ -82,15 +97,9 @@ void TriangleCollisionModel<DataTypes>::init()
 
     // Check object pointer access
     bool modelsOk = true;
-    if (m_mstate == NULL)
+    if (m_mstate == nullptr)
     {
-        msg_error() << "No MechanicalObject found. TriangleModel requires a Vec3 Mechanical Model in the same Node.";
-        modelsOk = false;
-    }
-
-    if (m_topology == NULL)
-    {
-        msg_error() << "No Topology found. TriangleModel requires a Triangular Topology in the same Node.";
+        msg_error() << "No MechanicalObject found. TriangleCollisionModel<sofa::defaulttype::Vec3Types> requires a Vec3 Mechanical Model in the same Node.";
         modelsOk = false;
     }
 
@@ -197,56 +206,10 @@ void TriangleCollisionModel<DataTypes>::updateFromTopology()
             ++index;
         }
     }
-    updateFlags();
     updateNormals();
 
     // topology has changed, force boudingTree recomputation
     m_needsUpdate = true;
-}
-
-template<class DataTypes>
-void TriangleCollisionModel<DataTypes>::updateFlags(int /*ntri*/)
-{
-#if 0
-    if (ntri < 0) ntri = m_triangles->size();
-    //VecCoord& x =m_mstate->read(core::ConstVecCoordId::position())->getValue();
-    //VecDeriv& v = m_mstate->read(core::ConstVecDerivId::velocity())->getValue();
-    vector<bool> pflags(m_mstate->getSize());
-    std::set<std::pair<int,int> > eflags;
-    for (unsigned i=0; i<m_triangles->size(); i++)
-    {
-        int f = 0;
-        topology::Triangle t = (*m_triangles)[i];
-        if (!pflags[t[0]])
-        {
-            f |= FLAG_P1;
-            pflags[t[0]] = true;
-        }
-        if (!pflags[t[1]])
-        {
-            f |= FLAG_P2;
-            pflags[t[1]] = true;
-        }
-        if (!pflags[t[2]])
-        {
-            f |= FLAG_P3;
-            pflags[t[2]] = true;
-        }
-        if (eflags.insert( (t[0]<t[1])?std::make_pair(t[0],t[1]):std::make_pair(t[1],t[0]) ).second)
-        {
-            f |= FLAG_E12;
-        }
-        if (i < (unsigned)ntri && eflags.insert( (t[1]<t[2])?std::make_pair(t[1],t[2]):std::make_pair(t[2],t[1]) ).second) // don't use the diagonal edge of quads
-        {
-            f |= FLAG_E23;
-        }
-        if (eflags.insert( (t[2]<t[0])?std::make_pair(t[2],t[0]):std::make_pair(t[0],t[2]) ).second)
-        {
-            f |= FLAG_E31;
-        }
-        elems[i].flags = f;
-    }
-#endif
 }
 
 
@@ -290,7 +253,7 @@ bool TriangleCollisionModel<DataTypes>::canCollideWithElement(int index, Collisi
 template<class DataTypes>
 void TriangleCollisionModel<DataTypes>::computeBoundingTree(int maxDepth)
 {
-    CubeModel* cubeModel = createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = createPrevious<CubeCollisionModel>();
 
     // check first that topology didn't changed
     if (m_topology->getRevision() != m_topologyRevision)
@@ -352,7 +315,7 @@ void TriangleCollisionModel<DataTypes>::computeBoundingTree(int maxDepth)
 template<class DataTypes>
 void TriangleCollisionModel<DataTypes>::computeContinuousBoundingTree(double dt, int maxDepth)
 {
-    CubeModel* cubeModel = createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = createPrevious<CubeCollisionModel>();
 
     // check first that topology didn't changed
     if (m_topology->getRevision() != m_topologyRevision)
@@ -457,6 +420,8 @@ int TriangleCollisionModel<DataTypes>::getTriangleFlags(Topology::TriangleID i)
 template<class DataTypes>
 void TriangleCollisionModel<DataTypes>::computeBBox(const core::ExecParams* params, bool onlyVisible)
 {
+    SOFA_UNUSED(params);
+
     if( !onlyVisible ) return;
 
     // check first that topology didn't changed
@@ -488,7 +453,7 @@ void TriangleCollisionModel<DataTypes>::computeBBox(const core::ExecParams* para
         }
     }
 
-    this->f_bbox.setValue(params,sofa::defaulttype::TBoundingBox<Real>(minBBox,maxBBox));
+    this->f_bbox.setValue(sofa::defaulttype::TBoundingBox<Real>(minBBox,maxBBox));
 }
 
 
@@ -556,7 +521,7 @@ void TriangleCollisionModel<DataTypes>::draw(const core::visual::VisualParams* v
 
         }
     }
-    if (getPrevious()!=NULL && vparams->displayFlags().getShowBoundingCollisionModels())
+    if (getPrevious()!=nullptr && vparams->displayFlags().getShowBoundingCollisionModels())
         getPrevious()->draw(vparams);
 }
 

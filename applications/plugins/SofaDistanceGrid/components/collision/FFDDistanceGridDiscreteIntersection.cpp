@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -47,10 +47,10 @@ IntersectorCreator<DiscreteIntersection, FFDDistanceGridDiscreteIntersection> FF
 FFDDistanceGridDiscreteIntersection::FFDDistanceGridDiscreteIntersection(DiscreteIntersection* object)
     : intersection(object)
 {
-    intersection->intersectors.add<FFDDistanceGridCollisionModel, PointModel,                        FFDDistanceGridDiscreteIntersection>  (this);
-    intersection->intersectors.add<FFDDistanceGridCollisionModel, SphereModel,                       FFDDistanceGridDiscreteIntersection>  (this);
-    intersection->intersectors.add<FFDDistanceGridCollisionModel, TriangleModel,                     FFDDistanceGridDiscreteIntersection>  (this);
-    intersection->intersectors.add<RayModel, FFDDistanceGridCollisionModel,   FFDDistanceGridDiscreteIntersection>  (this);
+    intersection->intersectors.add<FFDDistanceGridCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>,                        FFDDistanceGridDiscreteIntersection>  (this);
+    intersection->intersectors.add<FFDDistanceGridCollisionModel, SphereCollisionModel<sofa::defaulttype::Vec3Types>,                       FFDDistanceGridDiscreteIntersection>  (this);
+    intersection->intersectors.add<FFDDistanceGridCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>,                     FFDDistanceGridDiscreteIntersection>  (this);
+    intersection->intersectors.add<RayCollisionModel, FFDDistanceGridCollisionModel,   FFDDistanceGridDiscreteIntersection>  (this);
     intersection->intersectors.add<FFDDistanceGridCollisionModel,   RigidDistanceGridCollisionModel, FFDDistanceGridDiscreteIntersection>  (this);
     intersection->intersectors.add<FFDDistanceGridCollisionModel,   FFDDistanceGridCollisionModel,   FFDDistanceGridDiscreteIntersection> (this);
 }
@@ -525,7 +525,7 @@ bool FFDDistanceGridDiscreteIntersection::testIntersection(FFDDistanceGridCollis
 int FFDDistanceGridDiscreteIntersection::computeIntersection(FFDDistanceGridCollisionElement& e1, Triangle& e2, OutputVector* contacts)
 {
     const int f2 = e2.flags();
-    if (!(f2&TriangleModel::FLAG_POINTS)) return 0; // no points associated with this triangle
+    if (!(f2&TriangleCollisionModel<sofa::defaulttype::Vec3Types>::FLAG_POINTS)) return 0; // no points associated with this triangle
 
     DistanceGrid* grid1 = e1.getGrid();
     FFDDistanceGridCollisionModel::DeformedCube& c1 = e1.getCollisionModel()->getDeformCube(e1.getIndex());
@@ -538,7 +538,7 @@ int FFDDistanceGridDiscreteIntersection::computeIntersection(FFDDistanceGridColl
     int nc = 0;
     for (unsigned int iP = 0; iP < 3; ++iP)
     {
-        if (!(f2&(TriangleModel::FLAG_P1<<iP))) continue;
+        if (!(f2&(TriangleCollisionModel<sofa::defaulttype::Vec3Types>::FLAG_P1<<iP))) continue;
         Vector3 p2 = e2.p(iP);
         DistanceGrid::Coord p1 = p2;
 

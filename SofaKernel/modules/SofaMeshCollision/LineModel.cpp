@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,7 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#define SOFA_COMPONENT_COLLISION_LINEMODEL_CPP
+#define SOFA_COMPONENT_COLLISION_LINECOLLISIONMODEL_CPP
 #include <SofaMeshCollision/LineModel.inl>
 #include <sofa/core/ObjectFactory.h>
 
@@ -33,7 +33,7 @@ namespace collision
 {
 
 int LineCollisionModelClass = core::RegisterObject("collision model using a linear mesh, as described in MeshTopology")
-        .add< LineCollisionModel<defaulttype::Vec3Types> >()
+        .add< LineCollisionModel<sofa::defaulttype::Vec3Types> >()
 
         .addAlias("TLineModel")
         .addAlias("Line")

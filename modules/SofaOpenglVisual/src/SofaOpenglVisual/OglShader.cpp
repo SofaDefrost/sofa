@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,17 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-//
-// C++ Implementation: Shader
-//
-// Description:
-//
-//
-// Author: The SOFA team </www.sofa-framework.org>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include <SofaOpenglVisual/OglShader.h>
 #include <SofaOpenglVisual/CompositingVisualLoop.h>
 #include <sofa/core/visual/VisualParams.h>
@@ -48,7 +37,7 @@ namespace visualmodel
 
 
 //Register OglShader in the Object Factory
-static int OglShaderClass = core::RegisterObject("OglShader")
+int OglShaderClass = core::RegisterObject("OglShader")
         .add< OglShader >()
         ;
 
@@ -163,7 +152,7 @@ void OglShader::initVisual()
 
     if (!sofa::helper::gl::GLSLShader::InitGLSL())
     {
-        serr << "InitGLSL failed" << sendl;
+        msg_error() << "InitGLSL failed";
         return;
     }
     unsigned int nshaders = (unsigned int)shaderVector.size();
@@ -211,7 +200,7 @@ void OglShader::parse(core::objectmodel::BaseObjectDescription* arg)
     const char* fileVertexShaderAlias = arg->getAttribute("vertFilename");
     if( fileVertexShader || fileVertexShaderAlias )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data<vector<string>> 'fileVertexShader' or 'vertFilename', please use the new Data<SVector<string>>'fileVertexShaders'"<<sendl;
+        msg_deprecated() << "Parse: You are using a deprecated Data<vector<string>> 'fileVertexShader' or 'vertFilename', please use the new Data<SVector<string>>'fileVertexShaders'";
         helper::vector<std::string> simplevector;
         std::istringstream( fileVertexShader ? fileVertexShader : fileVertexShaderAlias ) >> simplevector;
         vertFilename.setValue( simplevector );
@@ -220,7 +209,7 @@ void OglShader::parse(core::objectmodel::BaseObjectDescription* arg)
     const char* fileFragmentShaderAlias = arg->getAttribute("fragFilename");
     if( fileFragmentShader || fileFragmentShaderAlias )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data<vector<string>> 'fileFragmentShader' or 'fragFilename', please use the new Data<SVector<string>>'fileFragmentShaders'"<<sendl;
+        msg_deprecated() << "Parse: You are using a deprecated Data<vector<string>> 'fileFragmentShader' or 'fragFilename', please use the new Data<SVector<string>>'fileFragmentShaders'";
         helper::vector<std::string> simplevector;
         std::istringstream( fileFragmentShader ? fileFragmentShader : fileFragmentShaderAlias ) >> simplevector;
         fragFilename.setValue( simplevector );
@@ -230,7 +219,7 @@ void OglShader::parse(core::objectmodel::BaseObjectDescription* arg)
     const char* fileGeometryShaderAlias = arg->getAttribute("geoFilename");
     if( fileGeometryShader || fileGeometryShaderAlias )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data<vector<string>> 'fileGeometryShader' or 'geoFilename', please use the new Data<SVector<string>>'fileGeometryShaders'"<<sendl;
+        msg_deprecated() << "Parse: You are using a deprecated Data<vector<string>> 'fileGeometryShader' or 'geoFilename', please use the new Data<SVector<string>>'fileGeometryShaders'";
         helper::vector<std::string> simplevector;
         std::istringstream( fileGeometryShader ? fileGeometryShader : fileGeometryShaderAlias ) >> simplevector;
         geoFilename.setValue( simplevector );
@@ -240,7 +229,7 @@ void OglShader::parse(core::objectmodel::BaseObjectDescription* arg)
     const char* fileTessellationControlShader = arg->getAttribute("fileTessellationControlShader");
     if( fileTessellationControlShader )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data<vector<string>> 'fileTessellationControlShader', please use the new Data<SVector<string>>'fileTessellationControlShaders'"<<sendl;
+        msg_deprecated() << "Parse: You are using a deprecated Data<vector<string>> 'fileTessellationControlShader', please use the new Data<SVector<string>>'fileTessellationControlShaders'";
         helper::vector<std::string> simplevector;
         std::istringstream( fileTessellationControlShader ) >> simplevector;
         tessellationControlFilename.setValue( simplevector );
@@ -250,7 +239,7 @@ void OglShader::parse(core::objectmodel::BaseObjectDescription* arg)
     const char* fileTessellationEvaluationShader = arg->getAttribute("fileTessellationEvaluationShader");
     if( fileTessellationEvaluationShader )
     {
-        serr<<helper::logging::Message::Deprecated<<"parse: You are using a deprecated Data<vector<string>> 'fileTessellationEvaluationShader', please use the new Data<SVector<string>>'fileTessellationEvaluationShaders'"<<sendl;
+        msg_deprecated() << "Parse: You are using a deprecated Data<vector<string>> 'fileTessellationEvaluationShader', please use the new Data<SVector<string>>'fileTessellationEvaluationShaders'";
         helper::vector<std::string> simplevector;
         std::istringstream( fileTessellationEvaluationShader ) >> simplevector;
         tessellationEvaluationFilename.setValue( simplevector );
@@ -568,9 +557,9 @@ void OglShaderElement::init()
         id.setValue(this->getName());
 
     /*when no multipass is active */
-    sofa::component::visualmodel::CompositingVisualLoop* isMultipass=NULL;
+    sofa::component::visualmodel::CompositingVisualLoop* isMultipass=nullptr;
     isMultipass= mycontext->core::objectmodel::BaseContext::get<sofa::component::visualmodel::CompositingVisualLoop>();
-    if(isMultipass==NULL)
+    if(isMultipass==nullptr)
     {
         if ( OglShader* shader = mycontext->core::objectmodel::BaseContext::get<OglShader>(this->getTags()) )
         {
@@ -598,7 +587,7 @@ void OglShaderElement::init()
 
     if (shaders.empty())
     {
-        serr << this->getTypeName() <<" \"" << this->getName() << "\": no relevant shader found. please check tags validity"<< sendl;
+        msg_error() << this->getTypeName() <<" \"" << this->getName() << "\": no relevant shader found. please check tags validity"<< sendl;
         return;
     }
 }

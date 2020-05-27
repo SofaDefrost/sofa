@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,9 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-// Author: François Faure, INRIA-UJF, (C) 2006
-//
-// Copyright: See COPYING file that comes with this distribution
 #ifndef SOFA_COMPONENT_INTERACTIONFORCEFIELD_STIFFSPRINGFORCEFIELD_H
 #define SOFA_COMPONENT_INTERACTIONFORCEFIELD_STIFFSPRINGFORCEFIELD_H
 #include "config.h"
@@ -29,7 +26,7 @@
 #include <SofaDeformable/SpringForceField.h>
 #include <sofa/defaulttype/Mat.h>
 #include <sofa/core/MechanicalParams.h>
-
+#include <SofaBaseTopology/TopologySubsetData.h>
 
 namespace sofa
 {
@@ -61,6 +58,8 @@ public:
 
     typedef core::objectmodel::Data<VecDeriv>    DataVecDeriv;
     typedef core::objectmodel::Data<VecCoord>    DataVecCoord;
+    typedef helper::vector<unsigned int> SetIndexArray;
+    typedef sofa::component::topology::PointSubsetData< SetIndexArray > SetIndex;
 
 
     typedef typename Inherit::Spring Spring;
@@ -69,6 +68,10 @@ public:
     enum { N=DataTypes::spatial_dimensions };
     typedef defaulttype::Mat<N,N,Real> Mat;
 
+    SetIndex d_indices1; ///< Indices of the source points on the first model
+    SetIndex d_indices2; ///< Indices of the fixed points on the second model
+
+    core::objectmodel::Data<SReal> d_length;
 protected:
     sofa::helper::vector<Mat>  dfdx;
 
@@ -80,6 +83,11 @@ protected:
 
     StiffSpringForceField(double ks=100.0, double kd=5.0);
     StiffSpringForceField(MechanicalState* object1, MechanicalState* object2, double ks=100.0, double kd=5.0);
+
+    void doUpdateInternal() override;
+
+    /// Will create the set of springs using \sa d_indices1 and \sa d_indices2 with \sa d_length
+    void createSpringsFromInputs();
 
 public:
     void init() override;

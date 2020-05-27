@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -180,9 +180,15 @@ public:
     Data<defaulttype::Vec4f> drawColor3; ///<  draw color for faces 3
     Data<defaulttype::Vec4f> drawColor4; ///<  draw color for faces 4
     Data<std::map < std::string, sofa::helper::vector<double> > > _volumeGraph;
+
+    /// Link to be set to the topology container in the component graph. 
+    SingleLink<TetrahedralCorotationalFEMForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 protected:
     TetrahedralCorotationalFEMForceField();
     TetrahedronHandler* tetrahedronHandler;
+
+    /// Pointer to the topology container. Will be set by link @sa l_topology
+    sofa::core::topology::BaseMeshTopology* m_topology;
 public:
 
     void setPoissonRatio(Real val) { this->_poissonRatio.setValue(val); }
@@ -202,7 +208,7 @@ public:
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx) override;
     SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override
     {
-        serr << "Get potentialEnergy not implemented" << sendl;
+        msg_warning() << "Method getPotentialEnergy not implemented yet.";
         return 0.0;
     }
 

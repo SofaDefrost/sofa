@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -91,7 +91,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid read access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid read access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return 0.0;
         }
 #endif
@@ -103,7 +103,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -115,7 +115,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize()/Nout || j >= colSize()/Nin )
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()/Nout<<","<<colSize()/Nin<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() / Nout << "," << colSize() / Nin << ")";
             return;
         }
 #endif
@@ -131,7 +131,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "/*<<this->Name()*/<<" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in "/*<<this->Name()*/ << " of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -143,7 +143,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -222,7 +222,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid read access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid read access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return 0.0;
         }
 #endif
@@ -234,7 +234,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -250,7 +250,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "/*<<this->Name()*/<<" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in "/*<<this->Name()*/ << " of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -262,7 +262,7 @@ public:
 #ifdef EigenVector_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error("EigenVector") << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif

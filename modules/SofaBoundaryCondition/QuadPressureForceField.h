@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -70,6 +70,9 @@ public:
     Data<Real> dmax;///< coordinates max of the plane for the vertex selection
     Data<bool> p_showForces; ///< draw quads which have a given pressure
 
+    /// Link to be set to the topology container in the component graph.
+    SingleLink<QuadPressureForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
+
 protected:
 
     class QuadPressureInformation
@@ -98,7 +101,8 @@ protected:
 
     sofa::component::topology::QuadSparseData<sofa::helper::vector<QuadPressureInformation> > quadPressureMap; ///< map between edge indices and their pressure
 
-    sofa::core::topology::BaseMeshTopology* _topology;
+    /// Pointer to the current topology                                                                        /// Pointer to the current topology
+    sofa::core::topology::BaseMeshTopology* m_topology;
 
     QuadPressureForceField();
 
@@ -115,7 +119,7 @@ public:
     /// Constant pressure has null variation
     void addKToMatrix(const core::MechanicalParams* /*mparams*/, const sofa::core::behavior::MultiMatrixAccessor* /*matrix*/ ) override {}
 
-    SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override { serr << "Get potentialEnergy not implemented" << sendl; return 0.0; }
+    SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override { msg_warning() << "Method getPotentialEnergy not implemented yet."; return 0.0; }
 
     void draw(const core::visual::VisualParams* vparams) override;
 

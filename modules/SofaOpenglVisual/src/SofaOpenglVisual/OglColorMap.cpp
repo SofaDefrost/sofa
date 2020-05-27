@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -39,7 +39,7 @@ namespace component
 namespace visualmodel
 {
 
-static int OglColorMapClass = core::RegisterObject("Provides color palette and support for conversion of numbers to colors.")
+int OglColorMapClass = core::RegisterObject("Provides color palette and support for conversion of numbers to colors.")
         .add< OglColorMap >()
         .addAlias("ColorMap")
         ;
@@ -121,7 +121,7 @@ void OglColorMap::reinit()
 OglColorMap* OglColorMap::getDefault()
 {
     static OglColorMap::SPtr defaultOglColorMap;
-    if (defaultOglColorMap == NULL) {
+    if (defaultOglColorMap == nullptr) {
         defaultOglColorMap = sofa::core::objectmodel::New< OglColorMap >();
         std::string tmp("");
         //defaultOglColorMap->initOld(tmp); // TODO: replace initOld() with init()

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -83,7 +83,7 @@ protected:
 public:
     /// Tool model path
     Data < std::string > d_toolModelPath; 
-    /// TriangleSetModel or SphereModel path
+    /// TriangleSetModel or SphereCollisionModel<sofa::defaulttype::Vec3Types> path
     Data < std::string > d_surfaceModelPath;
 
     /// Collision distance at which cavring will start. Equal to contactDistance by default.

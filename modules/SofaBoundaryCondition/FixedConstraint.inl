@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -70,27 +70,27 @@ void FixedConstraint<DataTypes>::FCPointHandler::applyDestroyFunction(unsigned i
 
 template <class DataTypes>
 FixedConstraint<DataTypes>::FixedConstraint()
-    : core::behavior::ProjectiveConstraintSet<DataTypes>(NULL)
+    : core::behavior::ProjectiveConstraintSet<DataTypes>(nullptr)
     , d_indices( initData(&d_indices,"indices","Indices of the fixed points") )
     , d_fixAll( initData(&d_fixAll,false,"fixAll","filter all the DOF to implement a fixed object") )
     , d_showObject(initData(&d_showObject,true,"showObject","draw or not the fixed constraints"))
     , d_drawSize( initData(&d_drawSize,(SReal)0.0,"drawSize","0 -> point based rendering, >0 -> radius of spheres") )
     , d_projectVelocity( initData(&d_projectVelocity,false,"activate_projectVelocity","activate project velocity to set velocity") )
+    , l_topology(initLink("topology", "link to the topology container"))
     , data(new FixedConstraintInternalData<DataTypes>())
+    , m_pointHandler(nullptr)
 {
     // default to indice 0
     d_indices.beginEdit()->push_back(0);
     d_indices.endEdit();
-
-    pointHandler = new FCPointHandler(this, &d_indices);
 }
 
 
 template <class DataTypes>
 FixedConstraint<DataTypes>::~FixedConstraint()
 {
-    if (pointHandler)
-        delete pointHandler;
+    if (m_pointHandler)
+        delete m_pointHandler;
 
     delete data;
 }
@@ -131,14 +131,28 @@ void FixedConstraint<DataTypes>::init()
         return;
     }
 
-    topology = this->getContext()->getMeshTopology();
-    if (!topology)
-        msg_warning() << "Can not find the topology, won't be able to handle topological changes";
+    if (l_topology.empty())
+    {
+        msg_info() << "link to Topology container should be set to ensure right behavior. First Topology found in current context will be used.";
+        l_topology.set(this->getContext()->getMeshTopologyLink());
+    }
 
-    // Initialize topological functions
-    d_indices.createTopologicalEngine(topology, pointHandler);
-    d_indices.registerTopologicalData();
+    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
 
+    if (_topology)
+    {
+        msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
+
+        // Initialize topological functions
+        m_pointHandler = new FCPointHandler(this, &d_indices);
+        d_indices.createTopologicalEngine(_topology, m_pointHandler);
+        d_indices.registerTopologicalData();
+    }
+    else
+    {
+        msg_info() << "Can not find the topology, won't be able to handle topological changes";
+    }
+   
     this->checkIndices();
     this->m_componentstate = ComponentState::Valid;
 }
@@ -206,8 +220,10 @@ void FixedConstraint<DataTypes>::projectMatrix( sofa::defaulttype::BaseMatrix* M
 template <class DataTypes>
 void FixedConstraint<DataTypes>::projectResponse(const core::MechanicalParams* mparams, DataVecDeriv& resData)
 {
-    helper::WriteAccessor<DataVecDeriv> res ( mparams, resData );
-    const SetIndexArray & indices = d_indices.getValue(mparams);
+    SOFA_UNUSED(mparams);
+
+    helper::WriteAccessor<DataVecDeriv> res (resData );
+    const SetIndexArray & indices = d_indices.getValue();
 
     if( d_fixAll.getValue() )
     {
@@ -230,8 +246,10 @@ void FixedConstraint<DataTypes>::projectResponse(const core::MechanicalParams* m
 template <class DataTypes>
 void FixedConstraint<DataTypes>::projectJacobianMatrix(const core::MechanicalParams* mparams, DataMatrixDeriv& cData)
 {
-    helper::WriteAccessor<DataMatrixDeriv> c ( mparams, cData );
-    const SetIndexArray & indices = d_indices.getValue(mparams);
+    SOFA_UNUSED(mparams);
+
+    helper::WriteAccessor<DataMatrixDeriv> c (cData );
+    const SetIndexArray & indices = d_indices.getValue();
 
     MatrixDerivRowIterator rowIt = c->begin();
     MatrixDerivRowIterator rowItEnd = c->end();
@@ -265,9 +283,11 @@ void FixedConstraint<DataTypes>::projectJacobianMatrix(const core::MechanicalPar
 template <class DataTypes>
 void FixedConstraint<DataTypes>::projectVelocity(const core::MechanicalParams* mparams, DataVecDeriv& vData)
 {
+    SOFA_UNUSED(mparams);
+
     if(!d_projectVelocity.getValue()) return;
     const SetIndexArray & indices = this->d_indices.getValue();
-    helper::WriteAccessor<DataVecDeriv> res ( mparams, vData );
+    helper::WriteAccessor<DataVecDeriv> res (vData );
 
     if( d_fixAll.getValue() )    // fix everyting
     {

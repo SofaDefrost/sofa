@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -36,7 +36,6 @@ namespace sofa
 {
 
 using namespace core::objectmodel;
-using namespace sofa::component::misc;
 
 namespace gui
 {
@@ -63,11 +62,15 @@ QDisplayDataWidget::QDisplayDataWidget(QWidget* parent,
     if(data_ == nullptr)
         return;
 
+    const std::string& help = data_->getHelp().c_str();
     const std::string valuetype = data_->getValueTypeString();
+    const std::string& ownerClass = data_->getOwnerClass();
     std::stringstream s;
 
-    s << data_->getHelp()<< "\nData type: " << valuetype
-                         << "\nOwner: "<<data_->getOwnerClass() ;
+    s << (!help.empty() ? help : "< No help found >")
+      << "\nData type: " << valuetype
+      << "\nOwner: " << (!ownerClass.empty() ? ownerClass : "< No owner found >");
+
     const std::string fullHelpText = s.str();
     setToolTip(fullHelpText.c_str());
     datainfowidget_ = new QDisplayDataInfoWidget(this,fullHelpText,data_,
@@ -103,7 +106,7 @@ QDisplayDataWidget::QDisplayDataWidget(QWidget* parent,
         datawidget_ = new QDataSimpleEdit(this,dwarg.data->getName().c_str(), dwarg.data);
         datawidget_->createWidgets();
         datawidget_->setDataReadOnly(dwarg.readOnly);
-        assert(datawidget_ != NULL);
+        assert(datawidget_ != nullptr);
     }
 
     if(datawidget_->layout())
@@ -243,7 +246,6 @@ void QDataSimpleEdit::writeToData()
     {
         value = innerWidget_.widget.lineEdit->text().toStdString();
     }
-    getBaseData()->read(value);
 }
 
 /* QPoissonRatioWidget */

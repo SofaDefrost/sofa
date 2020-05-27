@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -111,7 +111,6 @@ protected:
 #if  !defined(SOFA_COMPONENT_MAPPING_TUBULARMAPPING_CPP)
 
 extern template class SOFA_MISC_MAPPING_API TubularMapping< defaulttype::Rigid3Types, defaulttype::Vec3dTypes >;
-extern template class SOFA_MISC_MAPPING_API TubularMapping< defaulttype::Rigid3Types, defaulttype::ExtVec3Types >;
 
 
 

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -141,7 +141,7 @@ QDataDescriptionWidget::QDataDescriptionWidget(QWidget* parent, core::objectmode
     std::vector<sofa::core::objectmodel::BaseData*> selecteddatum ;
     for(sofa::core::objectmodel::BaseData* datafield : object->getDataFields())
     {
-        if( !strcmp(datafield->getGroup(), "Infos" ) )
+        if( datafield->getGroup() == "Infos" )
             selecteddatum.push_back(datafield) ;
     }
 

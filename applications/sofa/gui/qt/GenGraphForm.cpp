@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -345,7 +345,7 @@ void GenGraphForm::doDisplay()
     std::cout << "OPEN " << exportedFile.toStdString() << std::endl;
 
 #ifdef WIN32
-    ShellExecuteA(NULL, "open", exportedFile.toStdString().c_str(), NULL, NULL, SW_SHOWNORMAL);
+    ShellExecuteA(nullptr, "open", exportedFile.toStdString().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 #else
     QStringList argv;
     argv << "display" << exportedFile;

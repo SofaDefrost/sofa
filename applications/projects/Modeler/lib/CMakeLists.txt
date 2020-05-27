@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
-project(SofaModeler)
+project(SofaModeler VERSION 0.1)
+
+find_package(TinyXML REQUIRED)
 
 set(HEADER_FILES
     ../../../sofa/gui/qt/SofaPluginManager.h
@@ -54,8 +56,17 @@ if(Qt5Core_FOUND)
 endif()
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${MOC_FILES} ${FORM_FILES} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} SofaGuiMain SofaComponentBase SofaComponentCommon SofaComponentGeneral SofaComponentAdvanced SofaComponentMisc ${EXT_QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC SofaGuiMain SofaBase SofaCommon SofaGeneral SofaMisc ${EXT_QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC tinyxml) # Public because needed by Modeler (exec)
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADER_FILES}")
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${EXT_QT_INCLUDES}>")
+target_include_directories(${PROJECT_NAME} PUBLIC "$<INSTALL_INTERFACE:include>")
 
-sofa_install_targets(SofaGui SofaModeler "SofaModeler")
+sofa_generate_package(
+    NAME ${PROJECT_NAME}
+    VERSION ${PROJECT_VERSION}
+    TARGETS ${PROJECT_NAME}
+    INCLUDE_SOURCE_DIR "."
+    INCLUDE_INSTALL_DIR "."
+    RELOCATABLE "projects"
+    )

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -31,9 +31,6 @@
 #include <SofaUserInteraction/AddRecordedCameraPerformer.h>
 #include <SofaUserInteraction/StartNavigationPerformer.h>
 #include <SofaUserInteraction/SuturePointPerformer.h>
-#ifdef SOFA_HAVE_ARPLUGIN
-#include "./../../../applications-dev/plugins/ARPlugin/ARPSAttachPerformer.h"
-#endif
 
 namespace sofa
 {
@@ -73,7 +70,7 @@ void Operation::start()
 sofa::component::collision::InteractionPerformer *Operation::createPerformer()
 {
     std::string type = defaultPerformerType();
-    if (type.empty()) return NULL;
+    if (type.empty()) return nullptr;
     return component::collision::InteractionPerformer::InteractionPerformerFactory::getInstance()->createObject(type, pickHandle->getInteraction()->mouseInteractor.get());
 }
 
@@ -87,7 +84,7 @@ void Operation::end()
     if (performer)
     {
         pickHandle->getInteraction()->mouseInteractor->removeInteractionPerformer(performer);
-        delete performer; performer=NULL;
+        delete performer; performer=nullptr;
     }
 }
 

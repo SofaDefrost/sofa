@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -21,13 +21,13 @@
 ******************************************************************************/
 #ifndef SOFA_COMPONENT_MISC_READSTATE_H
 #define SOFA_COMPONENT_MISC_READSTATE_H
-#include "config.h"
+#include <SofaGeneralLoader/config.h>
 
 #include <sofa/simulation/AnimateBeginEvent.h>
 #include <sofa/simulation/AnimateEndEvent.h>
 #include <sofa/simulation/Visitor.h>
 
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAGENERALLOADER_HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -58,7 +58,7 @@ public:
 protected:
     core::behavior::BaseMechanicalState* mmodel;
     std::ifstream* infile;
-#ifdef SOFA_HAVE_ZLIB
+#if SOFAGENERALLOADER_HAVE_ZLIB
     gzFile gzfile;
 #endif
     double nextTime;
@@ -88,8 +88,10 @@ public:
     template<class T>
     static bool canCreate(T* obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
     {
-        if (context->getMechanicalState() == NULL)
+        if (context->getMechanicalState() == nullptr) {
+            arg->logError("No mechanical state found in the context node.");
             return false;
+        }
         return BaseObject::canCreate(obj, context, arg);
     }
 

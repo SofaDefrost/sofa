@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -208,7 +208,7 @@ void RigidDistanceGridCollisionModel::updateState()
 /// Create or update the bounding volume hierarchy.
 void RigidDistanceGridCollisionModel::computeBoundingTree(int maxDepth)
 {
-    CubeModel* cubeModel = this->createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = this->createPrevious<CubeCollisionModel>();
 
     if (!modified && !isMoving() && !cubeModel->empty()) return; // No need to recompute BBox if immobile
 
@@ -595,7 +595,7 @@ void FFDDistanceGridCollisionModel::setGrid(DistanceGrid* surf, int index)
 /// Create or update the bounding volume hierarchy.
 void FFDDistanceGridCollisionModel::computeBoundingTree(int maxDepth)
 {
-    CubeModel* cubeModel = this->createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = this->createPrevious<CubeCollisionModel>();
 
     if (!isMoving() && !cubeModel->empty()) return; // No need to recompute BBox if immobile
 
@@ -827,7 +827,7 @@ void FFDDistanceGridCollisionModel::draw(const core::visual::VisualParams* vpara
 //        this->child->addObject(visu);
 //        visu->useAlpha.setValue(true);
 //        visu->vscale.setValue(this->model->getContext()->getDt());
-//        IdentityMapping< DataTypes, ExtVectorTypes< Vec<3,GLfloat>, Vec<3,GLfloat> > > * map = new IdentityMapping< DataTypes, ExtVectorTypes< Vec<3,GLfloat>, Vec<3,GLfloat> > >( outmodel, visu );
+//        IdentityMapping< DataTypes, StdVectorTypes< Vec<3,GLfloat>, Vec<3,GLfloat> > > * map = new IdentityMapping< DataTypes, StdVectorTypes< Vec<3,GLfloat>, Vec<3,GLfloat> > >( outmodel, visu );
 //        this->child->addObject(map);
 //        visu->init();
 //        map->init(); */

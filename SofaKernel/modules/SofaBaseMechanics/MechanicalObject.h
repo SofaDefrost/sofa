@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -57,7 +57,7 @@ template<class DataTypes>
 class MechanicalObjectInternalData
 {
 public:
-    MechanicalObjectInternalData(MechanicalObject<DataTypes>* = NULL) {}
+    MechanicalObjectInternalData(MechanicalObject<DataTypes>* = nullptr) {}
 };
 
 /**
@@ -154,7 +154,6 @@ public:
     Data< float > showVectorsScale; ///< Scale for vectors display. (default=0.0001)
     Data< int > drawMode; ///< The way vectors will be drawn: - 0: Line - 1:Cylinder - 2: Arrow.  The DOFS will be drawn: - 0: point - >1: sphere. (default=0)
     Data< defaulttype::Vec4f > d_color;  ///< drawing color
-    Data < bool > isToPrint; ///< ignore some Data for file export
 
     void init() override;
     void reinit() override;

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -49,6 +49,7 @@ void FixedTranslationConstraint<gpu::cuda::CudaVec6dTypes>::draw(const core::vis
 template <>
 void component::projectiveconstraintset::FixedTranslationConstraint<gpu::cuda::CudaVec6fTypes>::draw(const core::visual::VisualParams* vparams)
 {
+#ifndef SOFA_NO_OPENGL
     const SetIndexArray & indices = f_indices.getValue();
     if (!vparams->displayFlags().getShowBehaviorModels())
         return;
@@ -72,6 +73,7 @@ void component::projectiveconstraintset::FixedTranslationConstraint<gpu::cuda::C
         }
     }
     glEnd();
+#endif //   SOFA_NO_OPENGL
 }
 
 #ifdef SOFA_GPU_CUDA_DOUBLE

@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -64,13 +64,12 @@ core::objectmodel::BaseObject* RayTriangleVisitor::embeddingModel()
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
-void RayTriangleVisitor::processTriangleModel(simulation::Node* /*node*/, component::collision::TriangleModel* tm)
+void RayTriangleVisitor::processTriangleModel(simulation::Node* /*node*/, component::collision::TriangleCollisionModel<sofa::defaulttype::Vec3Types>* tm)
 {
-    typedef component::collision::TriangleModel TriangleModel;
-    typedef TriangleModel::DataTypes DataTypes;
+    typedef TriangleCollisionModel<sofa::defaulttype::Vec3Types>::DataTypes DataTypes;
 
     const DataTypes::VecCoord& x = tm->getMechanicalState()->read(sofa::core::ConstVecCoordId::position())->getValue();
     for( core::topology::BaseMeshTopology::SeqTriangles::const_iterator it=tm->getTriangles().begin(), iend=tm->getTriangles().end() ; it!=iend; it++)
@@ -173,7 +172,7 @@ simulation::Visitor::Result RayTriangleVisitor::processNodeTopDown(simulation::N
     using component::visualmodel::VisualModelImpl;
     typedef simulation::Node::Sequence<core::CollisionModel> CollisionModels;
     typedef simulation::Node::Sequence<VisualModel> VisualModels;
-    using component::collision::TriangleModel;
+    typedef component::collision::TriangleCollisionModel<sofa::defaulttype::Vec3Types> TriangleModel;
 
     for( CollisionModels::const_iterator it=node->collisionModel.begin(), iend=node->collisionModel.end(); it!=iend; it++ )
     {

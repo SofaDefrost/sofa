@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -51,18 +51,14 @@ PickHandler::PickHandler(double defaultLength):
     interactorInUse(false),
     mouseStatus(DEACTIVATED),
     mouseButton(NONE),
-    mouseNode(NULL),
-    mouseContainer(NULL),
-    mouseCollision(NULL),
-#ifndef SOFA_NO_OPENGL
-    _fbo(true,true,true,false,0),
-#endif
-    renderCallback(NULL),
+    mouseNode(nullptr),
+    mouseContainer(nullptr),
+    mouseCollision(nullptr),
+    renderCallback(nullptr),
     pickingMethod(RAY_CASTING),
-    _fboAllocated(false),
     m_defaultLength(defaultLength)
 {
-    operations[LEFT] = operations[MIDDLE] = operations[RIGHT] = NULL;
+    operations[LEFT] = operations[MIDDLE] = operations[RIGHT] = nullptr;
 }
 
 
@@ -73,7 +69,7 @@ PickHandler::~PickHandler()
         if (operations[i])
         {
             delete operations[i];
-            operations[i] = NULL;
+            operations[i] = nullptr;
         }
     }
     if(mouseNode)
@@ -85,7 +81,7 @@ PickHandler::~PickHandler()
     std::vector< ComponentMouseInteraction *>::iterator it;
     for( it = instanceComponents.begin(); it != instanceComponents.end(); ++it)
     {
-        if(*it != NULL ) delete *it;
+        if(*it != nullptr ) delete *it;
     }
     instanceComponents.clear();
 
@@ -94,42 +90,13 @@ PickHandler::~PickHandler()
 
 void PickHandler::allocateSelectionBuffer(int width, int height)
 {
-    /*called when shift key is pressed */
-    assert(_fboAllocated == false );
-#ifndef SOFA_NO_OPENGL
-    static bool firstTime=true;
-    if (firstTime)
-    {
-        _fboParams.depthInternalformat = GL_DEPTH_COMPONENT24;
-#if defined(GL_VERSION_3_0)
-        if (GLEW_VERSION_3_0)
-        {
-            _fboParams.colorInternalformat = GL_RGBA32F;
-        }
-        else
-#endif //  (GL_VERSION_3_0)
-        {
-            _fboParams.colorInternalformat = GL_RGBA16;
-        }
-        _fboParams.colorFormat         = GL_RGBA;
-        _fboParams.colorType           = GL_FLOAT;
-
-        _fbo.setFormat(_fboParams);
-        firstTime=false;
-    }
-    _fbo.init(width,height);
-#endif /* SOFA_NO_OPENGL */
-    _fboAllocated = true;
+    SOFA_UNUSED(width);
+    SOFA_UNUSED(height);
 }
 
 void PickHandler::destroySelectionBuffer()
 {
-    /*called when shift key is released */
-    assert(_fboAllocated);
-#ifndef SOFA_NO_OPENGL
-    _fbo.destroy();
-#endif // SOFA_NO_OPENGL
-    _fboAllocated = false;
+
 }
 
 
@@ -160,7 +127,7 @@ void PickHandler::init(core::objectmodel::BaseNode* root)
     const MouseFactory *factory = MouseFactory::getInstance();
     for (MouseFactory::const_iterator it = factory->begin(); it != factory->end(); ++it)
     {
-        instanceComponents.push_back(it->second->createInstance(NULL));
+        instanceComponents.push_back(it->second->createInstance(nullptr));
     }
     interaction = instanceComponents.back();
 
@@ -170,7 +137,7 @@ void PickHandler::init(core::objectmodel::BaseNode* root)
     core::collision::Pipeline *pipeline;
     root->getContext()->get(pipeline, core::objectmodel::BaseContext::SearchRoot);
 
-    useCollisions = (pipeline != NULL);
+    useCollisions = (pipeline != nullptr);
 }
 
 void PickHandler::reset()
@@ -190,7 +157,7 @@ void PickHandler::unload()
     std::vector< ComponentMouseInteraction *>::iterator it;
     for( it = instanceComponents.begin(); it != instanceComponents.end(); ++it)
     {
-        if(*it != NULL ) delete *it;
+        if(*it != nullptr ) delete *it;
     }
     instanceComponents.clear();
 
@@ -201,7 +168,7 @@ Operation *PickHandler::changeOperation(sofa::component::configurationsetting::M
     if (operations[setting->button.getValue().getSelectedId()])
     {
         delete operations[setting->button.getValue().getSelectedId()];
-        operations[setting->button.getValue().getSelectedId()] = NULL;
+        operations[setting->button.getValue().getSelectedId()] = nullptr;
     }
     Operation *mouseOp=OperationFactory::Instanciate(setting->getOperationType());
     mouseOp->configure(this,setting);
@@ -214,7 +181,7 @@ Operation *PickHandler::changeOperation(MOUSE_BUTTON button, const std::string &
     if (operations[button])
     {
         delete operations[button];
-        operations[button] = NULL;
+        operations[button] = nullptr;
     }
     Operation *mouseOp=OperationFactory::Instanciate(op);
     mouseOp->configure(this,button);
@@ -434,7 +401,7 @@ component::collision::BodyPicked PickHandler::findCollisionUsingPipeline()
 
                 const double d = (output[i]->point[1]-origin)*direction;
                 if (d<0.0 || d>maxLength) continue;
-                if (result.body == NULL || d < result.rayLength)
+                if (result.body == nullptr || d < result.rayLength)
                 {
                     result.body=modelInCollision;
                     result.indexCollisionElement = output[i]->elem.second.getIndex();
@@ -450,7 +417,7 @@ component::collision::BodyPicked PickHandler::findCollisionUsingPipeline()
 
                 const double d = (output[i]->point[0]-origin)*direction;
                 if (d<0.0 || d>maxLength) continue;
-                if (result.body == NULL || d < result.rayLength)
+                if (result.body == nullptr || d < result.rayLength)
                 {
                     result.body=modelInCollision;
                     result.indexCollisionElement = output[i]->elem.first.getIndex();
@@ -505,35 +472,13 @@ component::collision::BodyPicked PickHandler::findCollisionUsingBruteForce(const
 component::collision::BodyPicked PickHandler::findCollisionUsingColourCoding(const defaulttype::Vector3& origin,
         const defaulttype::Vector3& direction)
 {
-    assert(_fboAllocated);
+    SOFA_UNUSED(origin);
+    SOFA_UNUSED(direction);
+
     BodyPicked result;
-#ifndef SOFA_NO_OPENGL
-    result.dist =  0;
-    sofa::defaulttype::Vec4f color;
-    int x = mousePosition.x;
-    int y = mousePosition.screenHeight - mousePosition.y;
-    TriangleModel* tmodel;
-    SphereModel* smodel;
-    _fbo.start();
-    if(renderCallback)
-    {
-        renderCallback->render(ColourPickingVisitor::ENCODE_COLLISIONELEMENT );
-        glReadPixels(x,y,1,1,_fboParams.colorFormat,_fboParams.colorType,color.elems);
-        decodeCollisionElement(color,result);
-        renderCallback->render(ColourPickingVisitor::ENCODE_RELATIVEPOSITION );
-        glReadPixels(x,y,1,1,_fboParams.colorFormat,_fboParams.colorType,color.elems);
-        if( ( tmodel = dynamic_cast<TriangleModel*>(result.body) ) != NULL )
-        {
-            decodePosition(result,color,tmodel,result.indexCollisionElement);
-        }
-        if( ( smodel = dynamic_cast<SphereModel*>(result.body)) != NULL)
-        {
-            decodePosition(result, color,smodel,result.indexCollisionElement);
-        }
-        result.rayLength = (result.point-origin)*direction;
-    }
-    _fbo.stop();
-#endif // SOFA_NO_OPENGL
+
+    msg_error("PickHandler") << "findCollisionUsingColourCoding not implemented!";
+
     return result;
 }
 

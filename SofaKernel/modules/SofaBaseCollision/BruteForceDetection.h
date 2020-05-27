@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -52,7 +52,7 @@ public:
     }
 
     /// Begin intersection tests between two collision models. Return the number of contacts written in the contacts vector.
-    /// If the given contacts vector is NULL, then this method should allocate it.
+    /// If the given contacts vector is nullptr, then this method should allocate it.
     int beginIntersect(core::CollisionModel* model1, core::CollisionModel* model2, core::collision::DetectionOutputVector*& contacts) override
     {
         return intersector->beginIntersect(model2, model1, contacts);
@@ -91,7 +91,7 @@ private:
 
     Data< helper::fixed_array<sofa::defaulttype::Vector3,2> > box; ///< if not empty, objects that do not intersect this bounding-box will be ignored
 
-    CubeModel::SPtr boxModel;
+    CubeCollisionModel::SPtr boxModel;
 
 
 protected:

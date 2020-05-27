@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -60,6 +60,12 @@ public:
 
     virtual void setReferencePosition(sofa::defaulttype::SolidTypes<SReal>::Transform& referencePosition);
     virtual bool isEnabled();
+
+    /// Abstract method to lock or unlock the force feedback computation. To be implemented by child class if needed
+    virtual void setLock(bool value)
+    {
+        SOFA_UNUSED(value);
+    }
 
 protected:
     ForceFeedback();

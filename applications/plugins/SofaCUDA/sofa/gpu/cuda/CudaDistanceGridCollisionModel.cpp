@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,17 +19,18 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <GL/glew.h>
-#ifdef SOFA_HAVE_MINIFLOWVR
-    #include <flowvr/render/mesh.h>
-#endif // SOFA_HAVE_MINIFLOWVR
+
 #include "CudaDistanceGridCollisionModel.h"
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseCollision/CubeModel.h>
-#include <fstream>
 #include <sofa/helper/gl/template.h>
 #include <sofa/helper/rmath.h>
+#include <SofaBaseCollision/CubeModel.h>
+#if SOFACUDA_HAVE_MINIFLOWVR
+    #include <flowvr/render/mesh.h>
+#endif // SOFACUDA_HAVE_MINIFLOWVR
+#include <GL/glew.h>
+#include <fstream>
 
 namespace sofa
 {
@@ -135,7 +136,7 @@ CudaDistanceGrid* CudaDistanceGrid::load(const std::string& filename, double sca
             grid->sampleSurface(sampling);
         return grid;
     }
-#ifdef SOFA_HAVE_MINIFLOWVR
+#if SOFACUDA_HAVE_MINIFLOWVR
     else if (filename.length()>6 && filename.substr(filename.length()-6) == ".fmesh")
     {
         flowvr::render::Mesh mesh;
@@ -195,7 +196,7 @@ CudaDistanceGrid* CudaDistanceGrid::load(const std::string& filename, double sca
         std::cout << "Distance grid creation DONE."<<std::endl;
         return grid;
     }
-#endif // SOFA_HAVE_MINIFLOWVR
+#endif // SOFACUDA_HAVE_MINIFLOWVR
     else if (filename.length()>4 && filename.substr(filename.length()-4) == ".obj")
     {
         sofa::helper::io::Mesh* mesh = sofa::helper::io::Mesh::Create(filename);
@@ -596,12 +597,12 @@ void CudaRigidDistanceGridCollisionModel::setNewState(int index, double dt, Cuda
     modified = true;
 }
 
-using sofa::component::collision::CubeModel;
+using sofa::component::collision::CubeCollisionModel;
 
 /// Create or update the bounding volume hierarchy.
 void CudaRigidDistanceGridCollisionModel::computeBoundingTree(int maxDepth)
 {
-    CubeModel* cubeModel = this->createPrevious<CubeModel>();
+    CubeCollisionModel* cubeModel = this->createPrevious<CubeCollisionModel>();
 
     if (!modified && !isMoving() && !cubeModel->empty()) return; // No need to recompute BBox if immobile
 
@@ -673,6 +674,7 @@ void CudaRigidDistanceGridCollisionModel::draw(const core::visual::VisualParams*
 
 void CudaRigidDistanceGridCollisionModel::draw(const core::visual::VisualParams* ,int index)
 {
+#ifndef SOFA_NO_OPENGL
     if (elems[index].isTransformed)
     {
         glPushMatrix();
@@ -802,6 +804,7 @@ void CudaRigidDistanceGridCollisionModel::draw(const core::visual::VisualParams*
     {
         glPopMatrix();
     }
+#endif // SOFA_NO_OPENGL
 }
 
 

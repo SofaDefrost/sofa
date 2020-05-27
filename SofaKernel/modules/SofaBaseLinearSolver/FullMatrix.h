@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -84,7 +84,7 @@ protected:
 public:
 
     FullMatrix()
-        : data(NULL), nRow(0), nCol(0), pitch(0), allocsize(0)
+        : data(nullptr), nRow(0), nCol(0), pitch(0), allocsize(0)
     {
     }
 
@@ -148,7 +148,7 @@ public:
             {
                 if (nbRow*nbCol > -allocsize)
                 {
-                    std::cerr << "ERROR: cannot resize preallocated matrix to size ("<<nbRow<<","<<nbCol<<")"<<std::endl;
+                    msg_error() << "Cannot resize preallocated matrix to size (" << nbRow << "," << nbCol << ")";
                     return;
                 }
             }
@@ -185,7 +185,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid read access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid read access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return 0.0;
         }
 #endif
@@ -200,7 +200,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -215,7 +215,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "/*<<this->Name()*/<<" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to element (" << i << "," << j << ") in "/*<<this->Name()*/ << " of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -230,7 +230,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize() || j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to element ("<<i<<","<<j<<") in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to element (" << i << "," << j << ") in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -245,7 +245,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize())
         {
-            std::cerr << "ERROR: invalid write access to row "<<i<<" in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to row " << i << " in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -261,7 +261,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (j >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to column "<<j<<" in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to column " << j << " in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -277,7 +277,7 @@ public:
 #ifdef FULLMATRIX_CHECK
         if (i >= rowSize() || i >= colSize())
         {
-            std::cerr << "ERROR: invalid write access to row and column "<<i<<" in "<</*this->Name()<<*/" of size ("<<rowSize()<<","<<colSize()<<")"<<std::endl;
+            msg_error() << "Invalid write access to row and column " << i << " in " <</*this->Name()<<*/" of size (" << rowSize() << "," << colSize() << ")";
             return;
         }
 #endif
@@ -287,12 +287,14 @@ public:
 
     void clear() override
     {
-        //if (pitch == nCol)
-        //    std::fill(data, data+nRow*pitch, (Real)0);
-        //else
-        for (Index i=0; i<nRow; ++i)
-            for (Index j=0; j<nCol; ++j)
-                data[i*pitch+j] = (Real)0;
+        if (pitch == nCol)
+            std::fill(data, data+nRow*pitch, (Real)0);
+        else
+        {
+            for (Index i = 0; i<nRow; ++i)
+                for (Index j = 0; j<nCol; ++j)
+                    data[i*pitch + j] = (Real)0;
+        }
     }
 
     /// matrix-vector product
@@ -423,7 +425,7 @@ protected:
     Index lallocsize;
 public:
     LPtrFullMatrix()
-        : ldata(NULL), lallocsize(0)
+        : ldata(nullptr), lallocsize(0)
     {
     }
 

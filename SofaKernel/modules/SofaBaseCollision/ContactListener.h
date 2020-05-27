@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -85,9 +85,7 @@ public:
 
         if (collModel1 == nullptr && collModel2 == nullptr )
         {
-            msg_error(context) << "Creation of " << className(obj) <<
-                                  " CollisonListener failed because no Collision Model links are found: \"" << collModelPath1
-                               << "\" and \"" << collModelPath2 << "\" " << context->sendl;
+            arg->logError("Data attributes 'collisionModel1' and 'collisionModel2' are not pointing to valid collision models.");
             return false;
         }
 

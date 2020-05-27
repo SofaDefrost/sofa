@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -863,10 +863,10 @@ static PyObject * Data_getHelp(PyObject *self, PyObject * args)
     }
 
     BaseData* data = get_basedata( self );
-    const char *h = data->getHelp() ;
-    if(h == nullptr)
+    const std::string h = data->getHelp() ;
+    if(h.empty())
         return PyString_FromString("(No help available)");
-    return PyString_FromString(h);
+    return PyString_FromString(h.c_str());
 }
 
 

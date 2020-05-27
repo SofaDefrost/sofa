@@ -19,7 +19,7 @@
     <CGLinearSolver  />
 
   <Node name="FEM"  >
-        <Mesh name="mesh" src="@../sampler" />
+        <MeshTopology name="mesh" src="@../sampler" />
 	<MechanicalObject template="Vec3d" name="parent" showObject="false" />
 
         <BoxROI template="Vec3d" box="0 -2 0 5 2 5" position="@mesh.position" name="FixedROI"/>
@@ -30,13 +30,14 @@
 	<HexahedronFEMForceField youngModulus="2000.0" poissonRatio="0.2" method="polar" updateStiffnessMatrix="false" />
 
 	<Node name="Visual"  >
-	     <OglModel  fileMesh="mesh/torus.obj"  color="1 .4 0.5 1" />
+	     <MeshObjLoader name="meshLoader_0" filename="mesh/torus.obj" handleSeams="1" />
+	     <OglModel src="@meshLoader_0"  color="1 .4 0.5 1" />
 	     <BarycentricMapping input="@.." output="@." />
 	</Node>
   </Node>
 
   <Node name="Flexible"  >
-        <Mesh name="mesh" src="@../sampler" />
+        <MeshTopology name="mesh" src="@../sampler" />
 	<MechanicalObject template="Vec3d" name="parent" showObject="false" showObjectScale="0.05"/>
 
         <BoxROI template="Vec3d" box="0 -2 0 5 2 5" position="@mesh.position" name="FixedROI"/>
@@ -63,7 +64,8 @@
         </Node>
 
 	<Node name="Visual"  >
-	     <OglModel  fileMesh="mesh/torus.obj" />
+	     <MeshObjLoader name="meshLoader_1" filename="mesh/torus.obj" handleSeams="1" />
+	     <OglModel src="@meshLoader_1" />
              <LinearMapping template="Vec3d,ExtVec3f"/>
 	</Node>
 

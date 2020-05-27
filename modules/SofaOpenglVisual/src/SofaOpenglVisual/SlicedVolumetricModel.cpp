@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -67,16 +67,16 @@ SlicedVolumetricModel::SlicedVolumetricModel() //const std::string &name, std::s
     alpha(initData(&alpha, 0.2f, "alpha", "Opacity of the billboards. 1.0 is 100% opaque.")),
     color(initData(&color, defaulttype::RGBAColor(1.0,1.0,1.0,1.0), "color", "Billboard color.(default=1.0,1.0,1.0,1.0)")),
     _nbPlanes(initData(&_nbPlanes, 100, "nbSlices", "Number of billboards.")),
-    _topology(NULL),
-    _mstate(NULL),
-    texture_data(NULL),
+    _topology(nullptr),
+    _mstate(nullptr),
+    texture_data(nullptr),
     _first(1)
 {
 }
 
 SlicedVolumetricModel::~SlicedVolumetricModel()
 {
-    if(texture_data != NULL)
+    if(texture_data != nullptr)
         delete [] texture_data;
 }
 
@@ -176,7 +176,7 @@ void SlicedVolumetricModel::drawTransparent(const core::visual::VisualParams* vp
         glTexImage3D(GL_TEXTURE_3D, 0, GL_ALPHA, _width, _height, _depth, 0, GL_ALPHA, GL_UNSIGNED_BYTE, texture_data);
 
         delete [] texture_data;
-        texture_data = NULL;
+        texture_data = nullptr;
         return;
     }
 

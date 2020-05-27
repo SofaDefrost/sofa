@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU General Public License as published by the Free  *
@@ -555,16 +555,16 @@ void SofaWindowProfiler::addTreeItem(AnimationSubStepData* subStep, QTreeWidgetI
     treeItem->setText(3, QString::number(subStep->m_totalMs));
     treeItem->setText(4, QString::number(subStep->m_selfMs));
 
-    if (subStep->m_level <= 1)
-    {        
+    if (subStep->m_level <= 2)
+    {
         QFont font = QApplication::font();
         font.setBold(true);
 
-        for (int i=0; i<treeItem->columnCount(); i++)
+        for (int i = 0; i<treeItem->columnCount(); i++)
             treeItem->setFont(i, font);
-    }
-    if (subStep->m_level <= 3)
+
         treeItem->setExpanded(true);
+    }
 
     // process children
     for (unsigned int i=0; i<subStep->m_children.size(); i++)

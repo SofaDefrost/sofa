@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -72,7 +72,7 @@ void LCPForceFeedback< Rigid3Types >::computeWrench(const sofa::defaulttype::Sol
     W_tool_world.setTorque(getVOrientation(forces[0]));
 }
 
-static int lCPForceFeedbackClass = sofa::core::RegisterObject("LCP force feedback for the device")
+int lCPForceFeedbackClass = sofa::core::RegisterObject("LCP force feedback for the device")
         .add< LCPForceFeedback<defaulttype::Vec1Types> >()
         .add< LCPForceFeedback<defaulttype::Rigid3Types> >();
 

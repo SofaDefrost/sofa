@@ -1,6 +1,6 @@
 /******************************************************************************
-*       SOFA, Simulation Open-Framework Architecture, development version     *
-*                (c) 2006-2019 INRIA, USTL, UJF, CNRS, MGH                    *
+*                 SOFA, Simulation Open-Framework Architecture                *
+*                    (c) 2006 INRIA, USTL, UJF, CNRS, MGH                     *
 *                                                                             *
 * This program is free software; you can redistribute it and/or modify it     *
 * under the terms of the GNU Lesser General Public License as published by    *
@@ -19,9 +19,6 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-// Author: Hadrien Courtecuisse
-//
-// Copyright: See COPYING file that comes with this distribution
 #define SOFA_COMPONENT_LINEARSOLVER_CHOLESKYSOLVER_CPP
 #include <SofaGeneralLinearSolver/CholeskySolver.inl>
 
@@ -38,7 +35,7 @@ namespace linearsolver
 
 using namespace sofa::defaulttype;
 
-static int CholeskySolverClass = core::RegisterObject("Direct linear solver based on Cholesky factorization, for dense matrices")
+int CholeskySolverClass = core::RegisterObject("Direct linear solver based on Cholesky factorization, for dense matrices")
         .add< CholeskySolver< SparseMatrix<double>, FullVector<double> > >(true)
         .add< CholeskySolver< FullMatrix<double>, FullVector<double> > >();
 
