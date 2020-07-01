@@ -28,6 +28,7 @@ using sofa::core::collision::Contact ;
 
 #include <SofaMeshCollision/RigidContactMapper.inl>
 #include <SofaMeshCollision/PointModel.h>
+#include <SofaMeshCollision/LineModel.h>
 #include <SofaMeshCollision/TriangleModel.h>
 
 #include <SofaMeshCollision/BarycentricContactMapper.inl>
@@ -65,14 +66,17 @@ using sofa::component::collision::BarycentricDistanceLMConstraintContact;
 using sofa::component::collision::FrictionContact;
 using sofa::component::collision::ContactMapper;
 using sofa::component::collision::PointCollisionModel;
+using sofa::component::collision::LineCollisionModel;
 
 //using sofa::component::collision::SphereCollisionModel;
 //using sofa::component::collision::TriangleCollisionModel;
 
-Creator<Contact::Factory, BarycentricPenalityContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridDistanceGridContactClass("default", true);
+///Creator<Contact::Factory, BarycentricPenalityContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridDistanceGridContactClass("default", true);
+Creator<Contact::Factory, BarycentricPenalityContact<ScalarFieldCollisionModel, LineCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridDistanceGridContactClass("default", true);
 
 ///////////////////////////////// BARYCENTRICSTICK /////////////////////////////////////////////////
-Creator<Contact::Factory, BarycentricStickContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointStickContactClass("stick", true);
+///Creator<Contact::Factory, BarycentricStickContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointStickContactClass("stick", true);
+Creator<Contact::Factory, BarycentricStickContact<ScalarFieldCollisionModel, LineCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointStickContactClass("stick", true);
 //Creator<Contact::Factory, BarycentricStickContact<ScalarFieldCollisionModel, SphereCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridSphereStickContactClass("stick", true);
 //Creator<Contact::Factory, BarycentricStickContact<ScalarFieldCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridTriangleStickContactClass("stick", true);
 
@@ -82,7 +86,8 @@ Creator<Contact::Factory, FrictionContact<ScalarFieldCollisionModel, PointCollis
 //Creator<Contact::Factory, FrictionContact<ScalarFieldCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridTriangleFrictionContactClass("FrictionContact", true);
 
 /////////////////////////////////////// BarycentricDistanceLMConstraint ///////////////////////////////////
-Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointDistanceLMConstraintContactClass("distanceLMConstraint",true);
+///Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<ScalarFieldCollisionModel, PointCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointDistanceLMConstraintContactClass("distanceLMConstraint",true);
+Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<ScalarFieldCollisionModel, LineCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridPointDistanceLMConstraintContactClass("distanceLMConstraint",true);
 //Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<ScalarFieldCollisionModel, SphereCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridSphereDistanceLMConstraintContactClass("distanceLMConstraint",true);
 //Creator<Contact::Factory, BarycentricDistanceLMConstraintContact<ScalarFieldCollisionModel, TriangleCollisionModel<sofa::defaulttype::Vec3Types>> > DistanceGridTriangleDistanceLMConstraintContactClass("distanceLMConstraint",true);
 
