@@ -115,6 +115,11 @@ public:
     const Deriv& velocity(int index) const;
 
     Data<bool> bothSide; ///< to activate collision on both side of the point model (when surface normals are defined on these points)
+    Data<bool> displayContactModes;
+    Data<std::string> d_lambdaModesPath;
+    Data<std::string> d_lambdaModesCoeffsPath;
+    Eigen::MatrixXd lambdaModes;
+    Eigen::MatrixXd contactIndices;
 
     /// Pre-construction check method called by ObjectFactory.
     /// Check that DataTypes matches the MechanicalState.

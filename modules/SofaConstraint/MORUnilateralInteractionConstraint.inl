@@ -141,13 +141,13 @@ void MORUnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const 
     {
         MatrixDeriv& c1 = *c1_d.beginEdit();
         MatrixDeriv& c2 = *c2_d.beginEdit();
-        msg_warning() << "2: contacts.size() is : " << contacts.size();
+//        msg_warning() << "2: contacts.size() is : " << contacts.size();
         unsigned int line = 0;
         bool somethingAdded;
 
         for (unsigned int numMode=0; numMode < lambdaModes.cols(); numMode++)
         {
-            msg_warning() << "Building H: numMode is :" << numMode;
+//            msg_warning() << "Building H: numMode is :" << numMode;
             somethingAdded = false;
             MatrixDerivRowIterator c1_it = c1.writeLine(line);
             MatrixDerivRowIterator c2_it = c2.writeLine(line);
@@ -201,8 +201,8 @@ void MORUnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const 
 
             }
             if (somethingAdded){
-                msg_warning() << "Something was added at line:" << line;
-                msg_warning() << "myMuForAllContacts:" << myMuForAllContacts;
+//                msg_warning() << "Something was added at line:" << line;
+//                msg_warning() << "myMuForAllContacts:" << myMuForAllContacts;
                 if (myMuForAllContacts == 0.0)
                 {
                     reducedContacts.resize(line+1);
@@ -326,6 +326,8 @@ void MORUnilateralInteractionConstraint<DataTypes>::getPositionViolation(default
 
         // Sets dfree in global violation vector
         if (c.mu == 0.0){
+//            msg_warning() << "dfree for contact " << i << ": " << dfree;
+
             for (int k=0;k<reducedContacts.size();k++){
                 if (contactIndices(c.m2) != -1)
                     dfreeRed(k) += dfree*lambdaModes(contactIndices(c.m2),reducedContacts[k]);
@@ -350,6 +352,7 @@ void MORUnilateralInteractionConstraint<DataTypes>::getPositionViolation(default
     }
      msg_warning() << " v size is: " << v->size();
     for (int k=0;k<reducedContacts.size();k++){
+//        msg_warning() << "dfreeRed "  << dfreeRed(k);
         v->set(k, dfreeRed(k));
     }
     msg_warning() << " v is: " << v[0];
@@ -393,26 +396,19 @@ void MORUnilateralInteractionConstraint<DataTypes>::getConstraintResolution(cons
 
     for(unsigned int i=0; i<reducedContacts.size(); i++)
     {
-        msg_warning("MORUnilateralInteractionConstraint") << " i is:" << i;
         auto& c = contacts[0];
-        msg_warning("MORUnilateralInteractionConstraint") << " mu is:" << c.mu;
         if(c.mu > 0.0)
         {
             i = i+2;
             UnilateralConstraintResolutionWithFriction* ucrwf = new UnilateralConstraintResolutionWithFriction(c.mu, NULL, &contactsStatus[i]);
             ucrwf->setTolerance(customTolerance);
             resTab[offset] = ucrwf;
-            msg_warning("MORUnilateralInteractionConstraint") <<  "offset: " << offset;
-            msg_warning("MORUnilateralInteractionConstraint") <<  "resTab[offset]: " << resTab[offset];
             // TODO : cette méthode de stockage des forces peu mal fonctionner avec 2 threads quand on utilise l'haptique
             offset += 3;
-            msg_warning("MORUnilateralInteractionConstraint") <<  "offset after incrementation: " << offset;
         }
         else
         {
-            msg_warning("MORUnilateralInteractionConstraint") <<  "offset: " << offset;
             resTab[offset++] = new UnilateralConstraintResolution();
-//            msg_warning("MORUnilateralInteractionConstraint") <<  "resTab: " << resTab[offset;
         }
     }
 }

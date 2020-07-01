@@ -1452,7 +1452,7 @@ void TetrahedronFEMForceField<DataTypes>::init()
     reinit(); // compute per-element stiffness matrices and other precomputed values
 
     msg_info() << "Init done with "<<_indexedElements->size()<<" tetras.";
-    Keig.resize(_mesh->getNbPoints()*3, _mesh->getNbPoints()*3);
+    Keig.resize(m_topology->getNbPoints()*3, m_topology->getNbPoints()*3);
 //    msg_warning() << "NB points:::::::::::::::::: " << _mesh->getNbPoints();
 }
 
@@ -2098,7 +2098,7 @@ void TetrahedronFEMForceField<DataTypes>::addKToMatrix(sofa::defaulttype::BaseMa
         Keig.setZero();
 
         std::vector< Eigen::Triplet<double> > tripletList;
-        tripletList.reserve(_mesh->getNbTetrahedra()*4);
+        tripletList.reserve(m_topology->getNbTetrahedra()*4);
         for(it = _indexedElements->begin(), IT=0 ; it != _indexedElements->end() ; ++it,++IT)
         {
             if (method == SMALL)
