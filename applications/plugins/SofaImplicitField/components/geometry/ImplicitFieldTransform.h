@@ -19,66 +19,39 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_IMPLICIT_SPHERICALFIELD_H
-#define SOFA_IMPLICIT_SPHERICALFIELD_H
 
-#include "ScalarField.h"
 
-namespace sofa
-{
+#include <SofaImplicitField/config.h>
+#include <sofa/core/objectmodel/BaseObject.h>
+#include <SofaImplicitField/components/geometry/ScalarField.h>
+///#include <SofaBaseVisual/BaseCamera.h>
+///#include <sofa/core/DataEngine.h>
 
-namespace component
-{
 
-namespace geometry
-{
 
-namespace _sphericalfield_
-{
-
+///using sofa::component::visualmodel::BaseCamera;
+using sofa::component::geometry::ScalarField;
+///using sofa::core::DataEngine;
 using sofa::defaulttype::Vec3d ;
+///using sofa::defaulttype::Vec2i;
 
-class  SOFA_SOFAIMPLICITFIELD_API SphericalField  : public ScalarField
+class SOFA_SOFAIMPLICITFIELD_API ImplicitFieldTransform : public sofa::core::objectmodel::BaseObject
 {
 public:
-    SOFA_CLASS(SphericalField, ScalarField);
+   SOFA_CLASS(ImplicitFieldTransform, sofa::core::objectmodel::BaseObject);
 
-public:
-    SphericalField() ;
-    ~SphericalField() override { }
+   ///void init() override;
+   ///void reinit() override;
+   Vec3d opTwist(Vec3d & P);
+   Vec3d  opcheapBend(Vec3d &P);
+   ///void doUpdate() override;
 
-    /// Inherited from BaseObject
-    void init() override ;
-    void reinit() override ;
-
-    /// Inherited from ScalarField.
-    double getValue(Vec3d& Pos, int &domain) override ;
-    Vec3d getGradient(Vec3d &Pos, int& domain) override ;
-    void getValueAndGradient(Vec3d& pos, double& val, Vec3d& grad, int& domain) override ;
-
-
-    using ScalarField::getValue ;
-    using ScalarField::getGradient ;
-    using ScalarField::getValueAndGradient ;
-
-    Data<bool> d_inside; ///< If true the field is oriented inside (resp. outside) the sphere. (default = false)
-    Data<double> d_radiusSphere; ///< Radius of Sphere emitting the field. (default = 1)
-    Data<Vec3d> d_centerSphere; ///< Position of the Sphere Surface. (default=0 0 0)
+   SingleLink<ImplicitFieldTransform, ScalarField, BaseLink::FLAG_STRONGLINK> l_field;
 
 protected:
-    Vec3d m_center;
-    double m_radius;
-    bool m_inside;
+   ImplicitFieldTransform();
+   ~ImplicitFieldTransform() override {}
+
+  ///Vec3d transform(Vec3d (*operator)(Vec3d &P);
 };
 
-} /// _sphericalfield_
-
-using _sphericalfield_::SphericalField ;
-
-} /// geometry
-
-} /// component
-
-} /// sofa
-
-#endif

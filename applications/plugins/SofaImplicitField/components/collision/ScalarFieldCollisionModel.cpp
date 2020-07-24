@@ -64,7 +64,7 @@ void ScalarFieldCollisionModel::computeBoundingTree(int maxDepth)
     if (!cubeModel->empty()) return; // No need to recompute BBox if immobile
 
     cubeModel->resize(1);
-    cubeModel->setParentOf(0, {-2.0,-2.0,-2.0}, {2.0,2.0,2.0}); // define the bounding box of the current element
+    cubeModel->setParentOf(0, {-6.0,-6.0,-6.0}, {6.0,6.0,6.0}); // define the bounding box of the current element
     cubeModel->computeBoundingTree(maxDepth);
 }
 

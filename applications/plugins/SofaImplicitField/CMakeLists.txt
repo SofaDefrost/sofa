@@ -15,12 +15,17 @@ set(HEADER_FILES
 
     components/geometry/DiscreteGridField.h
     components/geometry/SphericalField.h
+    components/geometry/CubicField.h
+    components/geometry/TorusField.h
     components/geometry/ScalarField.h
+    components/geometry/TriprismField.h
+    #components/geometry/ImplicitFieldTransform.h
     components/mapping/ImplicitSurfaceMapping.h
     components/mapping/ImplicitSurfaceMapping.inl
 
     components/collision/ScalarFieldCollisionModel.h
     components/collision/ScalarFieldIntersection.h
+    components/collision/ScalarFieldIntersectionLine.h
     components/engine/RayMarchingEngine.h
 )
 
@@ -35,10 +40,15 @@ set(SOURCE_FILES
     components/geometry/ScalarField.cpp
     components/geometry/DiscreteGridField.cpp
     components/geometry/SphericalField.cpp
+    components/geometry/CubicField.cpp
+    components/geometry/TorusField.cpp
+    components/geometry/TriprismField.cpp
+    #components/geometry/ImplicitFieldTransform.cpp
     components/mapping/ImplicitSurfaceMapping.cpp
 
     components/collision/ScalarFieldCollisionModel.cpp
     components/collision/ScalarFieldIntersection.cpp
+    components/collision/ScalarFieldIntersectionLine.cpp
     components/engine/RayMarchingEngine.cpp
 )
 

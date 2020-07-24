@@ -19,8 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_IMPLICIT_SPHERICALFIELD_H
-#define SOFA_IMPLICIT_SPHERICALFIELD_H
+#ifndef SOFA_IMPLICIT_CUBEFIELD_H
+#define SOFA_IMPLICIT_CUBEFIELD_H
 
 #include "ScalarField.h"
 
@@ -33,19 +33,19 @@ namespace component
 namespace geometry
 {
 
-namespace _sphericalfield_
+namespace _Hexagfield_
 {
 
 using sofa::defaulttype::Vec3d ;
 
-class  SOFA_SOFAIMPLICITFIELD_API SphericalField  : public ScalarField
+class  SOFA_SOFAIMPLICITFIELD_API HexagField  : public ScalarField
 {
 public:
-    SOFA_CLASS(SphericalField, ScalarField);
+    SOFA_CLASS(HexagField, ScalarField);
 
 public:
-    SphericalField() ;
-    ~SphericalField() override { }
+    HexagField() ;
+    ~HexagField() override { }
 
     /// Inherited from BaseObject
     void init() override ;
@@ -53,27 +53,24 @@ public:
 
     /// Inherited from ScalarField.
     double getValue(Vec3d& Pos, int &domain) override ;
-    Vec3d getGradient(Vec3d &Pos, int& domain) override ;
-    void getValueAndGradient(Vec3d& pos, double& val, Vec3d& grad, int& domain) override ;
-
+    
 
     using ScalarField::getValue ;
-    using ScalarField::getGradient ;
-    using ScalarField::getValueAndGradient ;
+    
 
-    Data<bool> d_inside; ///< If true the field is oriented inside (resp. outside) the sphere. (default = false)
-    Data<double> d_radiusSphere; ///< Radius of Sphere emitting the field. (default = 1)
-    Data<Vec3d> d_centerSphere; ///< Position of the Sphere Surface. (default=0 0 0)
+    Data<bool> c_inside; ///< If true the field is oriented inside (resp. outside) the cube. (default = false)
+    Data<double> c_edge ; ///< edge of the cube emitting the field. (default = 1)
+     Data<Vec3d> c_center; ///< Position of the cube Surface. (default=0 0 0)
 
 protected:
-    Vec3d m_center;
-    double m_radius;
+    double m_edge;
     bool m_inside;
+    Vec3d m_center;
 };
 
-} /// _sphericalfield_
+} /// _Hexagfield_
 
-using _sphericalfield_::SphericalField ;
+using _Hexagfield_::HexagField ;
 
 } /// geometry
 
@@ -82,3 +79,4 @@ using _sphericalfield_::SphericalField ;
 } /// sofa
 
 #endif
+

@@ -19,66 +19,48 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_IMPLICIT_SPHERICALFIELD_H
-#define SOFA_IMPLICIT_SPHERICALFIELD_H
+#include <sofa/core/ObjectFactory.h>
 
-#include "ScalarField.h"
+#include "ImplicitFieldTransform.h"
 
-namespace sofa
+namespace sofa::core::objectmodel::BaseObject
 {
-
-namespace component
-{
-
-namespace geometry
-{
-
-namespace _sphericalfield_
-{
-
+///using sofa::defaulttype::RGBAColor;
+///using sofa::defaulttype::Ray;
 using sofa::defaulttype::Vec3d ;
 
-class  SOFA_SOFAIMPLICITFIELD_API SphericalField  : public ScalarField
-{
-public:
-    SOFA_CLASS(SphericalField, ScalarField);
+/// Register in the Factory
+static int ImplicitFieldTransformClass = core::RegisterObject("registering of ImplicitFieldTransform class") .add<ImplicitFieldTransform>();
 
-public:
-    SphericalField() ;
-    ~SphericalField() override { }
+//ImplicitFieldTransform::ImplicitFieldTransform() :
+//    l_field(initLink("field", "The scalar field to render"))
 
-    /// Inherited from BaseObject
-    void init() override ;
-    void reinit() override ;
+Vec3d ImplicitFieldTransform::opTwist(Vec3d & P){
+    double k = 3.0;
+    double c = cos(k*P[1]);
+    double s = sin(k*P[1]);
+    Vec3d z ;
+    z[0] = P[0]*c -P[2]*s;
+    z[1] = P[0]*s +P[2]*c;
+    z[2] = P[1];
 
-    /// Inherited from ScalarField.
-    double getValue(Vec3d& Pos, int &domain) override ;
-    Vec3d getGradient(Vec3d &Pos, int& domain) override ;
-    void getValueAndGradient(Vec3d& pos, double& val, Vec3d& grad, int& domain) override ;
+    return z ;
+
+}
+
+Vec3d ImplicitFieldTransform::opcheapBend(Vec3d & P){
+    double k = 3.0 ;
+    double c = cos(k*P[1]);
+    double s = sin(k*P[1]);
+    Vec3d w ;
+    w[0] = P[0]*c -P[1]*s;
+    w[1] = P[0]*s +P[1]*c;
+    w[2] = P[2];
+
+    return w;
+}
 
 
-    using ScalarField::getValue ;
-    using ScalarField::getGradient ;
-    using ScalarField::getValueAndGradient ;
+} /// namespace sofa::core::objectmodel::BaseObject
 
-    Data<bool> d_inside; ///< If true the field is oriented inside (resp. outside) the sphere. (default = false)
-    Data<double> d_radiusSphere; ///< Radius of Sphere emitting the field. (default = 1)
-    Data<Vec3d> d_centerSphere; ///< Position of the Sphere Surface. (default=0 0 0)
 
-protected:
-    Vec3d m_center;
-    double m_radius;
-    bool m_inside;
-};
-
-} /// _sphericalfield_
-
-using _sphericalfield_::SphericalField ;
-
-} /// geometry
-
-} /// component
-
-} /// sofa
-
-#endif
