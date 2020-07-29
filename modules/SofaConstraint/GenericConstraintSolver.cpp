@@ -83,12 +83,8 @@ GenericConstraintSolver::GenericConstraintSolver()
     , d_computeConstraintForces(initData(&d_computeConstraintForces,false,
                                         "computeConstraintForces",
                                         "enable the storage of the constraintForces (default = False)."))
-    ,l_contactMstate(initLink("contactMstate","The mechanicalState storing the contact"))
     , current_cp(&m_cpBuffer[0])
     , last_cp(NULL)
-    , d_storeLambdas(initData(&d_storeLambdas,false,"storeLambdas","Use the reduced model with the ECSW method"))
-    , d_lambdaPath(initData(&d_lambdaPath,std::string("lambdaStored.txt"),"lambdaPath","Path to the Reduced Integration domain when performing the ECSW method"))
-
 {
     addAlias(&maxIt, "maxIt");
 
@@ -150,34 +146,6 @@ void GenericConstraintSolver::init()
         dx.realloc(&vop,false,true);
         m_dxId = dx.id();
     }
-//    MatrixLoader<Eigen::MatrixXd>* matLoaderModes = new MatrixLoader<Eigen::MatrixXd>();
-//    matLoaderModes->setFileName("lambdaModes.txt");
-//    msg_warning(this) << "Name of data file read";
-
-//    matLoaderModes->load();
-//    msg_warning(this) << "file loaded";
-
-//    matLoaderModes->getMatrix(lambdaModes);
-//    msg_warning(this) << "Matrix Obtained";
-
-
-//    MatrixLoader<Eigen::MatrixXd>* matLoader = new MatrixLoader<Eigen::MatrixXd>();
-//    matLoader->setFileName("lambdaCoeffs.txt");
-//    msg_warning(this) << "Name of data file read";
-
-//    matLoader->load();
-//    msg_warning(this) << "file loaded";
-
-//    matLoader->getMatrix(contactIndices);
-//    msg_warning(this) << "Matrix Obtained";
-//    for (int i=0; i<10; i++)
-//        msg_warning("MatrixLoader") << "Lambda coeffs:" << contactIndices(i);
-
-    std::ofstream myLambdas (d_lambdaPath.getValue());
-    myLambdas.close();
-    std::ofstream Wfile ("W_File.txt");
-    Wfile.close();
-
 
 }
 
@@ -271,8 +239,6 @@ bool GenericConstraintSolver::buildSystem(const core::ConstraintParams *cParams,
     sofa::helper::AdvancedTimer::stepBegin("Get Constraint Resolutions");
     MechanicalGetConstraintResolutionVisitor(cParams, current_cp->constraintsResolutions).execute(context);
     sofa::helper::AdvancedTimer::stepEnd("Get Constraint Resolutions");
-
-    msg_warning() <<"GenericConstraintSooooooooooooooooolver: "<<numConstraints<<" constraints";
 
     // Test if the nodes containing the constraint correction are active (not sleeping)
     for (unsigned int i = 0; i < constraintCorrections.size(); i++)
@@ -469,32 +435,8 @@ bool GenericConstraintSolver::solveSystem(const core::ConstraintParams * /*cPara
         printLCP(tmp, current_cp->_d.ptr(), current_cp->getW(), current_cp->getF(), current_cp->getDimension(), false);
         msg_info() << tmp.str() ;
         msg_info() << "dim after resolution " <<current_cp->getDimension();
-//        double *lambda = current_cp->getF();
-//        std::ofstream myLambdas ("lambdaStored.txt", std::fstream::app);
-//        for (unsigned int k=0; k<current_cp->getDimension() ;k++)
-//            myLambdas << lambda[k] << " ";
-//        myLambdas << std::endl;
-//        myLambdas.close();
     }
     msg_info() << "Still there 3..........................";
-    double *lambda = current_cp->getF();
-    if (d_storeLambdas.getValue())
-    {
-        std::ofstream myLambdas (d_lambdaPath.getValue(), std::fstream::app);
-        for (unsigned int k=0; k<current_cp->getDimension() ;k++)
-            myLambdas << lambda[k] << " ";
-        myLambdas << std::endl;
-        myLambdas.close();
-    }
-//    int dim = current_cp->getDimension();
-//    double** w =  current_cp->getW();
-//    for (int i=0; i<dim;i++){
-//        for (int j=0; j<dim;j++){
-//            msg_error() << w[i][j];
-//        }
-//        msg_error() << "____________";
-//    }
-
 
     if(d_computeConstraintForces.getValue())
     {

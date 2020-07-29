@@ -74,8 +74,6 @@ public:
 
     int getNumConstraints();
     int getNumConstraintGroups();
-    Eigen::MatrixXd lambdaModes;
-    Eigen::MatrixXd contactIndices;
 
 };
 
@@ -126,12 +124,6 @@ public:
     Data<bool> reverseAccumulateOrder; ///< True to accumulate constraints from nodes in reversed order (can be necessary when using multi-mappings or interaction constraints not following the node hierarchy)
     Data<helper::vector< double >> d_constraintForces; ///< OUTPUT: The Data constraintForces is used to provide the intensities of constraint forces in the simulation. The user can easily check the constraint forces from the GenericConstraint component interface.
     Data<bool> d_computeConstraintForces; ///< The indices of the constraintForces to store in the constraintForce data field.
-
-    Data< bool > d_storeLambdas;
-    Data<std::string> d_lambdaPath;
-
-    SingleLink < GenericConstraintSolver, sofa::core::behavior::BaseMechanicalState , BaseLink::FLAG_STOREPATH > l_contactMstate;
-    sofa::core::objectmodel::DataFileName d_contactIndices;
 
     sofa::core::MultiVecDerivId getLambda() const override;
     sofa::core::MultiVecDerivId getDx() const override;
