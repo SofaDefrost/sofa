@@ -40,8 +40,6 @@
 #include <sofa/core/topology/BaseMeshTopology.h>
 
 #include <sofa/simulation/Simulation.h>
-#include "/home/olivier/sofa/plugins/ModelOrderReduction/src/component/loader/MatrixLoader.h"
-#include "/home/olivier/sofa/plugins/ModelOrderReduction/src/component/loader/MatrixLoader.inl"
 
 namespace sofa
 {
@@ -51,7 +49,6 @@ namespace component
 
 namespace collision
 {
-using sofa::component::loader::MatrixLoader;
 template<class DataTypes>
 PointCollisionModel<DataTypes>::PointCollisionModel()
     : bothSide(initData(&bothSide, false, "bothSide", "activate collision on both side of the point model (when surface normals are defined on these points)") )
@@ -60,9 +57,6 @@ PointCollisionModel<DataTypes>::PointCollisionModel()
     , m_lmdFilter( nullptr )
     , m_displayFreePosition(initData(&m_displayFreePosition, false, "displayFreePosition", "Display Collision Model Points free position(in green)") )
     , l_topology(initLink("topology", "link to the topology container"))
-    , displayContactModes(initData(&displayContactModes, false, "displayContactModes", "display Contact Modes"))
-    , d_lambdaModesPath (initData(&d_lambdaModesPath, "lambdaModesPath", "path to the file containing the lambda modes"))
-    , d_lambdaModesCoeffsPath (initData(&d_lambdaModesCoeffsPath, "lambdaModesCoeffsPath", "path to the file containing the coefficients of lambda modes"))
 {
     enum_type = POINT_TYPE;
 }
@@ -100,16 +94,6 @@ void PointCollisionModel<DataTypes>::init()
     const int npoints = mstate->getSize();
     resize(npoints);
     if (computeNormals.getValue()) updateNormals();
-
-    MatrixLoader<Eigen::MatrixXd>* matLoaderModes = new MatrixLoader<Eigen::MatrixXd>();
-    matLoaderModes->setFileName(d_lambdaModesPath.getValue());
-    matLoaderModes->load();
-    matLoaderModes->getMatrix(lambdaModes);
-
-    MatrixLoader<Eigen::MatrixXd>* matLoader = new MatrixLoader<Eigen::MatrixXd>();
-    matLoader->setFileName(d_lambdaModesCoeffsPath.getValue());
-    matLoader->load();
-    matLoader->getMatrix(contactIndices);
 
 }
 
@@ -465,7 +449,6 @@ void PointCollisionModel<DataTypes>::draw(const core::visual::VisualParams* vpar
         std::vector< defaulttype::Vector3 > pointsL;
         msg_warning() << "Displaying Points. Size is:" << size;
         int numMode;
-        double val;
         double step =  getContext()->getTime()/getContext()->getDt();
         numMode = (int) step - 1;
         msg_warning() << "numMode is:" << numMode;
@@ -476,18 +459,6 @@ void PointCollisionModel<DataTypes>::draw(const core::visual::VisualParams* vpar
             if (p.isActive())
             {
                 pointsP.push_back(p.p());
-                if (displayContactModes.getValue() && numMode >= 0 && numMode < lambdaModes.cols()){
-                    if (contactIndices(i) != -1)
-                        val = lambdaModes(contactIndices(i),numMode);
-                    else
-                        val = 0;
-                    if (val != 0){
-                    }
-//                    pointsL.push_back(p.p());
-//                    pointsL.push_back(p.p() + normals[i] * 1000.1f*val);
-//                    vparams->drawTool()->drawArrow(p.p(), p.p() + normals[i] * 20.1f*val, 0.06, 0.4, 0.3, {0.25f, 0.75f, 0.75f, 1});
-                    vparams->drawTool()->drawArrow(p.p(), p.p() + normals[i] * 60.1f*val, 0.4, 2.0, 1.8, {0.25f, 0.75f, 0.75f, 1});
-                }
                 if ((unsigned)i < normals.size())
                 {
 //                    pointsL.push_back(p.p());

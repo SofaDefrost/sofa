@@ -23,8 +23,6 @@ list(APPEND HEADER_FILES
     ContactIdentifier.h
     FreeMotionAnimationLoop.h
     FrictionContact.h
-    MORFrictionContact.h
-    MORFrictionContact.inl
     FrictionContact.inl
     GenericConstraintCorrection.h
     GenericConstraintSolver.h
@@ -50,8 +48,6 @@ list(APPEND HEADER_FILES
     UniformConstraint.h
     UniformConstraint.inl
     UnilateralInteractionConstraint.h
-    MORUnilateralInteractionConstraint.h
-    MORUnilateralInteractionConstraint.inl
     UnilateralInteractionConstraint.inl
     BarycentricDistanceLMConstraintContact.h
     BarycentricDistanceLMConstraintContact.inl
@@ -75,7 +71,6 @@ list(APPEND SOURCE_FILES
     ContactIdentifier.cpp
     FreeMotionAnimationLoop.cpp
     FrictionContact.cpp
-    MORFrictionContact.cpp
     GenericConstraintCorrection.cpp
     GenericConstraintSolver.cpp
     LCPConstraintSolver.cpp
@@ -90,7 +85,6 @@ list(APPEND SOURCE_FILES
     UncoupledConstraintCorrection.cpp
     UniformConstraint.cpp
     UnilateralInteractionConstraint.cpp
-    MORUnilateralInteractionConstraint.cpp
     BarycentricDistanceLMConstraintContact.cpp
     DOFBlockerLMConstraint.cpp
     FixedLMConstraint.cpp
