@@ -169,6 +169,38 @@ MechanicalObject<DataTypes>::MechanicalObject()
 
     // default size is 1
     resize(1);
+
+    addUpdateCallback("positionChanged", {&x},
+                      [&](const core::DataTracker& tracker) -> core::objectmodel::ComponentState
+    {
+        SOFA_UNUSED(tracker);
+        if (x.getValue().size() == d_size.getValue())
+            return core::objectmodel::ComponentState::Valid;
+        d_size.setValue(x.getValue().size());
+        return core::objectmodel::ComponentState::Loading;
+    }
+    , {&d_componentState, &d_size});
+
+    addUpdateCallback("sizeChanged", {&d_size},
+                      [&](const core::DataTracker& tracker) -> core::objectmodel::ComponentState
+    {
+        SOFA_UNUSED(tracker);
+        helper::getWriteOnlyAccessor(x).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(xfree).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(x0).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(reset_position).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(v).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(f).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(externalForces).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(dx).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(vfree).resize(d_size.getValue());
+        helper::getWriteOnlyAccessor(reset_velocity).resize(d_size.getValue());
+        init();
+        reinit();
+        bwdInit();
+        return core::objectmodel::ComponentState::Valid;
+    }
+    , {&d_componentState, &x, &xfree, &x0, &reset_position, &v, &f, &externalForces, &dx, &vfree, &reset_velocity});
 }
 
 
