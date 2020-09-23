@@ -860,12 +860,12 @@ void VisualModelImpl::init()
 {
     if (l_topology.empty())
     {
-        msg_info() << "link to Topology container should be set to ensure right behavior. First Topology found in current context will be used.";
+        msg_info(this) << "link to Topology container should be set to ensure right behavior. First Topology found in current context will be used.";
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
     m_topology = l_topology.get();
-    msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
+    msg_info(this) << "Topology path used: '" << l_topology.getLinkedPath() << "'";
 
 
     if (m_vertPosIdx.getValue().size() > 0 && m_vertices2.getValue().empty())
@@ -929,22 +929,34 @@ void VisualModelImpl::init()
     VisualModel::init();
     updateVisual();
 
-    addUpdateCallback("updateTopo", {&m_edges, &m_triangles, &m_quads, &fileMesh},
-                      [&](const core::DataTracker& tracker) -> sofa::core::objectmodel::ComponentState
+    if (!useTopology)
     {
-        std::cout << "updating TOPO" << std::endl;
-        SOFA_UNUSED(tracker);
-        m_topoChanged = true;
-        return sofa::core::objectmodel::ComponentState::Loading;
-    }, {&d_componentState});
+        addUpdateCallback("updateTopo", {&m_edges, &m_triangles, &m_quads, &fileMesh},
+                          [&](const core::DataTracker& tracker) -> sofa::core::objectmodel::ComponentState
+        {
+            SOFA_UNUSED(tracker);
+            m_topoChanged = true;
+            return sofa::core::objectmodel::ComponentState::Loading;
+        }, {&d_componentState});
 
-    addUpdateCallback("updateTextures", {&texturename, &m_vtexcoords},
-                      [&](const core::DataTracker& tracker) -> sofa::core::objectmodel::ComponentState
+        addUpdateCallback("updateTextures", {&texturename, &m_vtexcoords},
+                          [&](const core::DataTracker& tracker) -> sofa::core::objectmodel::ComponentState
+        {
+            SOFA_UNUSED(tracker);
+            m_textureChanged = true;
+            return sofa::core::objectmodel::ComponentState::Loading;
+        }, {&d_componentState});
+    }
+    else
     {
-        SOFA_UNUSED(tracker);
-        m_textureChanged = true;
-        return sofa::core::objectmodel::ComponentState::Loading;
-    }, {&d_componentState});
+        addUpdateCallback("updateTextures", {&texturename, &m_vtexcoords},
+                          [&](const core::DataTracker& tracker) -> sofa::core::objectmodel::ComponentState
+        {
+            SOFA_UNUSED(tracker);
+            m_textureChanged = true;
+            return sofa::core::objectmodel::ComponentState::Loading;
+        }, {&d_componentState});
+    }
 }
 
 void VisualModelImpl::computeNormals()

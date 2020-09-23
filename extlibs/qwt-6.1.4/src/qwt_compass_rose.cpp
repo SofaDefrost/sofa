@@ -11,6 +11,7 @@
 #include "qwt_point_polar.h"
 #include "qwt_painter.h"
 #include <qpainter.h>
+#include <QPainterPath>
 
 static QPointF qwtIntersection(
     QPointF p11, QPointF p12, QPointF p21, QPointF p22 )

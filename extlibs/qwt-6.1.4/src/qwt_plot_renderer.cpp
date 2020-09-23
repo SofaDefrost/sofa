@@ -70,6 +70,7 @@
 #if QWT_PDF_WRITER
 #include <qpdfwriter.h>
 #endif
+#include <QPainterPath>
 
 static QPainterPath qwtCanvasClip(
     const QWidget* canvas, const QRectF &canvasRect )

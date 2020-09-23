@@ -15,6 +15,7 @@
 #include <qdrawutil.h>
 #include <qstyle.h>
 #include <qstyleoption.h>
+#include <QPainterPath>
 
 #define FIX_GL_TRANSLATION 0
 

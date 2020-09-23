@@ -15,8 +15,7 @@
 #include <qpixmap.h>
 #include <qimage.h>
 #include <qpolygon.h>
-
-class QPainterPath;
+#include <QPainterPath>
 
 /*!
   QwtPainterCommand represents the attributes of a paint operation
