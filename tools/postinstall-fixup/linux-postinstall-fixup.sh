@@ -59,21 +59,23 @@ if [ -d "$QT_DIR" ]; then
 fi
 
 echo_debug() {
-    if [ -n "$DEBUG" ] && [ "$DEBUG" -gt 0 ]; then
+    # if [ -n "$DEBUG" ] && [ "$DEBUG" -gt 0 ]; then
         echo $*
-    fi
+    # fi
 }
 
 get-lib-deps-assoc() {
-	local base_build_dir="$1"
-	local base_install_dir="$2"
+    local base_build_dir="$1"
+    local base_install_dir="$2"
     local output="$3"
-	local build_libs="$(find "$base_build_dir" -type f -name "*.so*" -path "$base_build_dir/lib/*" ; find "$base_build_dir" -type f -name "*.so*" -path "$base_build_dir/bin/*")"
-	local install_libs="$(find "$base_install_dir" -type f -name "*.so*" -path "$base_install_dir/lib/*" ; find "$base_install_dir" -type f -name "*.so*" -path "$base_install_dir/bin/*")"
+    local build_libs="$(find "$base_build_dir" -type f -name "*.so*" -path "$base_build_dir/lib/*" ; find "$base_build_dir" -type f -name "*.so*" -path "$base_build_dir/bin/*") $base_build_dir/bin/runSofa2"
+    local install_libs="$(find "$base_install_dir" -type f -name "*.so*" -path "$base_install_dir/lib/*" ; find "$base_install_dir" -type f -name "*.so*" -path "$base_install_dir/bin/*") $base_install_dir/bin/runSofa2"
 
-	ldd $build_libs $install_libs | # get all deps from libs in build_dir/[bin,lib] and install_dir/[bin,lib]
+    echo_debug $PWD
+    echo_debug $base_build_dir/bin/runSofa2
+    ldd $build_libs $install_libs | # get all deps from libs in build_dir/[bin,lib] and install_dir/[bin,lib]
         grep " => [^ \.].* " | # remove unneeded results
-        grep -v "$base_build_dir" | # remove deps already satisfied locally (in build_dir)
+        # grep -v "$base_build_dir" | # remove deps already satisfied locally (in build_dir)
         grep -v "$base_install_dir" | # remove deps already satisfied locally (in install_dir)
         cut -c2- | # remove tabulation at beggining of each line
         sed -e 's/ (.*//g' | # keep only "libname => libpath"
@@ -84,16 +86,19 @@ get-lib-deps-assoc() {
 # Write dependencies to OUTPUT_TMP as "<lib-name> => <lib-path>" (from ldd output)
 get-lib-deps-assoc "$BUILD_DIR" "$INSTALL_DIR" "$OUTPUT_TMP"
 
+echo_debug "all deps to copy: `cat $OUTPUT_TMP`"
+
 # Copy libs
-groups="libQt libpng libicu libmng libxcb libxkb"
+groups="libQt libpng libicu libmng libxcb libxkb libSofaQtQuickGUI libSofaOpenglVisual libSofaExporter"
 for group in $groups; do
-    echo_debug "group = $group"
+    # echo_debug "meeeh has: `cat $OUTPUT_TMP | grep ${group}`"
+    # echo_debug "group = $group"
     # read all dep lib names matching the group
     lib_names="$(cat $OUTPUT_TMP | grep "${group}.* =>" | sed -e 's/ => .*//g' | sort | uniq)"
-    echo_debug "lib_names = $lib_names"
+    # echo_debug "lib_names = $lib_names"
     group_dirname=""
     for lib_name in $lib_names; do
-        echo_debug "lib_name = $lib_name"
+        # echo_debug "lib_name = $lib_name"
         # take first path found for the dep lib (paths are sorted so "/a/b/c" comes before "not found")
 		if [[ "$group" == "libQt" ]] && [ -e "$QT_DIR/lib/$lib_name" ]; then
 			lib_path="$QT_DIR/lib/$lib_name"
@@ -105,7 +110,7 @@ for group in $groups; do
         if [[ -e "$lib_path" ]]; then
             lib_basename="$(basename $lib_path)"
             group_dirname="$(dirname $lib_path)"
-            echo_debug "group_dirname = $group_dirname"
+            # echo_debug "group_dirname = $group_dirname"
             lib_path_to_copy="$lib_path"
         elif [[ -n "$group_dirname" ]] && [[ -e "$group_dirname/$lib_name" ]]; then
             lib_basename="$lib_name"
@@ -117,6 +122,27 @@ for group in $groups; do
         fi
     done
 done
+
+# adding QML files for SofaQtQuick
+cp -r /opt/Qt5/5.15.0/gcc_64/qml/ "$INSTALL_DIR/"
+cp -r /opt/Qt5/5.15.0/gcc_64/lib/libQt5QmlWorkerScript.so.{5,5.15.0} "$INSTALL_DIR/lib"
+
+# adding libNodes for SofaQtQuick
+cp -r /usr/local/lib/libnodes.so "$INSTALL_DIR/lib"
+
+# adding python stuff
+cp -r /usr/bin/python3.7m "$INSTALL_DIR/bin"
+cp -r /usr/lib/python3.7 "$INSTALL_DIR/lib"
+mkdir -p "$INSTALL_DIR/lib/x86_64-linux-gnu/x86_64-linux-gnu/"
+cp `ls /usr/lib/x86_64-linux-gnu/libpython3.7m.so*` "$INSTALL_DIR/lib/x86_64-linux-gnu/"
+cp `ls /usr/lib/x86_64-linux-gnu/libpython3.7m.so*` "$INSTALL_DIR/lib/x86_64-linux-gnu/x86_64-linux-gnu/"
+cp -r /usr/lib/python3.7/ "$INSTALL_DIR/lib/x86_64-linux-gnu/"
+
+# adding SofaQtQuick.py to site-packages
+cp -r lib/python3/site-packages/{PythonConsole,SofaQtQuick,graph_serialization}.py "$INSTALL_DIR/lib/python3/site-packages"
+
+# adding SofaApplication.cpythonXXX.so that is deployed in the install/plugin/... folder instead of install/lib/...:
+cp -r lib/python3/site-packages/SofaApplication.cpython-37m-x86_64-linux-gnu.so "$INSTALL_DIR/lib/python3/site-packages"
 
 # Add QtWebEngine dependencies
 if [ -e "$INSTALL_DIR/lib/libQt5WebEngineCore.so.5" ] && [ -d "$QT_DIR" ]; then
