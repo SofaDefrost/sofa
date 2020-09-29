@@ -576,7 +576,7 @@ RegisterObject::operator int()
         {
             if (reg.creatorMap.find(itc->first) != reg.creatorMap.end())
             {
-                msg_warning("ObjectFactory") << "Class already registered: " << itc->first;
+//                msg_warning("ObjectFactory") << "Class already registered: " << itc->first;
             }
             else
             {
