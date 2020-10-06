@@ -163,4 +163,5 @@ echo "copying python stuff"
 
 cp -r /System/Volumes/Data/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework "$INSTALL_DIR/lib/"
 
+cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/*.dylib" "$INSTALL_DIR/lib/"
 echo "Done."
