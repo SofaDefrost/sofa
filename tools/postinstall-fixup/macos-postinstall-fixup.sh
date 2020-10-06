@@ -165,4 +165,13 @@ cp -r /System/Volumes/Data/Applications/Xcode.app/Contents/Developer/Library/Fra
 
 cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaOpenglVisual.1.0.dylib" "$INSTALL_DIR/lib/"
 cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaOpenglVisual.dylib" "$INSTALL_DIR/lib/"
+
+# adding QML files for SofaQtQuick
+cp -r /opt/Qt5/5.15.0/gcc_64/qml/ "$INSTALL_DIR/"
+cp -r /opt/Qt5/5.15.0/gcc_64/lib/libQt5QmlWorkerScript.so.{5,5.15.0} "$INSTALL_DIR/lib"
+
+cp -Rf $QT_DIR/qml $INSTALL_DIR/
+cp -r $QT_DIR/lib/QtQmlWorkerScript.framework "$INSTALL_DIR/lib"
+
+
 echo "Done."
