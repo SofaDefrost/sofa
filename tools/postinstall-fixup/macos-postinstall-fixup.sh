@@ -159,4 +159,9 @@ else
     check-all-deps "fixup" "4/4"
 fi
 
+echo "copying python stuff"
+
+cp -r /usr/bin/python3 "$INSTALL_DIR/bin/"
+cp -r /usr/lib/libpython.dylib "$INSTALL_DIR/lib/"
+
 echo "Done."
