@@ -163,15 +163,23 @@ echo "copying python stuff"
 
 cp -r /System/Volumes/Data/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework "$INSTALL_DIR/lib/"
 
+
+#SofaOpenglVisual
 cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaOpenglVisual.1.0.dylib" "$INSTALL_DIR/lib/"
 cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaOpenglVisual.dylib" "$INSTALL_DIR/lib/"
+
+#SofaQtQuickGUI
+cp "$INSTALL_DIR/plugins/SofaQtQuickGUI/lib/libSofaQtQuickGUI.1.0.dylib" "$INSTALL_DIR/lib/"
+cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaQtQuickGUI.dylib" "$INSTALL_DIR/lib/"
 
 # adding QML files for SofaQtQuick
 cp -Rf $QT_DIR/qml $INSTALL_DIR/
 cp -r $QT_DIR/lib/QtQmlWorkerScript.framework "$INSTALL_DIR/lib"
+cp -r $QT_DIR/lib/QtQuickControls2.framework "$INSTALL_DIR/lib"
 
 # adding SofaQtQuick.py to site-packages
 cp -r lib/python3/site-packages/{PythonConsole,SofaQtQuick,graph_serialization}.py "$INSTALL_DIR/lib/python3/site-packages"
 cp lib/python3/site-packages/SofaApplication.cpython-38-darwin.so "$INSTALL_DIR/lib/python3/site-packages"
+
 
 echo "Done."
