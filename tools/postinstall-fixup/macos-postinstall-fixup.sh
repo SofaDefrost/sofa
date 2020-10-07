@@ -173,8 +173,6 @@ cp -r $QT_DIR/lib/QtQmlWorkerScript.framework "$INSTALL_DIR/lib"
 # adding SofaQtQuick.py to site-packages
 cp -r $INSTALL_DIR/lib/python2.7/site-packages/{PythonConsole,SofaQtQuick,graph_serialization}.py "$INSTALL_DIR/lib/python3/site-packages"
 
-# adding SofaApplication.cpythonXXX.so that is deployed in the install/plugin/... folder instead of install/lib/...:
-cp -r lib/python3/site-packages/SofaApplication.cpython-37m-x86_64-linux-gnu.so "$INSTALL_DIR/lib/python3/site-packages"
 
 
 echo "Done."
