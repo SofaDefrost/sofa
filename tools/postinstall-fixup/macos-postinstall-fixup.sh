@@ -174,9 +174,11 @@ cp "$INSTALL_DIR/plugins/SofaQtQuickGUI/lib/libSofaQtQuickGUI.dylib" "$INSTALL_D
 
 # adding QML files for SofaQtQuick
 cp -Rf $QT_DIR/qml $INSTALL_DIR/
-cp -r $QT_DIR/lib/QtQmlWorkerScript.framework "$INSTALL_DIR/lib"
 cp -r $QT_DIR/lib/QtQuickControls2.framework "$INSTALL_DIR/lib"
 cp -r $QT_DIR/lib/QtQuickTemplates2.framework "$INSTALL_DIR/lib"
+cp -r $QT_DIR/lib/QtQml.framework "$INSTALL_DIR/lib"
+cp -r $QT_DIR/lib/QtQmlModels.framework "$INSTALL_DIR/lib"
+cp -r $QT_DIR/lib/QtQmlWorkerScript.framework "$INSTALL_DIR/lib"
 
 # adding SofaQtQuick.py to site-packages
 cp -r lib/python3/site-packages/{PythonConsole,SofaQtQuick,graph_serialization}.py "$INSTALL_DIR/lib/python3/site-packages"
