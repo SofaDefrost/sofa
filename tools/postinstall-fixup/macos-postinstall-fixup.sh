@@ -170,7 +170,7 @@ cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaOpenglVisual.dylib" "$INSTA
 
 #SofaQtQuickGUI
 cp "$INSTALL_DIR/plugins/SofaQtQuickGUI/lib/libSofaQtQuickGUI.1.0.dylib" "$INSTALL_DIR/lib/"
-cp "$INSTALL_DIR/plugins/SofaOpenglVisual/lib/libSofaQtQuickGUI.dylib" "$INSTALL_DIR/lib/"
+cp "$INSTALL_DIR/plugins/SofaQtQuickGUI/lib/libSofaQtQuickGUI.dylib" "$INSTALL_DIR/lib/"
 
 # adding QML files for SofaQtQuick
 cp -Rf $QT_DIR/qml $INSTALL_DIR/
