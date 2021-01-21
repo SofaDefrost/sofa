@@ -252,6 +252,8 @@ set(SOURCE_FILES
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC SofaHelper SofaDefaultType)
 
+target_precompile_headers(${PROJECT_NAME} PUBLIC  ${SRC_ROOT}/objectmodel/BaseNode.h  ${SRC_ROOT}/objectmodel/BaseObject.h)
+
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # Silence attribute warnings (for example, ignored already defined external template)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wno-attributes)
