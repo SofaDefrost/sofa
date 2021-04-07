@@ -44,10 +44,12 @@ public:
    void reinit() override;
    void doUpdate() override;
 
-   SingleLink<RayMarchingEngine, ScalarField, BaseLink::FLAG_STRONGLINK> l_field;
+   SingleLink<RayMarchingEngine, ScalarField, BaseLink::FLAG_STRONGLINK> l_field; ///< The input scalar field
+
    Data<sofa::helper::vector<Vec3>> d_intersections;
    Data<sofa::defaulttype::BoundingBox> d_renderingCube;
    Data<sofa::defaulttype::Vec2i> d_resolution;
+
    void draw(const sofa::core::visual::VisualParams* params) override;
 
 protected:
