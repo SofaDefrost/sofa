@@ -22,7 +22,7 @@
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject ;
 
-#include "SphericalField.h"
+#include "cubefield.h"
 
 namespace sofa
 {
@@ -33,88 +33,53 @@ namespace component
 namespace geometry
 {
 
-namespace _sphericalfield_
+namespace _Cubicfield_
 {
 
-SphericalField::SphericalField()
-    : d_inside(initData(&d_inside, false, "inside", "If true the field is oriented inside (resp. outside) the sphere. (default = false)"))
-    , d_radiusSphere(initData(&d_radiusSphere, 1.0, "radius", "Radius of Sphere emitting the field. (default = 1)"))
-    , d_centerSphere(initData(&d_centerSphere, Vec3d(0.0,0.0,0.0), "center", "Position of the Sphere Surface. (default=0 0 0)" ))
+CubicField::CubicField()
+    : c_inside(initData(&d_inside, false, "inside", "If true the field is oriented inside (resp. outside) the cube. (default = false)"))
+    , c_side(initData(&c_side, 1.0, "side", "side of the cube emitting the field. (default = 1)"))
+   
 {init();
 }
 
-void SphericalField::init()
+void CubicField::init()
 {
-    m_inside = d_inside.getValue();
-    m_center = d_centerSphere.getValue();
-    m_radius = d_radiusSphere.getValue();
+    m_inside = c_inside.getValue();
+    b = c_side.getValue();
+    
 }
 
-void SphericalField::reinit()
+void CubicField::reinit()
 {
     init();
 }
 
-double SphericalField::getValue(Vec3d& Pos, int& domain)
+double CubicField::getValue(Vec3d& Pos, int& domain)
 {
     SOFA_UNUSED(domain) ;
-    double result = sqrt((Pos[0] - m_center[0])*(Pos[0] - m_center[0]) +
-            (Pos[1] - m_center[1])*(Pos[1] - m_center[1]) +
-            (Pos[2] - m_center[2])*(Pos[2] - m_center[2])) -
-            m_radius ;
+    vec3 d ;
+    d[0] = abs(pos[0]) - b[0];
+    d[1] = abs(pos[1]) - b[1];
+    d[2] = abs(pos[2]) - b[2];
+    double len_d = sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]);
     if(m_inside)
-        result = -result;
-
-    return result;
+        double result = max(len_d,0);
+    else{
+    	result = min(max(d[0],max(d[1],d[2])),0);
+}
+	 return result;
 }
 
-Vec3d SphericalField::getGradient(Vec3d &Pos, int &domain)
-{
-    SOFA_UNUSED(domain);
-    Vec3d g;
-    if (m_inside)
-    {
-        g[0] = -2* (Pos[0] - m_center[0]);
-        g[1] = -2* (Pos[1] - m_center[1]);
-        g[2] = -2* (Pos[2] - m_center[2]);
-    }
-    else
-    {
-        g[0] = 2* (Pos[0] - m_center[0]);
-        g[1] = 2* (Pos[1] - m_center[1]);
-        g[2] = 2* (Pos[2] - m_center[2]);
-    }
 
-    return g;
-}
-
-void SphericalField::getValueAndGradient(Vec3d& Pos, double &value, Vec3d& /*grad*/, int& domain)
-{
-    SOFA_UNUSED(domain);
-    Vec3d g;
-    g[0] = (Pos[0] - m_center[0]);
-    g[1] = (Pos[1] - m_center[1]);
-    g[2] = (Pos[2] - m_center[2]);
-    if (m_inside)
-    {
-        value = m_radius*m_radius - g.norm2();
-        g = g * (-2);
-    }
-    else
-    {
-        value = g.norm2() - m_radius*m_radius;
-        g = g * 2;
-    }
-
-    return;
-}
 
 // Register in the Factory
-static int SphericalFieldClass = core::RegisterObject("A spherical implicit field.")
-        .add< SphericalField >()
+static int CubicFieldClass = core::RegisterObject("A cubic implicit field.")
+        .add< CubicField >()
         ;
 
-} /// _sphericalfield_
+} /// _CubicField_
 } /// implicit
 } /// component
 } /// sofa
+
