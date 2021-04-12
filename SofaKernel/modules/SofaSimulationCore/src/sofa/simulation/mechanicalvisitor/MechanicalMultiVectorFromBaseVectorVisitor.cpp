@@ -19,57 +19,32 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_HELPER_MAP_H
-#define SOFA_HELPER_MAP_H
-
-#include <sofa/helper/config.h>
-
-#include <map>
-#include <iostream>
-#include <sstream>
-
-/// adding string serialization to std::map to make it compatible with Data
-/// \todo: refactoring of the containers required
-/// More info PR #113: https://github.com/sofa-framework/sofa/pull/113
-
-
-namespace std
+#include <sofa/simulation/mechanicalvisitor/MechanicalMultiVectorFromBaseVectorVisitor.h>
+#include <sofa/core/behavior/BaseMechanicalState.h>
+#include <sofa/core/behavior/MultiMatrixAccessor.h>
+namespace sofa::simulation::mechanicalvisitor
 {
 
-/// Output stream
-template<class K, class T>
-std::ostream& operator<< ( std::ostream& o, const std::map<K,T>& m )
+MechanicalMultiVectorFromBaseVectorVisitor::MechanicalMultiVectorFromBaseVectorVisitor(
+        const core::ExecParams* params, sofa::core::MultiVecId _dest,
+        const defaulttype::BaseVector * _src,
+        const sofa::core::behavior::MultiMatrixAccessor* _matrix)
+    : BaseMechanicalVisitor(params) , src(_src), dest(_dest), matrix(_matrix), offset(0)
 {
-    typename std::map<K,T>::const_iterator it=m.begin(), itend=m.end();
-    if (it == itend) return o;
-    o << it->first << " " << it->second; it++;
-    for ( ; it != itend ; ++it)
-    {
-        o << "\n" << it->first << " " << it->second;
-    }
-
-    return o;
 }
 
-/// Input stream
-template<class K, class T>
-std::istream& operator>> ( std::istream& i, std::map<K,T>& m )
+MechanicalMultiVectorFromBaseVectorVisitor::Result MechanicalMultiVectorFromBaseVectorVisitor::fwdMechanicalState(simulation::Node* /*node*/, core::behavior::BaseMechanicalState* mm)
 {
-    m.clear();
-    std::string line;
-    while (!i.eof())
+    if (matrix) offset = matrix->getGlobalOffset(mm);
+    if (src!= nullptr && offset >= 0)
     {
-        K k; T t;
-        i >> k;
-        std::getline(i,line);
-        if (line.empty()) break;
-        std::istringstream li(line);
-        li >> t;
-        m[k] = t;
+        unsigned int o = (unsigned int)offset;
+        mm->copyFromBaseVector(dest.getId(mm), src, o);
+        offset = (int)o;
     }
-    return i;
+
+    return RESULT_CONTINUE;
 }
 
-} // namespace std
+} // namespace sofa::simulation::mechanicalvisitor
 
-#endif

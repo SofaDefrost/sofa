@@ -19,57 +19,10 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_HELPER_MAP_H
-#define SOFA_HELPER_MAP_H
+#include <sofa/simulation/mechanicalvisitor/MechanicalMatrixVisitor.h>
 
-#include <sofa/helper/config.h>
-
-#include <map>
-#include <iostream>
-#include <sstream>
-
-/// adding string serialization to std::map to make it compatible with Data
-/// \todo: refactoring of the containers required
-/// More info PR #113: https://github.com/sofa-framework/sofa/pull/113
-
-
-namespace std
+namespace sofa::simulation::mechanicalvisitor
 {
 
-/// Output stream
-template<class K, class T>
-std::ostream& operator<< ( std::ostream& o, const std::map<K,T>& m )
-{
-    typename std::map<K,T>::const_iterator it=m.begin(), itend=m.end();
-    if (it == itend) return o;
-    o << it->first << " " << it->second; it++;
-    for ( ; it != itend ; ++it)
-    {
-        o << "\n" << it->first << " " << it->second;
-    }
+} // namespace sofa::simulation::mechanicalvisitor
 
-    return o;
-}
-
-/// Input stream
-template<class K, class T>
-std::istream& operator>> ( std::istream& i, std::map<K,T>& m )
-{
-    m.clear();
-    std::string line;
-    while (!i.eof())
-    {
-        K k; T t;
-        i >> k;
-        std::getline(i,line);
-        if (line.empty()) break;
-        std::istringstream li(line);
-        li >> t;
-        m[k] = t;
-    }
-    return i;
-}
-
-} // namespace std
-
-#endif

@@ -19,15 +19,30 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#include <sofa/simulation/MechanicalMatrixVisitor.h>
+#pragma once
 
-namespace sofa
+#include <sofa/simulation/BaseMechanicalVisitor.h>
+namespace sofa::simulation::mechanicalvisitor
 {
 
-namespace simulation
+class SOFA_SIMULATION_CORE_API MechanicalMultiVectorPeqBaseVectorVisitor : public BaseMechanicalVisitor
 {
+public:
+    const sofa::defaulttype::BaseVector *src;
+    sofa::core::MultiVecDerivId dest;
+    const sofa::core::behavior::MultiMatrixAccessor* matrix;
+    int offset;
 
-} // namespace simulation
+    MechanicalMultiVectorPeqBaseVectorVisitor(
+        const core::ExecParams* params, sofa::core::MultiVecDerivId _dest, const defaulttype::BaseVector * _src,
+        const sofa::core::behavior::MultiMatrixAccessor* _matrix = nullptr );
 
-} // namespace sofa
+    Result fwdMechanicalState(simulation::Node* /*node*/, core::behavior::BaseMechanicalState* mm) override;
 
+    /// Return a class name for this visitor
+    /// Only used for debugging / profiling purposes
+    const char* getClassName() const override { return "MechanicalMultiVectorPeqBaseVectorVisitor"; }
+};
+
+
+} // namespace sofa::simulation::mechanicalvisitor

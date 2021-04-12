@@ -19,57 +19,31 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_HELPER_MAP_H
-#define SOFA_HELPER_MAP_H
+#pragma once
 
-#include <sofa/helper/config.h>
-
-#include <map>
-#include <iostream>
-#include <sstream>
-
-/// adding string serialization to std::map to make it compatible with Data
-/// \todo: refactoring of the containers required
-/// More info PR #113: https://github.com/sofa-framework/sofa/pull/113
-
-
-namespace std
+#include <sofa/simulation/BaseMechanicalVisitor.h>
+#include <sofa/core/behavior/MultiMatrixAccessor.h>
+namespace sofa::simulation::mechanicalvisitor
 {
 
-/// Output stream
-template<class K, class T>
-std::ostream& operator<< ( std::ostream& o, const std::map<K,T>& m )
+/** Compute the size of a mechanical matrix (mass or stiffness) of the whole scene */
+class SOFA_SIMULATION_CORE_API MechanicalGetConstraintJacobianVisitor : public BaseMechanicalVisitor
 {
-    typename std::map<K,T>::const_iterator it=m.begin(), itend=m.end();
-    if (it == itend) return o;
-    o << it->first << " " << it->second; it++;
-    for ( ; it != itend ; ++it)
-    {
-        o << "\n" << it->first << " " << it->second;
-    }
+public:
+    const core::ConstraintParams* cparams;
+    defaulttype::BaseMatrix * J;
+    const sofa::core::behavior::MultiMatrixAccessor* matrix;
+    int offset;
 
-    return o;
-}
+    MechanicalGetConstraintJacobianVisitor(
+        const core::ConstraintParams* cparams, defaulttype::BaseMatrix * _J,
+        const sofa::core::behavior::MultiMatrixAccessor* _matrix = nullptr);
 
-/// Input stream
-template<class K, class T>
-std::istream& operator>> ( std::istream& i, std::map<K,T>& m )
-{
-    m.clear();
-    std::string line;
-    while (!i.eof())
-    {
-        K k; T t;
-        i >> k;
-        std::getline(i,line);
-        if (line.empty()) break;
-        std::istringstream li(line);
-        li >> t;
-        m[k] = t;
-    }
-    return i;
-}
+    Result fwdMechanicalState(simulation::Node* /*node*/, core::behavior::BaseMechanicalState* ms) override;
 
-} // namespace std
+    /// Return a class name for this visitor
+    /// Only used for debugging / profiling purposes
+    const char* getClassName() const override { return "MechanicalGetConstraintJacobianVisitor"; }
+};
 
-#endif
+} // namespace sofa::simulation::mechanicalvisitor
