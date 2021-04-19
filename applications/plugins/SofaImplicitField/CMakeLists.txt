@@ -27,9 +27,11 @@ set(HEADER_FILES
     components/collision/ScalarFieldIntersection.inl
     components/engine/RayMarchingEngine.h
     components/geometry/CubicField.h
-    components/geometry/ImplicitFieldTransform.h
+    #components/geometry/ImplicitFieldTransform.h
     components/geometry/TorusField.h
     components/geometry/TriprismField.h
+    components/geometry/twist.h
+    components/geometry/HexagField.h
 )
 
 set(SOURCE_FILES
@@ -52,7 +54,7 @@ set(SOURCE_FILES
     components/collision/ScalarFieldIntersectionLine.cpp
     components/engine/RayMarchingEngine.cpp
     components/geometry/CubicField.cpp
-    components/geometry/ImplicitFieldTransform.cpp
+    #components/geometry/ImplicitFieldTransform.cpp
     components/geometry/TorusField.cpp
     components/geometry/TriprismField.cpp
     

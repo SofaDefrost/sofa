@@ -22,10 +22,11 @@
 #include <sofa/core/ObjectFactory.h>
 
 #include "RayMarchingEngine.h"
+#include<sofa/core/visual/VisualParams.h>
 
 namespace sofa::component::engine
 {
-using sofa::defaulttype::RGBAColor;
+using sofa::type::RGBAColor;
 using sofa::defaulttype::Ray;
 
 /// Register in the Factory

@@ -22,7 +22,7 @@
 #pragma once
 
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec3Types.h>
+#include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/CollisionModel.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
 #include <sofa/core/behavior/MechanicalState.h>
