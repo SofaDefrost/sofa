@@ -25,6 +25,19 @@ set(HEADER_FILES
     components/geometry/StarShapedField.h
     components/mapping/ImplicitSurfaceMapping.h
     components/mapping/ImplicitSurfaceMapping.inl
+    
+    # adding missing components
+    components/collision/ScalarFieldCollisionModel.h
+    components/collision/ScalarFieldIntersection.h
+    components/collision/ScalarFieldIntersectionLine.h
+    components/collision/ScalarFieldIntersection.inl
+    components/engine/RayMarchingEngine.h
+    components/geometry/CubicField.h
+    #components/geometry/ImplicitFieldTransform.h
+    components/geometry/TorusField.h
+    components/geometry/TriprismField.h
+    components/geometry/twist.h
+    components/geometry/HexagField.h
 )
 
 set(SOURCE_FILES
@@ -44,6 +57,17 @@ set(SOURCE_FILES
     components/geometry/SphericalField.cpp
     components/geometry/StarShapedField.cpp
     components/mapping/ImplicitSurfaceMapping.cpp
+    
+    # adding missing components
+    components/collision/ScalarFieldCollisionModel.cpp
+    components/collision/ScalarFieldIntersection.cpp
+    components/collision/ScalarFieldIntersectionLine.cpp
+    components/engine/RayMarchingEngine.cpp
+    components/geometry/CubicField.cpp
+    #components/geometry/ImplicitFieldTransform.cpp
+    components/geometry/TorusField.cpp
+    components/geometry/TriprismField.cpp
+    
 )
 
 set(EXTRA_FILES

@@ -23,6 +23,7 @@
 #include <sofa/type/RGBAColor.h>
 #include <sofa/core/visual/VisualParams.h>
 #include "RayMarchingEngine.h"
+#include<sofa/core/visual/VisualParams.h>
 
 namespace sofa::component::engine
 {
