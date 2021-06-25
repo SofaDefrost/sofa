@@ -12,6 +12,10 @@ set(HEADER_FILES
     deprecated/ImplicitSurfaceContainer.h    # This is a backward compatibility file toward ScalarField
     deprecated/InterpolatedImplicitSurface.h # This is a backward compatibility file toward DiscreteridField
 
+    components/engine/RayMarchingEngine.h
+
+    components/geometry/DisplacementField.h
+
     components/geometry/BottleField.h
     components/geometry/DiscreteGridField.h
     components/geometry/SphericalField.h
@@ -27,6 +31,10 @@ set(SOURCE_FILES
     ## This is a backward compatibility..
     deprecated/SphereSurface.cpp
     deprecated/InterpolatedImplicitSurface.cpp
+
+    components/engine/RayMarchingEngine.cpp
+
+    components/geometry/DisplacementField.cpp
 
     components/geometry/BottleField.cpp
     components/geometry/ScalarField.cpp

@@ -20,12 +20,12 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
-
+#include <sofa/core/visual/VisualParams.h>
 #include "RayMarchingEngine.h"
 
 namespace sofa::component::engine
 {
-using sofa::defaulttype::RGBAColor;
+using sofa::type::RGBAColor;
 using sofa::defaulttype::Ray;
 
 /// Register in the Factory
