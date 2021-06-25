@@ -17,8 +17,10 @@ set(HEADER_FILES
     components/geometry/DisplacementField.h
 
     components/geometry/BottleField.h
+    components/geometry/CubicField.h
     components/geometry/DiscreteGridField.h
     components/geometry/SphericalField.h
+    components/geometry/TorusField.h
     components/geometry/ScalarField.h
     components/geometry/StarShapedField.h
     components/mapping/ImplicitSurfaceMapping.h
@@ -33,11 +35,11 @@ set(SOURCE_FILES
     deprecated/InterpolatedImplicitSurface.cpp
 
     components/engine/RayMarchingEngine.cpp
-
     components/geometry/DisplacementField.cpp
-
     components/geometry/BottleField.cpp
+    components/geometry/CubicField.cpp
     components/geometry/ScalarField.cpp
+    components/geometry/TorusField.cpp
     components/geometry/DiscreteGridField.cpp
     components/geometry/SphericalField.cpp
     components/geometry/StarShapedField.cpp

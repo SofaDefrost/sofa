@@ -20,6 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/type/RGBAColor.h>
 #include <sofa/core/visual/VisualParams.h>
 #include "RayMarchingEngine.h"
 
