@@ -51,6 +51,7 @@ set(SOURCE_FILES
     src/SofaOpenglVisual/OglLabel.cpp
     src/SofaOpenglVisual/OglModel.cpp
     src/SofaOpenglVisual/PointSplatModel.cpp
+    src/SofaOpenglVisual/PointSplatRenderer.cpp
     src/SofaOpenglVisual/MergeVisualModels.cpp
     src/SofaOpenglVisual/Light.cpp
     src/SofaOpenglVisual/LightManager.cpp
