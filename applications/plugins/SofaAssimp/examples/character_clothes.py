@@ -1,8 +1,9 @@
 import Sofa
+import os.path
 
 from Compliant import Rigid
 
-colladasceneloader_path = Sofa.src_dir() + '/applications/plugins/ColladaSceneLoader'
+colladasceneloader_path = os.path.realpath( os.path.dirname(__file__) + '../../ColladaSceneLoader' ).replace('\\', '/')
 mesh_path = colladasceneloader_path + '/Demos/'
 
 scale = 1
@@ -29,7 +30,8 @@ def createScene(root):
     scene = root.createChild('scene')
 
     scene.createObject('DefaultPipeline', depth='6')
-    scene.createObject('BruteForceDetection')
+    scene.createObject('BruteForceBroadPhase', name='N2')
+    scene.createObject('BVHNarrowPhase')
     scene.createObject('DefaultContactManager', responseParams='damping=0&amp;compliance=0&amp;restitution=0', response='CompliantContact')
     scene.createObject('MinProximityIntersection', alarmDistance='.7', contactDistance='0.5')
     

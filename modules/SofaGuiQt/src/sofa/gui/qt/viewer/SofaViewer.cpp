@@ -23,6 +23,9 @@
 #include <sofa/helper/Factory.inl>
 #include <SofaBaseVisual/VisualStyle.h>
 #include <sofa/core/visual/DisplayFlags.h>
+#include <sofa/core/objectmodel/KeypressedEvent.h>
+#include <sofa/core/objectmodel/KeyreleasedEvent.h>
+#include <sofa/core/objectmodel/MouseEvent.h>
 #include <sofa/gui/qt/PickHandlerCallBacks.h>
 #include <sofa/gui/BaseGUI.h>
 
@@ -235,7 +238,6 @@ void SofaViewer::keyPressEvent(QKeyEvent * e)
             msg_info("SofaViewer") << "Stereo mode: None"; break;
         default:
             msg_info("SofaViewer") << "Stereo mode: INVALID"; break;
-            break;
         }
         break;
     }

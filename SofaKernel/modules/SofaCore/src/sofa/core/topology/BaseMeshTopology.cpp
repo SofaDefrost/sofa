@@ -46,12 +46,12 @@ BaseMeshTopology::EdgesInHexahedron BaseMeshTopology::InvalidEdgesInHexahedron;
 
 int initStaticStructures()
 {
-    BaseMeshTopology::InvalidEdgesInTriangles.assign(Topology::InvalidID);
-    BaseMeshTopology::InvalidEdgesInQuad.assign(Topology::InvalidID);
-    BaseMeshTopology::InvalidTrianglesInTetrahedron.assign(Topology::InvalidID);
-    BaseMeshTopology::InvalidEdgesInTetrahedron.assign(Topology::InvalidID);
-    BaseMeshTopology::InvalidQuadsInHexahedron.assign(Topology::InvalidID);
-    BaseMeshTopology::InvalidEdgesInHexahedron.assign(Topology::InvalidID);
+    BaseMeshTopology::InvalidEdgesInTriangles.assign(sofa::InvalidID);
+    BaseMeshTopology::InvalidEdgesInQuad.assign(sofa::InvalidID);
+    BaseMeshTopology::InvalidTrianglesInTetrahedron.assign(sofa::InvalidID);
+    BaseMeshTopology::InvalidEdgesInTetrahedron.assign(sofa::InvalidID);
+    BaseMeshTopology::InvalidQuadsInHexahedron.assign(sofa::InvalidID);
+    BaseMeshTopology::InvalidEdgesInHexahedron.assign(sofa::InvalidID);
     return 0;
 }
 
@@ -372,25 +372,25 @@ std::list<const TopologyChange *>::const_iterator BaseMeshTopology::endStateChan
 }
 
 
-std::list<TopologyEngine *>::const_iterator BaseMeshTopology::beginTopologyEngine() const
+std::list<TopologyHandler *>::const_iterator BaseMeshTopology::beginTopologyHandler() const
 {
-    msg_error() << "beginTopologyEngine() not supported.";
-    std::list<TopologyEngine *>::const_iterator l;
+    msg_error() << "beginTopologyHandler() not supported.";
+    std::list<TopologyHandler *>::const_iterator l;
     return l;
 }
 
 
-std::list<TopologyEngine *>::const_iterator BaseMeshTopology::endTopologyEngine() const
+std::list<TopologyHandler *>::const_iterator BaseMeshTopology::endTopologyHandler() const
 {
-    msg_error() << "endTopologyEngine() not supported.";
-    std::list<TopologyEngine *>::const_iterator l;
+    msg_error() << "endTopologyHandler() not supported.";
+    std::list<TopologyHandler *>::const_iterator l;
     return l;
 }
 
-void BaseMeshTopology::addTopologyEngine(TopologyEngine* _topologyEngine)
+void BaseMeshTopology::addTopologyHandler(TopologyHandler* _TopologyHandler)
 {
-    msg_error() << "addTopologyEngine() not supported.";
-    (void)_topologyEngine;
+    msg_error() << "addTopologyHandler() not supported.";
+    (void)_TopologyHandler;
 }
 
 Topology::EdgeID BaseMeshTopology::getEdgeIndex(PointID, PointID)

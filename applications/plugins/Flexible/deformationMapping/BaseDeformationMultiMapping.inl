@@ -25,7 +25,7 @@
 #include "BaseDeformationMultiMapping.h"
 #include "BaseDeformationImpl.inl"
 #include "../quadrature/BaseGaussPointSampler.h"
-#include <sofa/helper/gl/Color.h>
+#include <sofa/gl/Color.h>
 #include <sofa/helper/system/glu.h>
 #include <sofa/helper/IndexOpenMP.h>
 
@@ -691,7 +691,7 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::draw(c
     if (vparams->displayFlags().getShowMechanicalMappings())
     {
         helper::vector< defaulttype::Vector3 > edge;     edge.resize(2);
-        defaulttype::Vec<4,float> col;
+        type::RGBAColor col;
 
         for(size_t i=0; i<out.size(); i++ )
         {
@@ -702,7 +702,7 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::draw(c
                 {
                     if(j<size1) In1::get(edge[0][0],edge[0][1],edge[0][2],in1[ref[i][j]]);
                     else In2::get(edge[0][0],edge[0][1],edge[0][2],in2[ref[i][j]-size1]);
-                    sofa::helper::gl::Color::getHSVA(&col[0],240.*w[i][j],1.,.8,1.);
+                    sofa::gl::Color::getHSVA(&col[0],240.*w[i][j],1.,.8,1.);
                     vparams->drawTool()->drawLines ( edge, 1, col );
                 }
         }
@@ -712,7 +712,7 @@ void BaseDeformationMultiMappingT<JacobianBlockType1,JacobianBlockType2>::draw(c
         const Data<OutVecDeriv>* outf = this->toModel->read(core::ConstVecDerivId::force());
         glEnable ( GL_LIGHTING );
         float scale=showDeformationGradientScale.getValue();
-        defaulttype::Vec<4,float> col( 0.5, 0.5, 0.0, 1.0 );
+        type::RGBAColor col( 0.5, 0.5, 0.0, 1.0 );
         defaulttype::Mat<3,3,float> F;
         defaulttype::Vec<3,float> p;
 

@@ -53,7 +53,7 @@ using helper::vector;
 TopologicalChangeManager::TopologicalChangeManager()
 {
     incision.firstCut = true;
-    incision.indexPoint = core::topology::BaseMeshTopology::InvalidID;
+    incision.indexPoint = sofa::InvalidID;
 }
 
 TopologicalChangeManager::~TopologicalChangeManager()
@@ -88,7 +88,7 @@ Index TopologicalChangeManager::removeItemsFromTriangleModel(sofa::component::co
     {
         //Quick HACK for Hexa2TetraMapping
         sofa::component::topology::Hexa2TetraTopologicalMapping* badMapping;
-        model->getContext()->get(badMapping, sofa::core::objectmodel::BaseContext::SearchRoot);
+        model->getContext()->get(badMapping, sofa::core::objectmodel::BaseContext::SearchUp);
         if(badMapping) //stop process
         {
             msg_warning("TopologicalChangeManager") << " Removing element is not handle by Hexa2TetraTopologicalMapping. Stopping process." ;
@@ -217,7 +217,7 @@ Index TopologicalChangeManager::removeItemsFromPointModel(sofa::component::colli
     {
         //Quick HACK for Hexa2TetraMapping
         sofa::component::topology::Hexa2TetraTopologicalMapping* badMapping;
-        model->getContext()->get(badMapping, sofa::core::objectmodel::BaseContext::SearchRoot);
+        model->getContext()->get(badMapping, sofa::core::objectmodel::BaseContext::SearchUp);
         if (badMapping) //stop process
         {
             msg_warning("TopologicalChangeManager") << " Removing element is not handle by Hexa2TetraTopologicalMapping. Stopping process.";
@@ -549,7 +549,7 @@ bool TopologicalChangeManager::incisionTriangleModel(TriangleCollisionModel<sofa
 
         // -- STEP 5: Splitting elements along path (incision path is stored inside "new_edges")
         sofa::helper::vector< Index > new_edges;
-        int result = triangleGeometry->SplitAlongPath(last_indexPoint, coord_a, core::topology::BaseMeshTopology::InvalidID, coord_b, topoPath_list, indices_list, coords2_list, new_edges, epsilonSnap, epsilonBorderSnap);
+        int result = triangleGeometry->SplitAlongPath(last_indexPoint, coord_a, sofa::InvalidID, coord_b, topoPath_list, indices_list, coords2_list, new_edges, epsilonSnap, epsilonBorderSnap);
 
         if (result == -1)
         {

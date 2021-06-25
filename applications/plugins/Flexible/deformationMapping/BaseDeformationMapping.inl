@@ -26,8 +26,7 @@
 #include "BaseDeformationImpl.inl"
 #include <SofaBaseVisual/VisualModelImpl.h>
 #include <sofa/core/MechanicalParams.h>
-#include <sofa/helper/gl/Color.h>
-#include <sofa/helper/system/glu.h>
+#include <sofa/gl/Color.h>
 #include <sofa/helper/IndexOpenMP.h>
 
 #ifdef _OPENMP
@@ -726,7 +725,7 @@ void BaseDeformationMappingT<JacobianBlockType>::draw(const core::visual::Visual
     if (vparams->displayFlags().getShowMechanicalMappings())
     {
         helper::vector< defaulttype::Vector3 > edge;     edge.resize(2);
-        defaulttype::Vec<4,float> col;
+        type::RGBAColor col;
 
         for(size_t i=0; i<out.size(); i++ )
         {
@@ -736,7 +735,7 @@ void BaseDeformationMappingT<JacobianBlockType>::draw(const core::visual::Visual
                 if(w[i][j])
                 {
                     In::get(edge[0][0],edge[0][1],edge[0][2],in[ref[i][j]]);
-                    sofa::helper::gl::Color::getHSVA(&col[0],240.f*(float)w[i][j],1.f,.8f,1.f);
+                    sofa::gl::Color::getHSVA(&col[0],240.f*(float)w[i][j],1.f,.8f,1.f);
                     vparams->drawTool()->drawLines ( edge, 1, col );
                 }
         }
@@ -746,7 +745,7 @@ void BaseDeformationMappingT<JacobianBlockType>::draw(const core::visual::Visual
         const Data<OutVecDeriv>* outf = this->toModel->read(core::ConstVecDerivId::force());
         glEnable ( GL_LIGHTING );
         float scale=showDeformationGradientScale.getValue();
-        defaulttype::Vec<4,float> col( 0.5, 0.5, 0.0, 1.0 );
+        type::RGBAColor col( 0.5, 0.5, 0.0, 1.0 );
         defaulttype::Mat<3,3,float> F;
         defaulttype::Vec<3,float> p;
 

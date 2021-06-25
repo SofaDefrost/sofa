@@ -23,7 +23,6 @@
 #include <sstream>
 #include <fstream>
 #include <sofa/helper/ArgumentParser.h>
-#include <sofa/helper/UnitTest.h>
 #include <sofa/helper/vector_algebra.h>
 #include <sofa/helper/vector.h>
 #include <sofa/helper/BackTrace.h>
@@ -192,9 +191,9 @@ simulation::Node::SPtr createScene()
 	eulerImplicitSolver->f_rayleighStiffness.setValue(0.005);
 
     CGLinearSolver::SPtr cgLinearSolver = New<CGLinearSolver>();
-	cgLinearSolver->f_maxIter.setValue(1000);
-	cgLinearSolver->f_tolerance.setValue(1E-3);
-	cgLinearSolver->f_smallDenominatorThreshold.setValue(1E-3);
+        cgLinearSolver->d_maxIter.setValue(1000);
+        cgLinearSolver->d_tolerance.setValue(1E-3);
+        cgLinearSolver->d_smallDenominatorThreshold.setValue(1E-3);
 
     root->addObject(eulerImplicitSolver);
     root->addObject(cgLinearSolver);

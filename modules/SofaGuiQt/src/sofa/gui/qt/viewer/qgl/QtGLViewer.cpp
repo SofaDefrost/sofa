@@ -27,6 +27,7 @@
 #include <sofa/simulation/UpdateMappingVisitor.h>
 #include <sofa/core/objectmodel/KeypressedEvent.h>
 #include <sofa/core/objectmodel/KeyreleasedEvent.h>
+#include <sofa/core/objectmodel/MouseEvent.h>
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/gui/ColourPickingVisitor.h>
 #include <cmath>
@@ -809,7 +810,9 @@ void QtGLViewer::draw()
         SofaViewer::captureEvent();
 
     if (_waitForRender)
+    {
         _waitForRender = false;
+    }
 
     emit( redrawn() );
 }
@@ -852,10 +855,12 @@ void QtGLViewer::keyPressEvent ( QKeyEvent * e )
     {
         switch(e->key())
         {
-        case Qt::Key_A: //axis
-        case Qt::Key_S: //sofa screenshot
-        case Qt::Key_H: //shortcuts for screenshot and help page specified for qglviewer
+        case Qt::Key_A: // axis
+        case Qt::Key_S: // sofa screenshot
+        case Qt::Key_H: // help page
+        case Qt::Key_G: // show grid
         {
+            // these shortcuts are handled by qglviewer
             QGLViewer::keyPressEvent(e);
             break;
         }

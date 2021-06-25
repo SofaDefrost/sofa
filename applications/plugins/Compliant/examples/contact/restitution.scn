@@ -3,11 +3,13 @@
 <Node animate="0" name="Root" dt="0.005" gravity="0 0 0">
   
   <RequiredPlugin name="Compliant" pluginName="Compliant" />
+  <RequiredPlugin name='SofaMiscCollision'/>
   <CompliantAttachButton/>
   
   <VisualStyle displayFlags="showCollisionModels hideVisual showMappings" />
   <DefaultPipeline depth="6" />
-  <BruteForceDetection />
+  <BruteForceBroadPhase/>
+  <BVHNarrowPhase/>
   
   <NewProximityIntersection alarmDistance=".2" contactDistance="0.1" />
 

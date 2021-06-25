@@ -22,8 +22,8 @@
 #pragma once
 #include <SofaUserInteraction/config.h>
 
-#include <sofa/core/collision/BroadPhaseDetection.h>
-#include <sofa/core/collision/NarrowPhaseDetection.h>
+#include <SofaBaseCollision/BruteForceBroadPhase.h>
+#include <SofaGeneralMeshCollision/RayTraceNarrowPhase.h>
 #include <sofa/core/CollisionElement.h>
 #include <sofa/defaulttype/Vec.h>
 #include <set>
@@ -39,40 +39,12 @@ namespace sofa::component::collision
  *   up to find a triangle in the other object. Both triangles are tested to evaluate if they are in
  *   colliding state. It must be used with a TriangleOctreeModel,as an octree is used to traverse the object.
  */
-class SOFA_SOFAUSERINTERACTION_API RayTraceDetection :public core::collision::BroadPhaseDetection,
-    public core::collision::NarrowPhaseDetection
+class SOFA_SOFAUSERINTERACTION_API RayTraceDetection :
+    public BruteForceBroadPhase,
+    public RayTraceNarrowPhase
 {
 public:
-    SOFA_CLASS2(RayTraceDetection, core::collision::BroadPhaseDetection, core::collision::NarrowPhaseDetection);
-
-private:
-    sofa::helper::vector < core::CollisionModel * >collisionModels;
-    Data < bool > bDraw;
-
-public:
-    typedef sofa::helper::vector<sofa::core::collision::DetectionOutput>    OutputVector;
-protected:
-    RayTraceDetection ();
-public:
-    void setDraw (bool val)
-    {
-        bDraw.setValue (val);
-    }
-    void selfCollision (TriangleOctreeModel * cm1);
-    void addCollisionModel (core::CollisionModel * cm) override;
-    void addCollisionPair (const std::pair < core::CollisionModel *,
-            core::CollisionModel * >&cmPair) override;
-
-    void findPairsVolume (CubeCollisionModel * cm1,
-            CubeCollisionModel * cm2);
-
-    void beginBroadPhase() override
-    {
-        core::collision::BroadPhaseDetection::beginBroadPhase();
-        collisionModels.clear();
-    }
-
-    void draw (const core::visual::VisualParams* vparams) override;
+    SOFA_CLASS2(RayTraceDetection, BruteForceBroadPhase, RayTraceNarrowPhase);
 };
 
 } // namespace sofa::component::collision
