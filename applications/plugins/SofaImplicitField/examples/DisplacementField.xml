@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<Node name="root" dt="0.005">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <RequiredPlugin name="SofaImplicitField"/>
+    <RequiredPlugin name='SofaLoader'/>
+    <RequiredPlugin name='SofaGeneralSimpleFem'/>
+    <VisualStyle displayFlags="showForceFields"/>
+   
+    <Node name="DisplacementField">
+        <EulerImplicitSolver name="cg_odesolver"   rayleighStiffness="0.1" rayleighMass="0.1" />
+        <CGLinearSolver name="linear solver" iterations="25" tolerance="1e-09" threshold="1e-09" />
+        <MeshGmshLoader name="meshLoader" filename="mesh/cube_low_res.msh" />
+        <TetrahedronSetTopologyContainer name="topo" src="@meshLoader" />
+        <MechanicalObject name="dofs" src="@meshLoader" />
+        <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
+        <DiagonalMass  name="computed using mass density" massDensity="1" />
+        <TetrahedralCorotationalFEMForceField template="Vec3d" name="FEM" method="large" poissonRatio="0.3" youngModulus="3000" computeGlobalMatrix="0" />
+    </Node>      
+   
+    <Node name="RigidField">
+            <SphericalField name="field" center="1.0 0.0 0.0" radius="2.0"/>
+            <DisplacementField name="displacement" 
+                               field="@field" 
+                               topology="@../DisplacementField/topo"
+                               dofs="@../DisplacementField/dofs"/>
+            <RayMarchingEngine name="raymarching" field="@field"/>
+            <PointSplatRenderer name="renderer" 
+                                points="@raymarching.intersections" 
+                                radius="0.1"/>
+    </Node>
+</Node>
