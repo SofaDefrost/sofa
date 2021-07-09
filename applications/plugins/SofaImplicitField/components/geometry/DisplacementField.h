@@ -32,8 +32,10 @@ namespace sofaimplicitfield
 using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofa::component::geometry::ScalarField;
-using sofa::defaulttype::Vec3d ;
-using sofa::defaulttype::Vec3Types ;
+using sofa::defaulttype::Vec3d;
+using sofa::defaulttype::Vec3Types;
+//using sofa::defaulttype::Vec4d;
+//using sofa::defaulttype::Vec4Types;
 
 class SOFA_SOFAIMPLICITFIELD_API DisplacementField : public sofaimplicitfield::ScalarField
 {
@@ -49,7 +51,9 @@ public:
 protected:
    DisplacementField();
    ~DisplacementField() override {}
-
+   
+   // TODO: replace this by a call to BarycentricMapper?
+   double determinant4x4ForVec3And1(Vec3d& v0, Vec3d& v1, Vec3d& v2, Vec3d& v3);
 };
 
 }

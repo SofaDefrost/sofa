@@ -42,17 +42,99 @@ DisplacementField::DisplacementField() :
 double DisplacementField::getValue(Vec3d &pos, int &domain)
 {
     SOFA_UNUSED(domain);
+    
+    // Read DOFs current positions.
+    auto dof = getReadAccessor(*l_dofs->read(sofa::core::VecCoordId::position()));
+    // Read DOFs rest positions:
+    auto dof_rest = getReadAccessor(*l_dofs->read(sofa::core::VecCoordId::restPosition()));
 
-    /// Here are the tetrahedron's descriptions
-    /// l_topology->
+    // Iterate over each tetrahedron:
+    for (int t=0; l_topology->getNbTetrahedra(); t++)//(auto tetra : l_topology->getTetrahedra())
+    {
+        // Get current positions of the tetrahedron vertices.
+        auto tetra = l_topology->getTetrahedron(t);
+        Vec3d r0 = dof[tetra[0]];
+        Vec3d r1 = dof[tetra[1]];
+        Vec3d r2 = dof[tetra[2]];
+        Vec3d r3 = dof[tetra[3]];
 
-    /// Here are the moving position.
-    /// l_dofs->
+        /* determinant() is undefined for 4x4 matrices?
+        Vec4d r0_1 = {r0[0], r0[1], r0[2], 1};
+        etc...
+        sofa::defaulttype::Mat4x4d T0 = {r0_1, r1_1, r2_1, r3_1};
+        etc...
+        auto d0 = determinant(T0);
+        etc... */
 
-    auto x = getReadAccessor(*l_dofs->read(sofa::core::VecCoordId::position()));
+        // Compute the determinants of each sub-tetrahedra.
+        double d0 = determinant4x4ForVec3And1(r0, r1, r2, r3); // DisplacementField:: <- ?
+        double d1 = determinant4x4ForVec3And1(pos, r1, r2, r3);
+        double d2 = determinant4x4ForVec3And1(r0, pos, r2, r3);
+        double d3 = determinant4x4ForVec3And1(r0, r1, pos, r3);
+        double d4 = determinant4x4ForVec3And1(r0, r1, r2, pos);
 
-    Vec3d p0 = x[0] - pos;
-    return l_field->getValue( p0 );
+        // Test if 'pos' belongs to the current tetrahedron.
+        if (d0 == 0)
+        {
+            msg_warning() << "The tetrahedron is degenerate (flat)!";
+            continue;
+        }
+        if ((d0<0 && d1<=0 && d2<=0 && d3<=0 && d4<=0) || (d0>0 && d1>=0 && d2>=0 && d3>=0 && d4>=0))
+        {
+            // Draws the deformed state.
+            //drawtools->drawTetrahedron(r0, r1, r2, r3, RGBAColor::red());
+
+            // Compute the barycentric coefficients of 'pos' in the deformed tetrahedron:
+            double coef0 = d1/d0;
+            double coef1 = d2/d0;
+            double coef2 = d3/d0;
+            double coef3 = d4/d0;
+
+            // Compute the underformed coordinate of 'pos':
+            Vec3d p0 = coef0 * dof_rest[tetra[0]] + coef1 * dof_rest[tetra[1]] + coef2 * dof_rest[tetra[2]] + coef3 * dof_rest[tetra[3]];
+            
+            msg_warning() << "The tetrahedron containing the point (" << pos << ") has been found!";
+            msg_warning() << "d0: " << d0;
+            msg_warning() << "d1: " << d1 << ", coef0: " << coef0;
+            msg_warning() << "d2: " << d2 << ", coef1: " << coef1;
+            msg_warning() << "d3: " << d3 << ", coef2: " << coef2;
+            msg_warning() << "d4: " << d4 << ", coef3: " << coef3;
+            msg_warning() << "new position: " << p0;
+            msg_warning() << "l_field->getValue( p0 ): " << l_field->getValue( p0 ) << "\n";
+
+            return l_field->getValue( p0 );
+        }
+    }
+    // The point 'pos' doesn't belong to any tetrahedra. It isn't subject to a deformation.
+    msg_warning() << "The point " << pos << " does not belong to any tetrahedron of the displacement field!";
+    return l_field->getValue(pos);
+}
+
+// TODO: replace this by a call to BarycentricMapper?
+double DisplacementField::determinant4x4ForVec3And1(Vec3d& v0, Vec3d& v1, Vec3d& v2, Vec3d& v3)
+{
+    /*
+    Compute the derterminant of the matrix:
+    ---                    ---
+    | v0[0], v0[1], v0[2], 1 |
+    | v1[0], v1[1], v1[2], 1 |
+    | v2[0], v2[1], v2[2], 1 |
+    | v3[0], v3[1], v3[2], 1 |
+    ---                    ---
+    */
+    double det = v1[2]*v2[1]*v3[0] - v0[2]*v2[1]*v3[0] -
+        v1[1]*v2[2]*v3[0] + v0[1]*v2[2]*v3[0] +
+        v0[2]*v1[1]*v3[0] - v0[1]*v1[2]*v3[0] -
+        v1[2]*v2[0]*v3[1] + v0[2]*v2[0]*v3[1] +
+        v1[0]*v2[2]*v3[1] - v0[0]*v2[2]*v3[1] -
+        v0[2]*v1[0]*v3[1] + v0[0]*v1[2]*v3[1] +
+        v1[1]*v2[0]*v3[2] - v0[1]*v2[0]*v3[2] -
+        v1[0]*v2[1]*v3[2] + v0[0]*v2[1]*v3[2] +
+        v0[1]*v1[0]*v3[2] - v0[0]*v1[1]*v3[2] -
+        v0[2]*v1[1]*v2[0] + v0[1]*v1[2]*v2[0] +
+        v0[2]*v1[0]*v2[1] - v0[0]*v1[2]*v2[1] -
+        v0[1]*v1[0]*v2[2] + v0[0]*v1[1]*v2[2];
+    return det;
 }
 
 } /// sofaimplicitfield

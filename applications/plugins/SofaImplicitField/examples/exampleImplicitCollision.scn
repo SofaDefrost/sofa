@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Node name="root" dt="0.005">
+    <RequiredPlugin name="SofaImplicitField"/>
+
+    <Node name="RigidField">
+            <VisualStyle displayFlags="showForceFields"/>
+            <SphericalField name="field" center="-1.0 0.0 0.0" radius="1"/>
+            <RegularGridTopology nx="3" ny="3" nz="3" xmin="-2" xmax="0" ymin="-1" ymax="1" zmin="-1" zmax="1" name="Container"/>
+            <MechanicalObject name="dofs" template="Vec3" showObject="True" />
+            <HexahedronFEMForceField name="FEM" youngModulus="600" poissonRatio="0.3" method="large"/>
+            <ConstantForceField name="FEM" indices="0 4 " forces="-1 -1 -1   1 2 3" showArrowSize="1"/>
+            <RayMarchingEngine name="raymarching" field="@field" resolution = "30 30" />
+            <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.05"/>
+    </Node>
+    <Node name="SomeOtherField">
+            <SphericalField name="field" center="2 0.0 0.0" radius="3"/>
+            <RayMarchingEngine name="raymarching" field="@field" resolution = "30 30" />
+            <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.05"/>
+    </Node>
+
+
+</Node>

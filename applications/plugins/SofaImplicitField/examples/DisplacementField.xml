@@ -4,6 +4,7 @@
     <RequiredPlugin name="SofaImplicitField"/>
     <RequiredPlugin name='SofaLoader'/>
     <RequiredPlugin name='SofaGeneralSimpleFem'/>
+    <RequiredPlugin name="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->  
     <VisualStyle displayFlags="showForceFields"/>
    
     <Node name="DisplacementField">
@@ -23,7 +24,7 @@
                                field="@field" 
                                topology="@../DisplacementField/topo"
                                dofs="@../DisplacementField/dofs"/>
-            <RayMarchingEngine name="raymarching" field="@field"/>
+            <RayMarchingEngine name="raymarching" field="@displacement"/>
             <PointSplatRenderer name="renderer" 
                                 points="@raymarching.intersections" 
                                 radius="0.1"/>
