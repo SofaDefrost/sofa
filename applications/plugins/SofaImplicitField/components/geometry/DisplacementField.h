@@ -34,7 +34,7 @@ using sofa::core::objectmodel::SingleLink;
 using sofa::component::geometry::ScalarField;
 using sofa::defaulttype::Vec3d;
 using sofa::defaulttype::Vec3Types;
-//using sofa::defaulttype::Vec4d;
+using sofa::defaulttype::Vec4d;
 //using sofa::defaulttype::Vec4Types;
 
 class SOFA_SOFAIMPLICITFIELD_API DisplacementField : public sofaimplicitfield::ScalarField
@@ -46,14 +46,26 @@ public:
    SingleLink<DisplacementField, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH> l_topology;
    SingleLink<DisplacementField, sofa::core::behavior::MechanicalState<Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs;
 
+   int getDeformationId(Vec3d& pos);
+
    double getValue(Vec3d& pos, int& domain) override;
+   double getValue(Vec3d& pos, int& tetrahedron_id, int& domain);
+
+   Vec3d getGradient(Vec3d& pos, int& domain) override;
+   Vec3d getGradient(Vec3d& pos, int& tetrahedron_id, int& domain);
+
+   Vec4d getBarycentricCoordinates(const Vec3d& p, const int& tetrahedron_id);
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const int& tetrahedron_id, Vec4d& barycentric_coefs);
 
 protected:
    DisplacementField();
    ~DisplacementField() override {}
    
-   // TODO: replace this by a call to BarycentricMapper?
-   double determinant4x4ForVec3And1(Vec3d& v0, Vec3d& v1, Vec3d& v2, Vec3d& v3);
+   double determinant4x4ForVec3And1(const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3); // TODO: replace this by a call to BarycentricMapper?
+   
+   Vec4d getBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3);
+
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3, Vec4d& barycentric_coefs);
 };
 
 }

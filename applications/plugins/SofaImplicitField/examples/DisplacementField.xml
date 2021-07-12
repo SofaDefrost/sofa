@@ -25,7 +25,7 @@
                                topology="@../DisplacementField/topo"
                                dofs="@../DisplacementField/dofs"/>
             <RayMarchingEngine name="raymarching" field="@displacement"/>
-            <PointSplatRenderer name="renderer" 
+            <PointSplatRenderer name="renderer"
                                 points="@raymarching.intersections" 
                                 radius="0.1"/>
     </Node>
