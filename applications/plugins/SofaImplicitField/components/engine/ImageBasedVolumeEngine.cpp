@@ -34,7 +34,7 @@ ImageBasedVolumeEngine::ImageBasedVolumeEngine():
     addOutput(&d_volume_gradients_two);
 }
 
-bool ImageBasedVolumeEngine::sphereTracing(const Ray& r, Vec3& out_vec, bool& out_ind, Vec2i& out_tetra, DisplacementField* field_one, DisplacementField* field_two, const double eps, const double max_depth)
+bool ImageBasedVolumeEngine::sphereTracing(const Ray& r, Vec3& out_vec, bool& out_ind, Vec2i& out_tetra, double& out_traveled, DisplacementField* field_one, DisplacementField* field_two, const double eps, const double max_depth)
 {
     double travelled = 0.0;
     Vec3 current_pos = r.origin();
@@ -42,18 +42,20 @@ bool ImageBasedVolumeEngine::sphereTracing(const Ray& r, Vec3& out_vec, bool& ou
     while (travelled <= max_depth)
     {
         // Naïve search for the parent volumetric primitive.
-        int t_one = field_one->getDomain(current_pos);
-        int t_two = field_two->getDomain(current_pos);
+        int t_one = field_one->getDomain(current_pos, -1);
+        int t_two = field_two->getDomain(current_pos, -1);
         // evaluate both implicit functions.
         double dist_one = field_one->getValue(current_pos, t_one);
         double dist_two = field_two->getValue(current_pos, t_two);
-        double dist = fabs(fmin(dist_one, dist_two));
+        double dist = fabs(fmax(dist_one, dist_two));
         if(dist<eps)
         {
+            // The ray intersects with the implicit surface.
             out_vec = current_pos;
             out_ind = (dist_one<=dist_two) ? true : false;
             out_tetra[0] = t_one;
             out_tetra[1] = t_two;
+            out_traveled = travelled;
             return true;
         }
         travelled += dist;
@@ -79,12 +81,12 @@ void ImageBasedVolumeEngine::doUpdate()
     DisplacementField* field_two = l_field_two.get();
     auto res = getReadAccessor(d_resolution);
     double eps = getReadAccessor(d_epsilon);
-    auto bbox_one = getReadAccessor(*l_dofs_one->read(sofa::defaulttype::BoundingBox::f_bbox()));
+    auto bbox_one = field_one->f_bbox.getValue();
     auto dof_one = getReadAccessor(*l_dofs_one->read(sofa::core::VecCoordId::position()));
-    auto tetra_one = l_topology_one->getTetrahedronArray();
-    auto bbox_two = getReadAccessor(*l_dofs_two->read(sofa::defaulttype::BoundingBox::f_bbox()));
+    auto tetra_one = l_topology_one->getTetrahedra();
+    auto bbox_two = field_two->f_bbox.getValue();
     auto dof_two = getReadAccessor(*l_dofs_two->read(sofa::core::VecCoordId::position()));
-    auto tetra_two = l_topology_two->getTetrahedronArray();
+    auto tetra_two = l_topology_two->getTetrahedra();
     // Outputs.
     auto intersections = getWriteAccessor(d_intersections);
     double volume = getWriteAccessor(d_volume);
@@ -103,16 +105,18 @@ void ImageBasedVolumeEngine::doUpdate()
     Vec3 out_vec;
     bool out_ind;
     Vec2i out_tetra;
+    double out_traveled;
     sofa::defaulttype::Vec4d barycentric_coordinates;
     sofa::core::topology::BaseMeshTopology::Tetrahedron tetra;
 
     /* Broad phase */
-    if (bbox_one->intersect(bbox_two))
+    Vec3 bbox_bottom, bbox_size;
+    if (bbox_one.intersect(bbox_two))
     {
         // Construct the AABB of the (potential) interpenetration volume.
-        auto bbox = bbox_one->getIntersection(bbox_two);
-        Vec3 bbox_bottom = bbox->minBBox();
-        Vec3 bbox_size = fabs(box->maxBBox()-bbox_bottom);
+        auto bbox = bbox_one.getIntersection(bbox_two);
+        bbox_bottom = bbox.minBBox();
+        bbox_size = bbox.maxBBox()-bbox_bottom;
     }
     else
     {
@@ -120,6 +124,7 @@ void ImageBasedVolumeEngine::doUpdate()
         return;
     }
     /* Narrow phase */
+    Vec3 temp;
     // Iterate over the faces of the AABB, pairing the oposite faces together.
     std::vector<sofa::defaulttype::Vec2i> planes {{1,2}, {0,1}, {0,2}};
     for (unsigned int plane_it=0; plane_it<3; plane_it++)
@@ -138,7 +143,7 @@ void ImageBasedVolumeEngine::doUpdate()
         viewing_direction[planes[plane_it][0]] = 0.0;
         viewing_direction[planes[plane_it][1]] = 0.0;
         // Define max depth.
-        double max_depth = (bbox_size * viewing_direction).sum();
+        double max_depth = bbox_size[0]*viewing_direction[0] + bbox_size[1]*viewing_direction[1] + bbox_size[2]*viewing_direction[2]; // (bbox_size * viewing_direction).sum()
         // Begin ray casting.
         Vec3 current_line = bbox_bottom;
         for (unsigned int i=0; i<res->x(); i++)
@@ -148,56 +153,73 @@ void ImageBasedVolumeEngine::doUpdate()
             {
                 // Launch ray.
                 Ray ray {current_column, viewing_direction};
-                if (sphereTracing(ray, out_vec, out_ind, out_tetra, field_one, field_two, eps, max_depth))
+                if (sphereTracing(ray, out_vec, out_ind, out_tetra, out_traveled, field_one, field_two, eps, max_depth))
                 {
                     // Store interesection point (for display purposes).
                     intersections.push_back(out_vec);
                     // Accumulate Volume.
-                    volume -= pixel_area*((out_vec-current_column)*viewing_direction).sum();
+                    volume -= pixel_area * out_traveled; //pixel_area * ((out_vec - current_column) * viewing_direction).sum()
                     // Accumulate volume gradients.
                     if (out_ind)
                     {
-                        barycentric_coordinates = field_one->getBarycentricCoordinates(out_vec, out_tetra[0]);
+                        barycentric_coordinates = field_one->getBarycentricCoordinates(out_vec, out_tetra[0], dof_one);
                         tetra = tetra_one[out_tetra[0]];
                         for (unsigned int k=0; k<4; k++)
                         {
-                            volume_gradients_one[out_tetra[0]] += pixel_area * barycentric_coordinates[k] * dof_one[tetra[k]] * viewing_direction * -1;
+                            // TODO: ask Damien about pointwise vector multiplication
+                            temp[0] = dof_one[tetra[k]][0] * viewing_direction[0];
+                            temp[1] = dof_one[tetra[k]][1] * viewing_direction[1];
+                            temp[2] = dof_one[tetra[k]][2] * viewing_direction[2];
+                            volume_gradients_one[out_tetra[0]] += -1 * pixel_area * barycentric_coordinates[k] * temp;
                         }
                     }
                     else
                     {
-                        barycentric_coordinates = field_two->getBarycentricCoordinates(out_vec, out_tetra[1]);
+                        barycentric_coordinates = field_two->getBarycentricCoordinates(out_vec, out_tetra[1], dof_two);
                         tetra = tetra_two[out_tetra[1]];
                         for (unsigned int k=0; k<4; k++)
                         {
-                            volume_gradients_two[out_tetra[1]] += pixel_area * barycentric_coordinates[k] * dof_two[tetra[k]] * viewing_direction * -1;
+                            // TODO: ask Damien about pointwise vector multiplication
+                            temp[0] = dof_two[tetra[k]][0] * viewing_direction[0];
+                            temp[1] = dof_two[tetra[k]][1] * viewing_direction[1];
+                            temp[2] = dof_two[tetra[k]][2] * viewing_direction[2];
+                            volume_gradients_two[out_tetra[1]] += -1 * pixel_area * barycentric_coordinates[k] * temp;
                         }
                     }                    
                     // Launch ray from the oposite side of the bounding box.
-                    ray.updateRay(current_column+max_depth*viewing_direction, -1*viewing_direction);
-                    if (sphereTracing(ray, out_vec, out_ind, out_tetra, field_one, field_two, eps, max_depth))
+                    ray.setOrigin(current_column+max_depth*viewing_direction);
+                    ray.setDirection(viewing_direction * -1);
+                    if (sphereTracing(ray, out_vec, out_ind, out_tetra, out_traveled, field_one, field_two, eps, max_depth))
                     {
                         // Store interesection point (for display purposes).
                         intersections.push_back(out_vec);
                         // Accumulate Volume.
-                        volume += pixel_area*((out_vec-current_column)*viewing_direction).sum();
+                        volume += pixel_area * (max_depth-out_traveled); //pixel_area*((out_vec-current_column)*viewing_direction).sum();
                         // Accumulate volume gradients.
                         if (out_ind)
                         {
-                            barycentric_coordinates = field_one->getBarycentricCoordinates(out_vec, out_tetra[0]);
+                            barycentric_coordinates = field_one->getBarycentricCoordinates(out_vec, out_tetra[0], dof_one);
                             tetra = tetra_one[out_tetra[0]];
                             for (unsigned int k=0; k<4; k++)
                             {
-                                volume_gradients_one[out_tetra[0]] += pixel_area * barycentric_coordinates[k] * dof_one[tetra[k]] * viewing_direction;
+                                // TODO: ask Damien about pointwise vector multiplication
+                                temp[0] = dof_one[tetra[k]][0] * viewing_direction[0];
+                                temp[1] = dof_one[tetra[k]][2] * viewing_direction[1];
+                                temp[2] = dof_one[tetra[k]][2] * viewing_direction[2];
+                                volume_gradients_one[out_tetra[0]] += pixel_area * barycentric_coordinates[k] * temp;
                             }
                         }
                         else
                         {
-                            barycentric_coordinates = field_two->getBarycentricCoordinates(out_vec, out_tetra[1]);
+                            barycentric_coordinates = field_two->getBarycentricCoordinates(out_vec, out_tetra[1], dof_two);
                             tetra = tetra_two[out_tetra[1]];
                             for (unsigned int k=0; k<4; k++)
                             {
-                                volume_gradients_two[out_tetra[1]] += pixel_area * barycentric_coordinates[k] * dof_two[tetra[k]] * viewing_direction;
+                                // TODO: ask Damien about pointwise vector multiplication
+                                temp[0] = dof_two[tetra[k]][0] * viewing_direction[0];
+                                temp[1] = dof_two[tetra[k]][1] * viewing_direction[1];
+                                temp[2] = dof_two[tetra[k]][2] * viewing_direction[2];
+                                volume_gradients_two[out_tetra[1]] += pixel_area * barycentric_coordinates[k] * temp;
                             }
                         }
                     }

@@ -43,7 +43,7 @@ protected:
    ImageBasedVolumeEngine();
    ~ImageBasedVolumeEngine() override {}
 
-   bool sphereTracing(const sofa::defaulttype::Ray& r, Vec3& out_vec, bool& out_ind, Vec2i& out_tetra, DisplacementField* field_one, DisplacementField* field_two, const double eps, const double max_depth);
+   bool sphereTracing(const sofa::defaulttype::Ray& r, Vec3& out_vec, bool& out_ind, Vec2i& out_tetra, double& out_traveled, DisplacementField* field_one, DisplacementField* field_two, const double eps, const double max_depth);
 };
 
 }

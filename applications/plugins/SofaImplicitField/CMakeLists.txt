@@ -13,7 +13,7 @@ set(HEADER_FILES
     deprecated/InterpolatedImplicitSurface.h # This is a backward compatibility file toward DiscreteridField
 
     components/engine/RayMarchingEngine.h
-    ## components/engine/ImageBasedVolumeEngine.h
+    components/engine/ImageBasedVolumeEngine.h
 
     components/geometry/DisplacementField.h
 
@@ -49,7 +49,7 @@ set(SOURCE_FILES
     deprecated/InterpolatedImplicitSurface.cpp
 
     components/engine/RayMarchingEngine.cpp
-    ## components/engine/ImageBasedVolumeEngine.cpp
+    components/engine/ImageBasedVolumeEngine.cpp
 
     components/geometry/DisplacementField.cpp
     components/geometry/BottleField.cpp
