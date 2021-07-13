@@ -6,3 +6,6 @@
 /DisplacementField/dofs.showColor = 1 1 1 1
 /DisplacementField/dofs.showObject = 1
 /DisplacementField/dofs.showObjectScale = 5
+
+--- NEW SESSION: 13/07/2021 09:51:43 ---
+/RigidField/raymarching.resolution = 10 10

@@ -19,6 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#pragma once
+
 #include <SofaImplicitField/config.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
@@ -46,16 +48,14 @@ public:
    SingleLink<DisplacementField, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH> l_topology;
    SingleLink<DisplacementField, sofa::core::behavior::MechanicalState<Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs;
 
-   int getDeformationId(Vec3d& pos);
+   int getDomain(Vec3d& pos);
 
    double getValue(Vec3d& pos, int& domain) override;
-   double getValue(Vec3d& pos, int& tetrahedron_id, int& domain);
 
    Vec3d getGradient(Vec3d& pos, int& domain) override;
-   Vec3d getGradient(Vec3d& pos, int& tetrahedron_id, int& domain);
 
-   Vec4d getBarycentricCoordinates(const Vec3d& p, const int& tetrahedron_id);
-   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const int& tetrahedron_id, Vec4d& barycentric_coefs);
+   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof);
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof, Vec4d& barycentric_coefs);
 
 protected:
    DisplacementField();
