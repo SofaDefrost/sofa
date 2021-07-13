@@ -62,7 +62,7 @@ bool ImageBasedVolumeEngine::sphereTracing(const Ray& r, Vec3& out_vec, bool& ou
     return false;
 }
 
-void RayMarchingEngine::doUpdate()
+void ImageBasedVolumeEngine::doUpdate()
 {
     if(l_field_one.empty() || l_field_two.empty())
     {

@@ -48,14 +48,12 @@ public:
    SingleLink<DisplacementField, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH> l_topology;
    SingleLink<DisplacementField, sofa::core::behavior::MechanicalState<Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs;
 
-   int getDomain(Vec3d& pos);
-
+   int getDomain(Vec3d& pos, int domain) override;
    double getValue(Vec3d& pos, int& domain) override;
-
    Vec3d getGradient(Vec3d& pos, int& domain) override;
 
-   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof);
-   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof, Vec4d& barycentric_coefs);
+   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof);
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof, Vec4d& barycentric_coefs);
 
 protected:
    DisplacementField();

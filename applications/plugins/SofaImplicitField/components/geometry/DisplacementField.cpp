@@ -54,11 +54,11 @@ double DisplacementField::getValue(Vec3d& pos, int& domain)
     if (domain!=-1)
     {
         // Test belonging and compute barycentric coefficients.
-        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, domain, barycentric_coefs, dof);
+        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, domain, dof, barycentric_coefs);
         if (found)
         {
             // Get target tetrahedron.
-            auto tetra = l_topology->getTetrahedron(t);
+            auto tetra = l_topology->getTetrahedron(domain);
             // Compute the underformed coordinate of 'pos':
             Vec3d pos_undeformed = barycentric_coefs[0] * dof_rest[tetra[0]] + 
                 barycentric_coefs[1] * dof_rest[tetra[1]] + 
@@ -72,7 +72,7 @@ double DisplacementField::getValue(Vec3d& pos, int& domain)
     for (int t=0; t<l_topology->getNbTetrahedra(); t++)
     {
         // Test belonging and compute barycentric coefficients.
-        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, barycentric_coefs, dof);
+        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, dof, barycentric_coefs);
         if (found)
         {
             // Save found domain.
@@ -107,21 +107,21 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
     if (domain!=-1)
     {
         // Test belonging and compute barycentric coefficients.
-        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, domain, barycentric_coefs, dof);
+        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, domain, dof, barycentric_coefs);
         if (found)
         {
             // Evaluate point.
-            double v = getValue(pos, t);
+            double v = getValue(pos, domain);
             // Evaluate displaced point:
             double epsilon = d_epsilon.getValue();
             pos[0] += epsilon;
-            gradient[0] = getValue(pos, t);
+            gradient[0] = getValue(pos, domain);
             pos[0] -= epsilon;
             pos[1] += epsilon;
-            gradient[1] = getValue(pos, t);
+            gradient[1] = getValue(pos, domain);
             pos[1] -= epsilon;
             pos[2] += epsilon;
-            gradient[2] = getValue(pos, t);
+            gradient[2] = getValue(pos, domain);
             pos[2] -= epsilon;
             // Finite difference.
             gradient[0] = (gradient[0]-v)/epsilon;
@@ -135,7 +135,7 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
     for ( int t=0; t<l_topology->getNbTetrahedra(); t++)
     {
         // Test belonging and compute barycentric coefficients.
-        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, barycentric_coefs, dof);
+        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, dof, barycentric_coefs);
         if (found)
         {
             // Save found domain.
@@ -167,10 +167,9 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
     return l_field->getGradient(pos, domain);
 }
 
-/* public */
-
-int DisplacementField::getDomain(Vec3d& pos)
+int DisplacementField::getDomain(Vec3d& pos, int domain)
 {
+    SOFA_UNUSED(domain);
     // Initialize containers.
     bool found;
     Vec4d barycentric_coefs;
@@ -181,7 +180,7 @@ int DisplacementField::getDomain(Vec3d& pos)
     for ( int t=0; t<l_topology->getNbTetrahedra(); t++)
     {
         // Test belonging and compute barycentric coefficients.
-        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, barycentric_coefs, dof);
+        found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, dof, barycentric_coefs);
         if (found)
         {
             return t;
@@ -190,14 +189,16 @@ int DisplacementField::getDomain(Vec3d& pos)
     return -1;
 }
 
-Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof)
+/* public */
+
+Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof)
 {
     // Get target tetrahedron.
     auto tetra = l_topology->getTetrahedron(domain);
     return getBarycentricCoordinates(p, dof[tetra[0]], dof[tetra[1]], dof[tetra[2]], dof[tetra[3]]);
 }
 
-bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, helper::ReadAccessor<Data<InVecCoord>>& dof, Vec4d& barycentric_coefs)
+bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof, Vec4d& barycentric_coefs)
 {
     // Get target tetrahedron.
     auto tetra = l_topology->getTetrahedron(domain);
