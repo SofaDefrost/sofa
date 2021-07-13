@@ -23,7 +23,6 @@
 #include <sofa/type/RGBAColor.h>
 #include <sofa/core/visual/VisualParams.h>
 #include "RayMarchingEngine.h"
-#include<sofa/core/visual/VisualParams.h>
 
 namespace sofa::component::engine
 {
@@ -150,6 +149,7 @@ void RayMarchingEngine::doUpdate()
 
 void RayMarchingEngine::draw(const sofa::core::visual::VisualParams* params)
 {
+    //doUpdate();
     if(!params->displayFlags().getShowBehavior())
         return;
     auto dt = params->drawTool();

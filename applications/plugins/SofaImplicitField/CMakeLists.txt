@@ -13,6 +13,7 @@ set(HEADER_FILES
     deprecated/InterpolatedImplicitSurface.h # This is a backward compatibility file toward DiscreteridField
 
     components/engine/RayMarchingEngine.h
+    components/engine/ImageBasedVolumeEngine.h
 
     components/geometry/DisplacementField.h
 
@@ -31,7 +32,7 @@ set(HEADER_FILES
     components/collision/ScalarFieldIntersection.h
     components/collision/ScalarFieldIntersectionLine.h
     components/collision/ScalarFieldIntersection.inl
-    components/engine/RayMarchingEngine.h
+    
     components/geometry/CubicField.h
     #components/geometry/ImplicitFieldTransform.h
     components/geometry/TorusField.h
@@ -48,6 +49,8 @@ set(SOURCE_FILES
     deprecated/InterpolatedImplicitSurface.cpp
 
     components/engine/RayMarchingEngine.cpp
+    components/engine/ImageBasedVolumeEngine.cpp
+
     components/geometry/DisplacementField.cpp
     components/geometry/BottleField.cpp
     components/geometry/CubicField.cpp
@@ -56,13 +59,14 @@ set(SOURCE_FILES
     components/geometry/DiscreteGridField.cpp
     components/geometry/SphericalField.cpp
     components/geometry/StarShapedField.cpp
+
     components/mapping/ImplicitSurfaceMapping.cpp
     
     # adding missing components
     components/collision/ScalarFieldCollisionModel.cpp
     components/collision/ScalarFieldIntersection.cpp
     components/collision/ScalarFieldIntersectionLine.cpp
-    components/engine/RayMarchingEngine.cpp
+
     components/geometry/CubicField.cpp
     #components/geometry/ImplicitFieldTransform.cpp
     components/geometry/TorusField.cpp
