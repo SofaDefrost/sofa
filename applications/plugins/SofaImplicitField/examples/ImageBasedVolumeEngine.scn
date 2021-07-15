@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<Node name="root" dt="0.005">
+    <RequiredPlugin name="SofaOpenglVisual"/>
+    <RequiredPlugin name="SofaImplicitField"/>
+    <RequiredPlugin name='SofaLoader'/>
+    <RequiredPlugin name='SofaGeneralSimpleFem'/>
+   
+    <Node name="AnimatedField"> <!-- "Animated" sphere. -->
+        <!-- FEM support mesh-->
+        <MeshGmshLoader name="meshLoaderOne" filename="mesh/cube_low_res.msh" translation="-2 0 0"/>
+        <TetrahedronSetTopologyContainer name="topo" src="@meshLoaderOne" />
+        <MechanicalObject name="dofs" src="@meshLoaderOne" />
+        <!-- Implicit surface. -->
+        <SphericalField name="field" center="-1.0 0.0 0.0" radius="2.0"/>
+        <DisplacementField name="displacement" 
+                           field="@field" 
+                           topology="@topo"
+                           dofs="@dofs"/>
+        <!-- Sphere drawing -->
+        <RayMarchingEngine name="raymarching" field="@displacement"
+                           renderingCube="-3.0 1.0 -2.0 2.0 -2.0 2.0"
+                           resolution="10 10"/>
+        <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.1"/>
+        
+    </Node>
+
+    <Node name="RigidField"> <!-- Fixed position sphere. -->
+        <!-- FEM support mesh-->
+        <MeshGmshLoader name="meshLoaderTwo" filename="mesh/cube_low_res.msh" translation="1 0 0"/>
+        <TetrahedronSetTopologyContainer name="topo" src="@meshLoaderTwo" />
+        <MechanicalObject name="dofs" src="@meshLoaderTwo" />
+        <!-- Implicit surface. -->
+        <SphericalField name="field" center="2.0 0.0 0.0" radius="2.0"/>
+        <DisplacementField name="displacement"
+                               field="@field"
+                               topology="@topo"
+                               dofs="@dofs"/>
+        <!-- Sphere drawing -->
+        <RayMarchingEngine name="raymarching" field="@field"
+                           renderingCube="0.0 4.0 -2.0 2.0 -2.0 2.0"
+                           resolution="10 10"/>
+        <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.1"/>
+    </Node>
+
+    <Node name="CandidateCollisionDetection">
+        <ImageBasedVolumeEngine name="ImageBasedInterpenetrationVolumeEstimator"
+                                field_one="@../AnimatedField/displacement"
+                                topology_one="@../AnimatedField/topo"
+                                dofs_one="@../AnimatedField/dofs"
+                                field_two="@../RigidField/displacement"
+                                topology_two="@../RigidField/topo"
+                                dofs_two="@../RigidField/dofs"/> 
+    </Node>
+</Node>
