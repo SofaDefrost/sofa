@@ -26,11 +26,7 @@ public:
 
     // Inputs:
     SingleLink<ImageBasedVolumeEngine, DisplacementField, BaseLink::FLAG_STRONGLINK> l_field_one;
-    SingleLink<ImageBasedVolumeEngine, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH> l_topology_one;
-    SingleLink<ImageBasedVolumeEngine, sofa::core::behavior::MechanicalState<defaulttype::Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs_one;
     SingleLink<ImageBasedVolumeEngine, DisplacementField, BaseLink::FLAG_STRONGLINK> l_field_two;
-    SingleLink<ImageBasedVolumeEngine, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH> l_topology_two;
-    SingleLink<ImageBasedVolumeEngine, sofa::core::behavior::MechanicalState<defaulttype::Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs_two;
     Data<Vec2i> d_resolution;
     Data<double> d_epsilon;
     // Outputs:
@@ -40,10 +36,20 @@ public:
     Data<sofa::helper::vector<Vec3>> d_volume_gradients_two;
 
 protected:
-   ImageBasedVolumeEngine();
-   ~ImageBasedVolumeEngine() override {}
+    ImageBasedVolumeEngine();
+    ~ImageBasedVolumeEngine() override {}
 
-   bool sphereTracing(const sofa::defaulttype::Ray& r, Vec3& out_vec, bool& out_ind, Vec2i& out_tetra, double& out_traveled, DisplacementField* field_one, DisplacementField* field_two, const double eps, const double max_depth);
+    struct Hit
+    {
+        bool found = false;
+        Vec3 pos;
+        Vec3 normal;
+        double distance;
+        bool surface_id;
+        int domain;
+    };
+
+    Hit sphereTracing(const sofa::defaulttype::Ray& r, const double eps, const double max_depth);
 };
 
 }

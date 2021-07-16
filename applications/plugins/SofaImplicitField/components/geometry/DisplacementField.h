@@ -49,6 +49,7 @@ public:
    SingleLink<DisplacementField, sofa::core::behavior::MechanicalState<Vec3Types>, BaseLink::FLAG_STOREPATH> l_dofs;
 
    int getDomain(Vec3d& pos, int domain) override;
+   
    double getValue(Vec3d& pos, int& domain) override;
    Vec3d getGradient(Vec3d& pos, int& domain) override;
 

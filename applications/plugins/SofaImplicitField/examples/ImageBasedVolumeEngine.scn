@@ -5,7 +5,7 @@
     <RequiredPlugin name='SofaLoader'/>
     <RequiredPlugin name='SofaGeneralSimpleFem'/>
    
-    <Node name="AnimatedField"> <!-- "Animated" sphere. -->
+    <Node name="AnimatedField"> 
         <!-- FEM support mesh-->
         <MeshGmshLoader name="meshLoaderOne" filename="mesh/cube_low_res.msh" translation="-2 0 0"/>
         <TetrahedronSetTopologyContainer name="topo" src="@meshLoaderOne" />
@@ -21,10 +21,10 @@
                            renderingCube="-3.0 1.0 -2.0 2.0 -2.0 2.0"
                            resolution="10 10"/>
         <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.1"/>
-        
+        <!-- TODO: Animate the sphere. -->
     </Node>
 
-    <Node name="RigidField"> <!-- Fixed position sphere. -->
+    <Node name="RigidField">
         <!-- FEM support mesh-->
         <MeshGmshLoader name="meshLoaderTwo" filename="mesh/cube_low_res.msh" translation="1 0 0"/>
         <TetrahedronSetTopologyContainer name="topo" src="@meshLoaderTwo" />
@@ -45,10 +45,7 @@
     <Node name="CandidateCollisionDetection">
         <ImageBasedVolumeEngine name="ImageBasedInterpenetrationVolumeEstimator"
                                 field_one="@../AnimatedField/displacement"
-                                topology_one="@../AnimatedField/topo"
-                                dofs_one="@../AnimatedField/dofs"
-                                field_two="@../RigidField/displacement"
-                                topology_two="@../RigidField/topo"
-                                dofs_two="@../RigidField/dofs"/> 
+                                field_two="@../RigidField/displacement"/>
+        <PointSplatRenderer name="renderer" points="@ImageBasedInterpenetrationVolumeEstimator.intersections" radius="0.5"/>
     </Node>
 </Node>
