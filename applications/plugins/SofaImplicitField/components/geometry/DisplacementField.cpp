@@ -113,7 +113,7 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
             // Evaluate point.
             double v = getValue(pos, domain);
             // Evaluate displaced point:
-            double epsilon = d_epsilon.getValue();
+            double epsilon = d_epsilon.getValue(); // l_field->d_epsilon.getValue();
             pos[0] += epsilon;
             gradient[0] = getValue(pos, domain);
             pos[0] -= epsilon;
@@ -132,7 +132,7 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
         // msg_warning() << "The point " << pos << " was not found in the passed domain: << domain << "!";
     }
     // Iterate over each tetrahedron:
-    for ( int t=0; t<l_topology->getNbTetrahedra(); t++)
+    for (int t=0; t<l_topology->getNbTetrahedra(); t++)
     {
         // Test belonging and compute barycentric coefficients.
         found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, dof, barycentric_coefs);
@@ -143,7 +143,7 @@ Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
             // Evaluate point.
             double v = getValue(pos, t);
             // Evaluate displaced point:
-            double epsilon = d_epsilon.getValue();
+            double epsilon = d_epsilon.getValue(); //l_field->d_epsilon.getValue();
             pos[0] += epsilon;
             gradient[0] = getValue(pos, t);
             pos[0] -= epsilon;
@@ -177,7 +177,7 @@ int DisplacementField::getDomain(Vec3d& pos, int domain)
     // Read DOFs current positions.
     auto dof = getReadAccessor(*l_dofs->read(sofa::core::VecCoordId::position()));
     // Iterate over each tetrahedron:
-    for ( int t=0; t<l_topology->getNbTetrahedra(); t++)
+    for (int t=0; t<l_topology->getNbTetrahedra(); t++)
     {
         // Test belonging and compute barycentric coefficients.
         found = checkPointInTetrahedronAndGetBarycentricCoordinates(pos, t, dof, barycentric_coefs);

@@ -1,5 +1,4 @@
 #include <sofa/core/ObjectFactory.h>
-//#include <sofa/core/objectmodel/Data.h> ??
 #include "ImageBasedVolumeEngine.h"
 
 namespace sofa::component::engine
@@ -10,7 +9,7 @@ using sofa::helper::getWriteAccessor;
 using sofaimplicitfield::DisplacementField;
 
 /// Register in the Factory
-static int ImageBasedVolumeEngineClass = core::RegisterObject("Mono-volume setting.").add< ImageBasedVolumeEngine >();
+static int ImageBasedVolumeEngineClass = core::RegisterObject("Mono-volume setting. Sequential implementation.").add< ImageBasedVolumeEngine >();
 
 ImageBasedVolumeEngine::ImageBasedVolumeEngine():
     // Inputs:
@@ -28,6 +27,17 @@ ImageBasedVolumeEngine::ImageBasedVolumeEngine():
     addOutput(&d_volume);
     addOutput(&d_volume_gradients_one);
     addOutput(&d_volume_gradients_two);
+}
+
+void ImageBasedVolumeEngine::init()
+{
+    setDirtyValue();
+}
+
+void ImageBasedVolumeEngine::reinit()
+{
+    setDirtyValue();
+    update();
 }
 
 ImageBasedVolumeEngine::Hit ImageBasedVolumeEngine::sphereTracing(const sofa::defaulttype::Ray& r, const double eps, const double max_depth)
@@ -136,10 +146,10 @@ void ImageBasedVolumeEngine::doUpdate()
         double max_depth = bbox_size[0]*viewing_direction[0] + bbox_size[1]*viewing_direction[1] + bbox_size[2]*viewing_direction[2]; // pointwise vector multiplication
         // Begin ray casting.
         Vec3 current_line = bbox_bottom;
-        for (unsigned int i=0; i<res->x(); i++)
+        for (int i=0; i<res->x(); i++)
         {
             Vec3 current_column = current_line;
-            for (unsigned int j=0; j<res->y(); j++)
+            for (int j=0; j<res->y(); j++)
             {
                 // Launch ray.
                 Ray ray {current_column, viewing_direction};
@@ -196,7 +206,7 @@ void ImageBasedVolumeEngine::doUpdate()
                             {
                                 // TODO: ask Damien about pointwise vector multiplication
                                 temp[0] = dof_one[tetra[k]][0] * viewing_direction[0];
-                                temp[1] = dof_one[tetra[k]][2] * viewing_direction[1];
+                                temp[1] = dof_one[tetra[k]][1] * viewing_direction[1];
                                 temp[2] = dof_one[tetra[k]][2] * viewing_direction[2];
                                 volume_gradients_one[hit.domain] += pixel_area * barycentric_coordinates[k] * temp;
                             }
