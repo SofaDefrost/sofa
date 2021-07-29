@@ -3,8 +3,10 @@
 #include <SofaImplicitField/config.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/defaulttype/VecTypes.h>
+#include <sofa/defaulttype/Ray.h>
+
+#include <sofa/core/DataEngine.h>
 #include <SofaImplicitField/components/geometry/DisplacementField.h>
-#include <SofaImplicitField/components/engine/RayMarchingEngine.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/behavior/MechanicalState.h>
 
@@ -14,14 +16,22 @@ namespace sofa::component::engine
 using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofaimplicitfield::DisplacementField;
+using sofa::core::DataEngine;
 using sofa::defaulttype::Vec3;
 using sofa::defaulttype::Vec2i;
 
-class SOFA_SOFAIMPLICITFIELD_API ImageBasedVolumeEngine : public RayMarchingEngine
+// Make Template with <FieldIn, FieldOut> with Variations:
+//      <DisplacementField, DisplacementField>
+//      <DisplacementField, ScalarField>
+//      <ScalarField, DisplacementField>
+// ?
+class SOFA_SOFAIMPLICITFIELD_API ImageBasedVolumeEngine : public DataEngine
 {
 public:
-    SOFA_CLASS(ImageBasedVolumeEngine, RayMarchingEngine);
+    SOFA_CLASS(ImageBasedVolumeEngine, DataEngine);
 
+    void init() override;
+    void reinit() override;
     void doUpdate() override;
 
     // Inputs:
@@ -49,6 +59,7 @@ protected:
         int domain;
     };
 
+    // Doesn't change regardless of template!
     Hit sphereTracing(const sofa::defaulttype::Ray& r, const double eps, const double max_depth);
 };
 
