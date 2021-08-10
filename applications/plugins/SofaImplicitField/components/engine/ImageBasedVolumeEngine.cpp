@@ -93,7 +93,7 @@ void ImageBasedVolumeEngine::doUpdate()
     double eps = getReadAccessor(d_epsilon);
     // Outputs.
     auto intersections = getWriteAccessor(d_intersections);
-    double volume = getWriteAccessor(d_volume);
+    double volume; // = getWriteAccessor(d_volume);
     auto volume_gradients_one = getWriteAccessor(d_volume_gradients_one);
     auto volume_gradients_two = getWriteAccessor(d_volume_gradients_two);
 
@@ -232,9 +232,9 @@ void ImageBasedVolumeEngine::doUpdate()
         }
     }
     volume /= 3;
-    
-    msg_warning() << "Found Volume: " << volume;
 
+    d_volume.setValue(volume);
+    
     return;
 }
 
