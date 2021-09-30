@@ -1,6 +1,8 @@
 #include <sofa/core/ObjectFactory.h>
 #include "ImageBasedVolumeEngine.h"
 
+#include <time.h> // Print execusion time of each time step!
+
 namespace sofa::component::engine
 {
 using sofa::defaulttype::Ray;
@@ -32,6 +34,33 @@ ImageBasedVolumeEngine::ImageBasedVolumeEngine():
 void ImageBasedVolumeEngine::init()
 {
     setDirtyValue();
+
+    
+    // Initialize outputs to 0.
+    auto dof_one = getReadAccessor(*l_field_one->l_dofs->read(sofa::core::VecCoordId::position()));
+    auto dof_two = getReadAccessor(*l_field_two->l_dofs->read(sofa::core::VecCoordId::position()));
+
+    auto volume_gradients_one = getWriteAccessor(d_volume_gradients_one);
+    auto volume_gradients_two = getWriteAccessor(d_volume_gradients_two);
+    
+    volume_gradients_one.clear();
+    volume_gradients_one.resize(dof_one.size());
+    std::fill(volume_gradients_one.begin(), volume_gradients_one.end(), Vec3{0.0, 0.0, 0.0});
+    volume_gradients_two.clear();
+    volume_gradients_two.resize(dof_two.size());
+    std::fill(volume_gradients_two.begin(), volume_gradients_two.end(), Vec3{0.0, 0.0, 0.0});
+
+    d_volume.beginEdit();
+    d_volume.setValue(0.0);
+    d_volume.endEdit();
+
+    // add to tracker ?
+    this->trackInternalData(d_intersections);
+    this->trackInternalData(d_volume);
+    this->trackInternalData(d_volume_gradients_one);
+    this->trackInternalData(d_volume_gradients_two);
+
+    // cleanDirty();
 }
 
 void ImageBasedVolumeEngine::reinit()
@@ -110,7 +139,7 @@ void ImageBasedVolumeEngine::doUpdate()
     sofa::defaulttype::Vec4d barycentric_coordinates;
     sofa::core::topology::BaseMeshTopology::Tetrahedron tetra;
 
-    /* Broad phase */
+    // Broad phase 
     if (bbox_one.intersect(bbox_two))
     {
         // Construct the AABB of the (potential) interpenetration volume.
@@ -123,7 +152,7 @@ void ImageBasedVolumeEngine::doUpdate()
         msg_warning() << "The broad phase determined that there is no interpenetration.";
         return;
     }
-    /* Narrow phase */
+    // Narrow phase 
     
     // Iterate over the faces of the AABB, pairing the oposite faces together.
     std::vector<sofa::defaulttype::Vec2i> planes {{1,2}, {0,1}, {0,2}};
@@ -233,9 +262,16 @@ void ImageBasedVolumeEngine::doUpdate()
     }
     volume /= 3;
 
+    d_volume.beginEdit();
     d_volume.setValue(volume);
-    
+    d_volume.endEdit();
+
     return;
+}
+
+void ImageBasedVolumeEngine::draw(const sofa::core::visual::VisualParams* params)
+{
+    doUpdate(); // CHEAT
 }
 
 } /// namespace sofa::component::engine
