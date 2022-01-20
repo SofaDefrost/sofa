@@ -19,8 +19,7 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_COMPONENT_LINEARSOLVER_ShewchukPCGLinearSolver_H
-#define SOFA_COMPONENT_LINEARSOLVER_ShewchukPCGLinearSolver_H
+#pragma once
 #include <SofaPreconditioner/config.h>
 
 #include <sofa/core/behavior/LinearSolver.h>
@@ -29,15 +28,8 @@
 
 #include <cmath>
 
-namespace sofa
+namespace sofa::component::linearsolver
 {
-
-namespace component
-{
-
-namespace linearsolver
-{
-
 
 /// Linear system solver using the conjugate gradient iterative algorithm
 template<class TMatrix, class TVector>
@@ -56,7 +48,7 @@ public:
     Data<unsigned> f_update_step; ///< Number of steps before the next refresh of precondtioners
     Data<bool> f_build_precond; ///< Build the preconditioners, if false build the preconditioner only at the initial step
     Data< std::string > f_preconditioners; ///< If not empty: path to the solvers to use as preconditioners
-    Data<std::map < std::string, sofa::helper::vector<double> > > f_graph; ///< Graph of residuals at each iteration
+    Data<std::map < std::string, sofa::type::vector<double> > > f_graph; ///< Graph of residuals at each iteration
 
 
 protected:
@@ -106,10 +98,4 @@ inline void ShewchukPCGLinearSolver<component::linearsolver::GraphScatteredMatri
 template<>
 inline void ShewchukPCGLinearSolver<component::linearsolver::GraphScatteredMatrix,component::linearsolver::GraphScatteredVector>::cgstep_alpha(Vector& x,Vector& p,double alpha);
 
-} // namespace linearsolver
-
-} // namespace component
-
-} // namespace sofa
-
-#endif
+} // namespace sofa::component::linearsolver

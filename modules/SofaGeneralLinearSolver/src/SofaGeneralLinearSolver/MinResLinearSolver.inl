@@ -22,9 +22,9 @@
 #pragma once
 #include <SofaGeneralLinearSolver/MinResLinearSolver.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/FullMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/helper/system/thread/CTime.h>
 #include <sofa/helper/AdvancedTimer.h>
@@ -79,8 +79,8 @@ void MinResLinearSolver<TMatrix,TVector>::solve(Matrix& A, Vector& x, Vector& b)
     const unsigned& max_iter = f_maxIter.getValue();
 
 
-    std::map < std::string, sofa::helper::vector<SReal> >& graph = *f_graph.beginEdit();
-    sofa::helper::vector<SReal>& graph_error = graph[std::string("Error")];
+    std::map < std::string, sofa::type::vector<SReal> >& graph = *f_graph.beginEdit();
+    sofa::type::vector<SReal>& graph_error = graph[std::string("Error")];
     graph_error.clear();
     graph_error.push_back(1);
 

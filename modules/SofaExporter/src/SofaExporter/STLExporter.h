@@ -64,8 +64,8 @@ public:
 
     Data<bool> d_binaryFormat;      //0 for Ascii Formats, 1 for Binary File Format
     Data<defaulttype::Vec3Types::VecCoord>               d_position; ///< points coordinates
-    Data< helper::vector< BaseMeshTopology::Triangle > > d_triangle; ///< triangles indices
-    Data< helper::vector< BaseMeshTopology::Quad > >     d_quad; ///< quads indices
+    Data< type::vector< BaseMeshTopology::Triangle > > d_triangle; ///< triangles indices
+    Data< type::vector< BaseMeshTopology::Quad > >     d_quad; ///< quads indices
 
     void doInit() override ;
     void doReInit() override ;
@@ -95,8 +95,8 @@ namespace exporter {
 // Import the object in the "old" namespaces to allow smooth update of code base.
 namespace misc {
     using STLExporter
-        SOFA_ATTRIBUTE_DEPRECATED("v17.12 (PR#372)", "v21.12", "Use sofa::component::STLExporter instead.")
-        = _stlexporter_::STLExporter;
+        SOFA_ATTRIBUTE_DISABLED("v17.12 (PR#372)", "v21.12", "Use sofa::component::STLExporter instead.")
+        = DeprecatedAndRemoved;
 } // namespace misc
 
 } // namespace sofa::component

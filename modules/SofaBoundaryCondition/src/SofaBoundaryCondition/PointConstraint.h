@@ -21,17 +21,18 @@
 ******************************************************************************/
 #pragma once
 #include <SofaBoundaryCondition/config.h>
+#include <sofa/config.h>
 
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/objectmodel/Event.h>
-#include <sofa/defaulttype/BaseMatrix.h>
-#include <sofa/defaulttype/BaseVector.h>
+#include <sofa/linearalgebra/BaseMatrix.h>
+#include <sofa/linearalgebra/BaseVector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/helper/vector.h>
-#include <SofaBaseTopology/TopologySubsetData.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
+#include <sofa/type/vector.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
 #include <set>
 
 namespace sofa::component::projectiveconstraintset
@@ -40,7 +41,7 @@ namespace sofa::component::projectiveconstraintset
 /** Attach given particles to their initial positions. This is a temporary class, somehow redundant with FixedConstraint, simplified to avoid the memory leak issue. @todo Remove one of the two classes
 */
 template <class DataTypes>
-class PointConstraint : public core::behavior::ProjectiveConstraintSet<DataTypes>
+class SOFA_ATTRIBUTE_DEPRECATED__POINTCONSTRAINT() PointConstraint : public core::behavior::ProjectiveConstraintSet<DataTypes>
 {
 public:
     SOFA_CLASS(SOFA_TEMPLATE(PointConstraint,DataTypes),SOFA_TEMPLATE(sofa::core::behavior::ProjectiveConstraintSet, DataTypes));
@@ -52,12 +53,12 @@ public:
     typedef typename DataTypes::Deriv Deriv;
     typedef typename MatrixDeriv::RowIterator MatrixDerivRowIterator;
     typedef typename MatrixDeriv::RowType MatrixDerivRowType;
-    typedef sofa::defaulttype::Vector3 Vector3;
+    typedef sofa::type::Vector3 Vector3;
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
     typedef Data<MatrixDeriv> DataMatrixDeriv;
-    typedef helper::vector<unsigned int> SetIndexArray;
-    typedef sofa::component::topology::PointSubsetData< SetIndexArray > SetIndex;
+    typedef type::vector<unsigned int> SetIndexArray;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
 
 
     SetIndex f_indices; ///< Indices of the fixed points
@@ -75,11 +76,10 @@ public:
     void projectVelocity(const core::MechanicalParams* mparams, DataVecDeriv& vData) override;
     void projectPosition(const core::MechanicalParams* mparams, DataVecCoord& xData) override;
     void projectJacobianMatrix(const core::MechanicalParams* mparams, DataMatrixDeriv& cData) override;
-    virtual const sofa::defaulttype::BaseMatrix* getJ(const core::MechanicalParams* );
+    virtual const sofa::linearalgebra::BaseMatrix* getJ(const core::MechanicalParams* );
 
-    using core::behavior::ProjectiveConstraintSet<DataTypes>::applyConstraint;
-    void applyConstraint(defaulttype::BaseMatrix *mat, unsigned int offset);
-    void applyConstraint(defaulttype::BaseVector *vect, unsigned int offset);
+    void applyConstraint(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
+    void applyConstraint(const core::MechanicalParams* mparams, linearalgebra::BaseVector* vector, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
 
     void draw(const core::visual::VisualParams* vparams) override;
 
@@ -87,7 +87,7 @@ public:
 protected :
 
     /// Matrix used in getJ
-    linearsolver::SparseMatrix<SReal> jacobian;
+    linearalgebra::SparseMatrix<SReal> jacobian;
 
 };
 

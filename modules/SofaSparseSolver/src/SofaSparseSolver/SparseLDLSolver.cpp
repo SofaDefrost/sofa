@@ -32,14 +32,16 @@ namespace component
 namespace linearsolver
 {
 
+using namespace sofa::linearalgebra;
+
 int SparseLDLSolverClass = core::RegisterObject("Direct Linear Solver using a Sparse LDL^T factorization.")
         .add< SparseLDLSolver< CompressedRowSparseMatrix<double>,FullVector<double> > >(true)
-        .add< SparseLDLSolver< CompressedRowSparseMatrix<defaulttype::Mat<3,3,double> >,FullVector<double> > >()
+        .add< SparseLDLSolver< CompressedRowSparseMatrix<type::Mat<3,3,double> >,FullVector<double> > >()
 
 ;
 
 template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< CompressedRowSparseMatrix<double>,FullVector<double> >;
-template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< CompressedRowSparseMatrix< defaulttype::Mat<3,3,double> >,FullVector<double> >;
+template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< CompressedRowSparseMatrix< type::Mat<3,3,double> >,FullVector<double> >;
 
 
 } // namespace linearsolver

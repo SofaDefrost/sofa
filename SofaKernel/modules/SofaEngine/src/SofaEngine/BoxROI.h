@@ -22,7 +22,7 @@
 #pragma once
 #include <SofaEngine/config.h>
 
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <sofa/core/DataEngine.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/core/behavior/MechanicalState.h>
@@ -47,7 +47,7 @@ namespace sofa::component::engine::boxroi
     using core::objectmodel::Event ;
     using core::ExecParams ;
     using core::DataEngine ;
-    using helper::vector ;
+    using type::vector ;
     using std::string ;
 
 
@@ -63,9 +63,9 @@ public:
     typedef typename DataTypes::VecCoord VecCoord;
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::Real Real;
-    typedef defaulttype::Vec<3,Real> Vec3;
-    typedef defaulttype::Vec<6,Real> Vec6;
-    typedef defaulttype::Vec<10,Real> Vec10;
+    typedef type::Vec<3,Real> Vec3;
+    typedef type::Vec<6,Real> Vec6;
+    typedef type::Vec<10,Real> Vec10;
     typedef BaseMeshTopology::SetIndex SetIndex;
     typedef typename DataTypes::CPos CPos;
 
@@ -155,7 +155,7 @@ protected:
     struct OrientedBox
     {
         typedef typename DataTypes::Real Real;
-        typedef defaulttype::Vec<3,Real> Vec3;
+        typedef type::Vec<3,Real> Vec3;
 
         Vec3 p0, p2;
         Vec3 normal;
@@ -171,7 +171,7 @@ protected:
     void computeOrientedBoxes();
 
     bool isPointInOrientedBox(const CPos& p, const OrientedBox& box);
-    bool isPointInAlignedBox(const typename DataTypes::CPos& p, const Vec6& box);
+    static bool isPointInAlignedBox(const typename DataTypes::CPos& p, const Vec6& box);
     bool isPointInBoxes(const CPos& p);
     bool isPointInBoxes(const PointID& pid);
     bool isEdgeInBoxes(const Edge& e);
@@ -190,6 +190,8 @@ protected:
 
 #if  !defined(SOFA_COMPONENT_ENGINE_BOXROI_CPP)
 extern template class SOFA_SOFAENGINE_API BoxROI<defaulttype::Vec3Types>;
+extern template class SOFA_SOFAENGINE_API BoxROI<defaulttype::Vec2Types>;
+extern template class SOFA_SOFAENGINE_API BoxROI<defaulttype::Vec1Types>;
 extern template class SOFA_SOFAENGINE_API BoxROI<defaulttype::Rigid3Types>;
 extern template class SOFA_SOFAENGINE_API BoxROI<defaulttype::Vec6Types>;
  

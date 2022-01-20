@@ -34,8 +34,6 @@ namespace sofa::component::collision
 template<class DataTypes>
 class PointCollisionModel;
 
-class PointLocalMinDistanceFilter;
-
 template<class TDataTypes>
 class TPoint : public core::TCollisionElementIterator<PointCollisionModel<TDataTypes> >
 {
@@ -58,7 +56,7 @@ public:
     /// Return true if the element stores a free position vector
     bool hasFreePosition() const;
 
-    bool testLMD(const sofa::defaulttype::Vector3 &, double &, double &);
+    bool testLMD(const sofa::type::Vector3 &, double &, double &);
 };
 using Point = TPoint<sofa::defaulttype::Vec3Types>;
 
@@ -76,7 +74,7 @@ public:
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::Deriv Deriv;
     typedef TPoint<DataTypes> Element;
-    typedef helper::vector<Index> VecIndex;
+    typedef type::vector<Index> VecIndex;
 
     friend class TPoint<DataTypes>;
 protected:
@@ -90,7 +88,7 @@ public:
 
     void computeBoundingTree(int maxDepth=0) override;
 
-    void computeContinuousBoundingTree(double dt, int maxDepth=0) override;
+    void computeContinuousBoundingTree(SReal dt, int maxDepth=0) override;
 
     void draw(const core::visual::VisualParams*, Index index) override;
     void draw(const core::visual::VisualParams* vparams) override;
@@ -100,10 +98,6 @@ public:
     core::behavior::MechanicalState<DataTypes>* getMechanicalState() { return mstate; }
 
     Deriv getNormal(Index index){ return (normals.size()) ? normals[index] : Deriv();}
-
-    PointLocalMinDistanceFilter *getFilter() const;
-
-    void setFilter(PointLocalMinDistanceFilter * /*lmdFilter*/);
 
     const Deriv& velocity(Index index) const;
 
@@ -138,8 +132,6 @@ protected:
     Data<bool> computeNormals; ///< activate computation of normal vectors (required for some collision detection algorithms)
 
     VecDeriv normals;
-
-    PointLocalMinDistanceFilter *m_lmdFilter;
 
     Data<bool> m_displayFreePosition; ///< Display Collision Model Points free position(in green)
                                       
@@ -190,7 +182,5 @@ inline bool TPoint<DataTypes>::hasFreePosition() const { return this->model->mst
 #if !defined(SOFA_COMPONENT_COLLISION_POINTCOLLISIONMODEL_CPP)
 extern template class SOFA_SOFAMESHCOLLISION_API PointCollisionModel<defaulttype::Vec3Types>;
 #endif
-
-//bool Point::testLMD(const Vector3 &PQ, double &coneFactor, double &coneExtension);
 
 } //namespace sofa::component::collision

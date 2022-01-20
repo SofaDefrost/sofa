@@ -19,44 +19,16 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-
 #pragma once
-#include "TriangularFEMForceFieldOptim.h"
-
+#include <SofaGeneralSimpleFem/TriangularFEMForceFieldOptim.h>
 #include <SofaBaseLinearSolver/BlocMatrixWriter.h>
-
 #include <sofa/core/visual/VisualParams.h>
-
-#include <SofaBaseTopology/TopologyData.inl>
-
+#include <sofa/core/topology/TopologyData.inl>
 #include <limits>
 
 
 namespace sofa::component::forcefield
 {
-
-// --------------------------------------------------------------------------------------
-// ---  Topology Creation/Destruction functions
-// --------------------------------------------------------------------------------------
-
-template< class DataTypes>
-void TriangularFEMForceFieldOptim<DataTypes>::TFEMFFOTriangleInfoHandler::applyCreateFunction(Index triangleIndex, TriangleInfo &ti, const Triangle &t, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    if (ff)
-    {
-        ff->initTriangleInfo(triangleIndex,ti,t, ff->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
-    }
-}
-
-template< class DataTypes>
-void TriangularFEMForceFieldOptim<DataTypes>::TFEMFFOTriangleStateHandler::applyCreateFunction(Index triangleIndex, TriangleState &ti, const Triangle &t, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    if (ff)
-    {
-        ff->initTriangleState(triangleIndex,ti,t, ff->mstate->read(core::ConstVecCoordId::position())->getValue());
-    }
-}
-
 
 // --------------------------------------------------------------------------------------
 // --- constructor
@@ -65,9 +37,7 @@ template <class DataTypes>
 TriangularFEMForceFieldOptim<DataTypes>::TriangularFEMForceFieldOptim()
     : d_triangleInfo(initData(&d_triangleInfo, "triangleInfo", "Internal triangle data (persistent)"))
     , d_triangleState(initData(&d_triangleState, "triangleState", "Internal triangle data (time-dependent)"))
-    , d_vertexInfo(initData(&d_vertexInfo, "vertexInfo", "Internal point data"))
-    , d_edgeInfo(initData(&d_edgeInfo, "edgeInfo", "Internal edge data"))
-    , d_poisson(initData(&d_poisson,(Real)(0.45),"poissonRatio","Poisson ratio in Hooke's law"))
+    , d_poisson(initData(&d_poisson,(Real)(0.3),"poissonRatio","Poisson ratio in Hooke's law"))
     , d_young(initData(&d_young,(Real)(1000.0),"youngModulus","Young modulus in Hooke's law"))
     , d_damping(initData(&d_damping,(Real)0.,"damping","Ratio damping/stiffness"))
     , d_restScale(initData(&d_restScale,(Real)1.,"restScale","Scale factor applied to rest positions (to simulate pre-stretched materials)"))
@@ -77,9 +47,6 @@ TriangularFEMForceFieldOptim<DataTypes>::TriangularFEMForceFieldOptim()
     , drawPrevMaxStress((Real)-1.0)
     , m_topology(nullptr)
 {
-    triangleInfoHandler = new TFEMFFOTriangleInfoHandler(this, &d_triangleInfo);
-    triangleStateHandler = new TFEMFFOTriangleStateHandler(this, &d_triangleState);
-
     d_poisson.setRequired(true);
     d_young.setRequired(true);
 }
@@ -88,8 +55,7 @@ TriangularFEMForceFieldOptim<DataTypes>::TriangularFEMForceFieldOptim()
 template <class DataTypes>
 TriangularFEMForceFieldOptim<DataTypes>::~TriangularFEMForceFieldOptim()
 {
-    if(triangleInfoHandler) delete triangleInfoHandler;
-    if(triangleStateHandler) delete triangleStateHandler;
+
 }
 
 
@@ -118,21 +84,31 @@ void TriangularFEMForceFieldOptim<DataTypes>::init()
     }
 
     // Create specific handler for TriangleData
-    d_triangleInfo.createTopologyHandler(m_topology, triangleInfoHandler);
-    d_triangleInfo.registerTopologicalData();
-
-    d_triangleState.createTopologyHandler(m_topology, triangleStateHandler);
-    d_triangleState.registerTopologicalData();
-
-    d_edgeInfo.createTopologyHandler(m_topology);
-    d_edgeInfo.registerTopologicalData();
-
-    d_vertexInfo.createTopologyHandler(m_topology);
-    d_vertexInfo.registerTopologicalData();
-
-    if (m_topology->getNbTriangles()==0 && m_topology->getNbQuads()!=0 )
+    d_triangleInfo.createTopologyHandler(m_topology);
+    d_triangleInfo.setCreationCallback([this](Index triangleIndex, TriangleInfo& ti,
+        const core::topology::BaseMeshTopology::Triangle& t,
+        const sofa::type::vector< Index >& ancestors,
+        const sofa::type::vector< SReal >& coefs)
     {
-        msg_warning() << "The topology only contains quads while this forcefield only supports triangles."<<msgendl;
+        createTriangleInfo(triangleIndex, ti, t, ancestors, coefs);
+    });
+
+    d_triangleState.createTopologyHandler(m_topology);
+    d_triangleState.setCreationCallback([this](Index triangleIndex, TriangleState& ti,
+        const core::topology::BaseMeshTopology::Triangle& t,
+        const sofa::type::vector< Index >& ancestors,
+        const sofa::type::vector< SReal >& coefs)
+    {
+        createTriangleState(triangleIndex, ti, t, ancestors, coefs);
+    });
+
+    if (m_topology->getNbTriangles() == 0)
+    {
+        msg_warning() << "No triangles found in linked Topology.";
+        if (m_topology->getNbQuads() != 0)
+        {
+            msg_warning() << "The topology only contains quads while this forcefield only supports triangles." << msgendl;
+        }        
     }
 
     reinit();
@@ -144,7 +120,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::parse( sofa::core::objectmodel::Ba
     const char* method = arg->getAttribute("method");
     if (method && *method && std::string(method) != std::string("large"))
     {
-        msg_warning() << "Attribute method was specified as \""<<method<<"\" while this version only implements the \"large\" method. Ignoring..." << sendl;
+        msg_warning() << "Attribute method was specified as \""<<method<<"\" while this version only implements the \"large\" method. Ignoring...";
     }
     Inherited::parse(arg);
 }
@@ -181,7 +157,10 @@ void TriangularFEMForceFieldOptim<DataTypes>::initTriangleInfo(Index i, Triangle
         ab *= restScale;
         ac *= restScale;
     }
-    computeTriangleRotation(ti.init_frame, ab, ac);
+    // equivalent to computeRotationLarge but in 2D == do not store the ortogonal vector are framex ^ framey
+    computeTriangleRotation(ti.init_frame, ab, ac); 
+        
+    // compute initial position in local space A[0, 0] B[x, 0] C[x, y]
     ti.bx = ti.init_frame[0] * ab;
     ti.cx = ti.init_frame[0] * ac;
     ti.cy = ti.init_frame[1] * ac;
@@ -189,7 +168,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::initTriangleInfo(Index i, Triangle
 }
 
 template <class DataTypes>
-void TriangularFEMForceFieldOptim<DataTypes>::initTriangleState(Index i, TriangleState& ti, const Triangle t, const VecCoord& x)
+void TriangularFEMForceFieldOptim<DataTypes>::initTriangleState(Index i, TriangleState& ts, const Triangle t, const VecCoord& x)
 {
     if (t[0] >= x.size() || t[1] >= x.size() || t[2] >= x.size())
     {
@@ -202,8 +181,26 @@ void TriangularFEMForceFieldOptim<DataTypes>::initTriangleState(Index i, Triangl
     Coord a  = x[t[0]];
     Coord ab = x[t[1]]-a;
     Coord ac = x[t[2]]-a;
-    computeTriangleRotation(ti.frame, ab, ac);
-    ti.stress.clear();
+    computeTriangleRotation(ts.frame, ab, ac);
+  
+    ts.stress.clear();
+}
+
+
+// --------------------------------------------------------------------------------------
+// ---  Topology Creation/Destruction functions
+// --------------------------------------------------------------------------------------
+
+template< class DataTypes>
+void TriangularFEMForceFieldOptim<DataTypes>::createTriangleInfo(Index triangleIndex, TriangleInfo& ti, const Triangle& t, const sofa::type::vector<Index>&, const sofa::type::vector<SReal>&)
+{
+    initTriangleInfo(triangleIndex, ti, t, this->mstate->read(core::ConstVecCoordId::restPosition())->getValue());
+}
+
+template< class DataTypes>
+void TriangularFEMForceFieldOptim<DataTypes>::createTriangleState(Index triangleIndex, TriangleState& ti, const Triangle& t, const sofa::type::vector<Index>&, const sofa::type::vector<SReal>&)
+{
+    initTriangleState(triangleIndex, ti, t, this->mstate->read(core::ConstVecCoordId::position())->getValue());
 }
 
 // --------------------------------------------------------------------------------------
@@ -237,16 +234,6 @@ void TriangularFEMForceFieldOptim<DataTypes>::reinit()
     d_triangleInfo.endEdit();
     d_triangleState.endEdit();
 
-    /// prepare to store info in the edge array
-    VecEdgeInfo& edgeInf = *(d_edgeInfo.beginEdit());
-    edgeInf.resize(m_topology->getNbEdges());
-    d_edgeInfo.endEdit();
-
-    /// prepare to store info in the vertex array
-    unsigned int nbPoints = m_topology->getNbPoints();
-    VecVertexInfo& vi = *(d_vertexInfo.beginEdit());
-    vi.resize(nbPoints);
-    d_vertexInfo.endEdit();
     data.reinit(this);
 }
 
@@ -283,37 +270,68 @@ void TriangularFEMForceFieldOptim<DataTypes>::addForce(const core::MechanicalPar
         Triangle t = triangles[i];
         const TriangleInfo& ti = triInfo[i];
         TriangleState& ts = triState[i];
-        Coord a  = x[t[0]];
-        Coord ab = x[t[1]]-a;
-        Coord ac = x[t[2]]-a;
+        Coord a = x[t[0]];
+        Coord ab = x[t[1]] -a;
+        Coord ac = x[t[2]] -a;
+
         computeTriangleRotation(ts.frame, ab, ac);
-        Real dbx = ti.bx - ts.frame[0]*ab;
-        Real dcx = ti.cx - ts.frame[0]*ac;
-        Real dcy = ti.cy - ts.frame[1]*ac;
 
-        defaulttype::Vec<3,Real> strain (
-            ti.cy * dbx,                // ( cy,   0,  0,  0) * (dbx, dby, dcx, dcy)
-            ti.bx * dcy,                // (  0, -cx,  0, bx) * (dbx, dby, dcx, dcy)
-            ti.bx * dcx - ti.cx * dbx); // (-cx,  cy, bx,  0) * (dbx, dby, dcx, dcy)
+        // Displacement in local space (rest pos - current pos), dby == 0
+        Real dbx = ti.bx - ts.frame[0] * ab;
+        Real dcx = ti.cx - ts.frame[0] * ac;
+        Real dcy = ti.cy - ts.frame[1] * ac;
+                
+        /// Full StrainDisplacement matrix. 
+        // | beta1  0       beta2  0        beta3  0      |
+        // | 0      gamma1  0      gamma2   0      gamma3 | / (2 * A)
+        // | gamma1 beta1   gamma2 beta2    gamma3 beta3 |
 
-        Real gammaXY = gamma*(strain[0]+strain[1]);
+        // As no displacement for Pa nor in Pb[y], Beta1, gamma1 and beta3 are not considered. Therefor we obtain:
+        // | beta2  0        beta3  0      |
+        // | 0      gamma2   0      gamma3 | / (2 * A) 
+        // | gamma2 beta2    gamma3 beta3 |
 
-        defaulttype::Vec<3,Real> stress (
-            mu*strain[0] + gammaXY,    // (gamma+mu, gamma   ,    0) * strain
-            mu*strain[1] + gammaXY,    // (gamma   , gamma+mu,    0) * strain
-            (Real)(0.5)*mu*strain[2]); // (       0,        0, mu/2) * strain
+        // |   cy     0     0      0   |
+        // |   0     -cx    0      bx  |
+        // |  -cx     cy    bx     0   |
 
-        ts.stress = stress;
+        // Directly apply division by determinant(Area = det * 0.5 in local space; det = bx * cy)
+        // |   1/bx        0        0        0   |
+        // |   0       -cx/(bx*cy)  0       1/cy |
+        // | -cx/(bx*cy)  1/bx     1/cy      0   |
+
+        // StrainDisplacement: 
+        // beta2 = ti.cy;
+        // gamma2 = -ti.cx;
+        // gamma3 = ti.bx;
+
+        // Strain = StrainDisplacement * Displacement
+        type::Vec<3,Real> strain (
+            ti.cy * dbx,                   // ( cy,   0,  0,  0) * (dbx, dby(0), dcx, dcy)
+            ti.bx * dcy,                   // (  0, -cx,  0, bx) * (dbx, dby(0), dcx, dcy)
+            ti.bx * dcx - ti.cx * dbx);    // ( -cx, cy, bx,  0) * (dbx, dby(0), dcx, dcy)
+        
+        // Stress = K * Strain
+        Real gammaXY = gamma * (strain[0] + strain[1]);
+        type::Vec<3,Real> stress (
+            mu*strain[0] + gammaXY,      // (gamma+mu, gamma   ,    0) * strain
+            mu*strain[1] + gammaXY,      // (gamma   , gamma+mu,    0) * strain
+            (Real)(0.5)*mu*strain[2]);   // (       0,        0, mu/2) * strain
 
         stress *= ti.ss_factor;
+        
         Deriv fb = ts.frame[0] * (ti.cy * stress[0] - ti.cx * stress[2])  // (cy,   0, -cx) * stress
-                + ts.frame[1] * (ti.cy * stress[2] - ti.cx * stress[1]); // ( 0, -cx,  cy) * stress
+                + ts.frame[1] * (ti.cy * stress[2] - ti.cx * stress[1]);  // ( 0, -cx,  cy) * stress
         Deriv fc = ts.frame[0] * (ti.bx * stress[2])                      // ( 0,   0,  bx) * stress
-                + ts.frame[1] * (ti.bx * stress[1]);                     // ( 0,  bx,   0) * stress
+                + ts.frame[1] * (ti.bx * stress[1]);                      // ( 0,  bx,   0) * stress
         Deriv fa = -fb-fc;
+
         f[t[0]] += fa;
         f[t[1]] += fb;
         f[t[2]] += fc;
+
+        // store data for re-use
+        ts.stress = stress;
     }
 }
 
@@ -344,29 +362,33 @@ void TriangularFEMForceFieldOptim<DataTypes>::addDForce(const core::MechanicalPa
         Deriv da  = dx[t[0]];
         Deriv dab = dx[t[1]]-da;
         Deriv dac = dx[t[2]]-da;
+
         Real dbx = ts.frame[0]*dab;
         Real dby = ts.frame[1]*dab;
         Real dcx = ts.frame[0]*dac;
         Real dcy = ts.frame[1]*dac;
+        
+        // Strain = StrainDisplacement * Displacement
+        type::Vec<3, Real> dstrain(
+            ti.cy * dbx,                                // ( cy,   0,  0,  0) * (dbx, dby, dcx, dcy)
+            ti.bx * dcy - ti.cx * dby,                  // (  0, -cx,  0, bx) * (dbx, dby, dcx, dcy)
+            ti.bx * dcx - ti.cx * dbx + ti.cy * dby);   // ( -cx, cy, bx,  0) * (dbx, dby, dcx, dcy)
 
-        defaulttype::Vec<3,Real> dstrain (
-            ti.cy  * dbx,                             // ( cy,   0,  0,  0) * (dbx, dby, dcx, dcy)
-            ti.bx * dcy - ti.cx * dby,                // (  0, -cx,  0, bx) * (dbx, dby, dcx, dcy)
-            ti.bx * dcx - ti.cx * dbx + ti.cy * dby); // (-cx,  cy, bx,  0) * (dbx, dby, dcx, dcy)
 
+        // Stress = K * Strain
         Real gammaXY = gamma*(dstrain[0]+dstrain[1]);
-
-        defaulttype::Vec<3,Real> dstress (
-            mu*dstrain[0] + gammaXY,    // (gamma+mu, gamma   ,    0) * dstrain
-            mu*dstrain[1] + gammaXY,    // (gamma   , gamma+mu,    0) * dstrain
-            (Real)(0.5)*mu*dstrain[2]); // (       0,        0, mu/2) * dstrain
-
+        type::Vec<3,Real> dstress (
+            mu*dstrain[0] + gammaXY,        // (gamma+mu, gamma   ,    0) * dstrain
+            mu*dstrain[1] + gammaXY,        // (gamma   , gamma+mu,    0) * dstrain
+            (Real)(0.5)*mu*dstrain[2]);     // (       0,        0, mu/2) * dstrain
+        
         dstress *= ti.ss_factor * kFactor;
-        Deriv dfb = ts.frame[0] * (ti.cy * dstress[0] - ti.cx * dstress[2])  // (cy,   0, -cx) * dstress
-                + ts.frame[1] * (ti.cy * dstress[2] - ti.cx * dstress[1]); // ( 0, -cx,  cy) * dstress
-        Deriv dfc = ts.frame[0] * (ti.bx * dstress[2])                       // ( 0,   0,  bx) * dstress
-                + ts.frame[1] * (ti.bx * dstress[1]);                      // ( 0,  bx,   0) * dstress
-        Deriv dfa = -dfb-dfc;
+        Deriv dfb = ts.frame[0] * (ti.cy * dstress[0] - ti.cx * dstress[2])  // (cy,   0, -cx) * stress
+            + ts.frame[1] * (ti.cy * dstress[2] - ti.cx * dstress[1]);       // ( 0, -cx,  cy) * stress
+        Deriv dfc = ts.frame[0] * (ti.bx * dstress[2])                       // ( 0,   0,  bx) * stress
+            + ts.frame[1] * (ti.bx * dstress[1]);                            // ( 0,  bx,   0) * stress
+        Deriv dfa = -dfb - dfc;
+
         df[t[0]] -= dfa;
         df[t[1]] -= dfb;
         df[t[2]] -= dfc;
@@ -402,7 +424,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrixT(const core::Mechanic
         Triangle t = triangles[i];
         const TriangleInfo& ti = triInfo[i];
         const TriangleState& ts = triState[i];
-        sofa::defaulttype::Mat<3,4,Real> KJt;
+        sofa::type::Mat<3,4,Real> KJt;
         Real factor = -kFactor * ti.ss_factor;
         Real fG = factor * gamma;
         Real fGM = factor * (gamma+mu);
@@ -411,7 +433,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrixT(const core::Mechanic
         KJt[1][0] = fG   *  ti.cy ;    KJt[1][1] = fGM  *(-ti.cx);    KJt[1][2] = 0;    KJt[1][3] = fGM  *ti.bx;
         KJt[2][0] = fM_2 *(-ti.cx);    KJt[2][1] = fM_2 *( ti.cy);    KJt[2][2] = fM_2 *ti.bx;    KJt[2][3] = 0;
 
-        sofa::defaulttype::Mat<2,2,Real> JKJt11, JKJt12, JKJt22;
+        sofa::type::Mat<2,2,Real> JKJt11, JKJt12, JKJt22;
         JKJt11[0][0] = ti.cy*KJt[0][0] - ti.cx*KJt[2][0];
         JKJt11[0][1] = ti.cy*KJt[0][1] - ti.cx*KJt[2][1];
         JKJt11[1][0] = JKJt11[0][1]; //ti.cy*KJt[2][0] - ti.cx*KJt[1][0];
@@ -427,7 +449,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrixT(const core::Mechanic
         JKJt22[1][0] = 0; //ti.bx*KJt[1][2];
         JKJt22[1][1] = ti.bx*KJt[1][3];
 
-        sofa::defaulttype::Mat<2,2,Real> JKJt00, JKJt01, JKJt02;
+        sofa::type::Mat<2,2,Real> JKJt00, JKJt01, JKJt02;
         // fA = -fB-fC, dxB/dxA = -1, dxC/dxA = -1
         // dfA/dxA = -dfB/dxA - dfC/dxA
         //         = -dfB/dxB * dxB/dxA -dfB/dxC * dxC/dxA   -dfC/dxB * dxB/dxA -dfC/dxC * dxC/dxA
@@ -457,7 +479,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::addKToMatrixT(const core::Mechanic
 template<class DataTypes>
 void TriangularFEMForceFieldOptim<DataTypes>::getTriangleVonMisesStress(Index i, Real& stressValue)
 {
-    Deriv s = d_triangleState[i].stress;
+    const Deriv& s = d_triangleState.getValue()[i].stress;
     Real vonMisesStress = sofa::helper::rsqrt(s[0]*s[0] - s[0]*s[1] + s[1]*s[1] + 3*s[2]);
     stressValue = vonMisesStress;
 }
@@ -473,7 +495,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::getTrianglePrincipalStress(Index i
 template<class DataTypes>
 void TriangularFEMForceFieldOptim<DataTypes>::getTrianglePrincipalStress(Index i, Real& stressValue, Deriv& stressDirection, Real& stressValue2, Deriv& stressDirection2)
 {
-    const TriangleState& ts = d_triangleState[i];
+    const TriangleState& ts = d_triangleState.getValue()[i];
     Deriv s = ts.stress;
 
     // If A = [ a b ] is a real symmetric 2x2 matrix
@@ -490,7 +512,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::getTrianglePrincipalStress(Index i
     Real deltaV2 = tr*tr-4*det;
     Real deltaV = helper::rsqrt(std::max((Real)0.0,deltaV2));
     Real eval1, eval2;
-    defaulttype::Vec<2,Real> evec1, evec2;
+    type::Vec<2,Real> evec1, evec2;
     eval1 = (tr + deltaV)/2;
     eval2 = (tr - deltaV)/2;
     if (s[2] == 0)
@@ -528,6 +550,96 @@ void TriangularFEMForceFieldOptim<DataTypes>::getTrianglePrincipalStress(Index i
     }
 }
 
+template<class DataTypes>
+type::fixed_array <typename TriangularFEMForceFieldOptim<DataTypes>::Coord, 3> TriangularFEMForceFieldOptim<DataTypes>::getRotatedInitialElement(Index elemId)
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleInfo > > triInfo = d_triangleInfo;
+    type::fixed_array <Coord, 3> positions;
+    if (elemId < 0 && elemId >= triInfo.size())
+    {
+        msg_warning() << "Method getRotatedInitialElement called with element index: " << elemId
+            << " which is out of bounds: [0, " << triInfo.size() << "]. Returning default empty array of coordinates.";
+        return positions;
+    }
+
+    const TriangleInfo& ti = triInfo[elemId];
+    positions[0] = Coord(0, 0, 0);
+    positions[1] = Coord(ti.bx, 0, 0);
+    positions[2] = Coord(ti.cx, ti.cy, 0);
+ 
+    return positions;
+}
+
+
+template<class DataTypes>
+typename TriangularFEMForceFieldOptim<DataTypes>::Transformation TriangularFEMForceFieldOptim<DataTypes>::getRotationMatrix(Index elemId)
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleState > > triState = d_triangleState;
+    if (elemId >= 0 && elemId < triState.size())
+        return triState[elemId].frame;
+
+    msg_warning() << "Method getRotationMatrix called with element index: "
+        << elemId << " which is out of bounds: [0, " << triState.size() << "]. Returning default empty rotation.";
+    return Transformation();
+}
+
+
+template<class DataTypes>
+typename TriangularFEMForceFieldOptim<DataTypes>::MaterialStiffness TriangularFEMForceFieldOptim<DataTypes>::getMaterialStiffness(Index elemId)
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleInfo > > triInfo = d_triangleInfo;
+    if (elemId < 0 && elemId >= triInfo.size())
+    {
+        msg_warning() << "Method getMaterialStiffness called with element index: "
+            << elemId << " which is out of bounds: [0, " << triInfo.size() << "]. Returning default empty matrix.";
+        return MaterialStiffness();
+    }
+
+    // (gamma+mu, gamma   ,    0)
+    // (gamma   , gamma+mu,    0)  
+    // (       0,        0, mu/2)
+    const Real gamma = this->gamma;
+    const Real mu = this->mu;
+
+    MaterialStiffness mat; 
+    mat[0][0] = mat[1][1] = gamma + mu;
+    mat[0][1] = mat[1][0] = gamma;
+    mat[2][2] = (Real)(0.5) * mu;
+   
+    return mat;
+}
+
+
+template<class DataTypes>
+sofa::type::Vec3 TriangularFEMForceFieldOptim<DataTypes>::getStrainDisplacementFactors(Index elemId)
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleInfo > > triInfo = d_triangleInfo;
+    if (elemId < 0 && elemId >= triInfo.size())
+    {
+        msg_warning() << "Method getStrainDisplacementFactors called with element index: "
+            << elemId << " which is out of bounds: [0, " << triInfo.size() << "]. Returning default empty displacements.";
+        return type::Vec< 3, Real>();
+    }
+
+    const TriangleInfo& ti = triInfo[elemId];
+    return type::Vec< 3, Real>(ti.cy, -ti.cx, ti.bx);
+}
+
+template<class DataTypes>
+typename TriangularFEMForceFieldOptim<DataTypes>::Real TriangularFEMForceFieldOptim<DataTypes>::getTriangleFactor(Index elemId)
+{
+    sofa::helper::ReadAccessor< core::objectmodel::Data< VecTriangleInfo > > triInfo = d_triangleInfo;
+    if (elemId < 0 && elemId >= triInfo.size())
+    {
+        msg_warning() << "Method getTriangleFactor called with element index: "
+            << elemId << " which is out of bounds: [0, " << triInfo.size() << "]. Returning 0.";
+        return Real(0);
+    }
+
+    return triInfo[elemId].ss_factor;
+}
+
+
 // --------------------------------------------------------------------------------------
 // --- Display methods
 // --------------------------------------------------------------------------------------
@@ -540,9 +652,9 @@ void TriangularFEMForceFieldOptim<DataTypes>::draw(const core::visual::VisualPar
     if (!vparams->displayFlags().getShowForceFields())
         return;
 
-    using defaulttype::Vector3;
-    using defaulttype::Vec3i;
-    using defaulttype::Vec4f;
+    using type::Vector3;
+    using type::Vec3i;
+    using type::Vec4f;
 
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
     unsigned int nbTriangles=m_topology->getNbTriangles();
@@ -582,9 +694,8 @@ void TriangularFEMForceFieldOptim<DataTypes>::draw(const core::visual::VisualPar
             {
                 Real maxs = std::min(stresses[i],stresses2[i]);
                 Triangle t = triangles[i];
-                for (unsigned int j=0;j<t.size();++j)
+                for (const auto p : t)
                 {
-                    unsigned int p = t[j];
                     pstresses[p].first += 1;
                     pstresses[p].second += helper::rabs(maxs);
                 }
@@ -599,7 +710,7 @@ void TriangularFEMForceFieldOptim<DataTypes>::draw(const core::visual::VisualPar
         else
         {
             drawPrevMaxStress = maxStress;
-            msg_info() << "max stress = " << maxStress << sendl;
+            msg_info() << "max stress = " << maxStress;
         }
         if (d_showStressMaxValue.isSet())
         {
@@ -630,18 +741,18 @@ void TriangularFEMForceFieldOptim<DataTypes>::draw(const core::visual::VisualPar
                 points[g2].push_back(center - d2);
                 points[g2].push_back(center + d2);
             }
-            vparams->drawTool()->drawLines(points[0], 2, sofa::helper::types::RGBAColor::yellow());
-            vparams->drawTool()->drawLines(points[1], 2, sofa::helper::types::RGBAColor::magenta());
+            vparams->drawTool()->drawLines(points[0], 2, sofa::type::RGBAColor::yellow());
+            vparams->drawTool()->drawLines(points[1], 2, sofa::type::RGBAColor::magenta());
         }
     }
     else
     {
         std::vector< Vector3 > points[4];
 
-        const sofa::helper::types::RGBAColor c0(1,0,0,1);
-        const sofa::helper::types::RGBAColor c1(0,1,0,1);
-        const sofa::helper::types::RGBAColor c2(1,0.5,0,1);
-        const sofa::helper::types::RGBAColor c3(0,0,1,1);
+        const sofa::type::RGBAColor c0(1,0,0,1);
+        const sofa::type::RGBAColor c1(0,1,0,1);
+        const sofa::type::RGBAColor c2(1,0.5,0,1);
+        const sofa::type::RGBAColor c3(0,0,1,1);
 
         points[0].reserve(nbTriangles*2);
         points[1].reserve(nbTriangles*2);

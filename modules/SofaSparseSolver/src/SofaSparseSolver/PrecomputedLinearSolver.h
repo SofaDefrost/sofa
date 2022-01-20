@@ -26,11 +26,11 @@
 #include <sofa/core/behavior/LinearSolver.h>
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/FullMatrix.h>
 #include <sofa/helper/map.h>
 #include <cmath>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #include <fstream>
 
 namespace sofa
@@ -47,10 +47,10 @@ class PrecomputedLinearSolverInternalData
 {
 public :
     typedef typename TMatrix::Real Real;
-    typedef FullMatrix<Real> TBaseMatrix ;
+    typedef sofa::linearalgebra::FullMatrix<Real> TBaseMatrix ;
 
-    FullMatrix<Real> JMinv;
-    FullMatrix<Real> Minv;
+    sofa::linearalgebra::FullMatrix<Real> JMinv;
+    sofa::linearalgebra::FullMatrix<Real> Minv;
     std::vector<int> idActiveDofs;
     std::vector<int> invActiveDofs;
 
@@ -90,9 +90,7 @@ public:
     Data<bool> jmjt_twostep; ///< Use two step algorithm to compute JMinvJt
     Data<bool> f_verbose; ///< Dump system state at each iteration
     Data<bool> use_file; ///< Dump system matrix in a file
-    Data<int> init_MaxIter;
     Data<double> init_Tolerance;
-    Data<double> init_Threshold;
 
     PrecomputedLinearSolver();
     void solve (TMatrix& M, TVector& x, TVector& b) override;
@@ -102,7 +100,7 @@ public:
 #if SOFASPARSESOLVER_HAVE_CSPARSE
     void loadMatrixWithCSparse(TMatrix& M);
 #endif
-    bool addJMInvJt(defaulttype::BaseMatrix* result, defaulttype::BaseMatrix* J, double fact) override;
+    bool addJMInvJt(linearalgebra::BaseMatrix* result, linearalgebra::BaseMatrix* J, SReal fact) override;
 
     /// Returns the sofa template name. By default the name of the c++ class signature is exposed...
     /// so we need to override that by implementing GetCustomTemplateName() function
@@ -119,7 +117,7 @@ public:
 
 protected :
     template<class JMatrix>
-    void ComputeResult(defaulttype::BaseMatrix * result,JMatrix& J, float fact);
+    void ComputeResult(linearalgebra::BaseMatrix * result,JMatrix& J, SReal fact);
 
     PrecomputedLinearSolverInternalData<TMatrix,TVector> internalData;
 
@@ -136,7 +134,7 @@ private :
 };
 
 #if !defined(SOFA_COMPONENT_LINEARSOLVER_PRECOMPUTEDLINEARSOLVER_CPP)
-extern template class SOFA_SOFASPARSESOLVER_API PrecomputedLinearSolver< CompressedRowSparseMatrix<double> , FullVector<double> >;
+extern template class SOFA_SOFASPARSESOLVER_API PrecomputedLinearSolver< linearalgebra::CompressedRowSparseMatrix<SReal> , linearalgebra::FullVector<SReal> >;
 #endif
 
 } // namespace linearsolver

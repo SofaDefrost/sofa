@@ -27,12 +27,12 @@
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <SofaBaseTopology/TopologySubsetData.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 
 namespace sofa::component::projectiveconstraintset
 {
 
-using sofa::defaulttype::BaseVector;
+using sofa::linearalgebra::BaseVector;
 using sofa::core::MechanicalParams;
 using sofa::core::visual::VisualParams;
 using sofa::core::topology::BaseMeshTopology;
@@ -64,8 +64,8 @@ public:
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
     typedef Data<MatrixDeriv> DataMatrixDeriv;
-    typedef helper::vector<Index> SetIndexArray;
-    typedef component::topology::PointSubsetData< SetIndexArray > SetIndex;
+    typedef type::vector<Index> SetIndexArray;
+    typedef core::topology::TopologySubsetIndices SetIndex;
 public:
     Data<Coord> d_direction; ///< direction on which the constraint applied
     Data<Real> d_dmin; ///< coordinates min of the plane for the vertex selection
@@ -86,14 +86,14 @@ public:
     void projectPosition(const MechanicalParams* mparams, DataVecCoord& xData) override;
 
     /// Implement projectMatrix for assembled solver of compliant
-    void projectMatrix( sofa::defaulttype::BaseMatrix* M, unsigned offset) override;
+    void projectMatrix( sofa::linearalgebra::BaseMatrix* M, unsigned offset) override;
     void projectJacobianMatrix(const MechanicalParams* mparams, DataMatrixDeriv& cData) override;
 
     /// Implement applyConstraint for direct solvers
     void applyConstraint(const MechanicalParams* mparams,
                                  const MultiMatrixAccessor* matrix) override;
 
-    void applyConstraint(const MechanicalParams* mparams, BaseVector* vector,
+    void applyConstraint(const MechanicalParams* mparams, BaseVector* vect,
                                  const MultiMatrixAccessor* matrix) override;
 
     void setDirection (Coord dir);
@@ -109,12 +109,6 @@ protected:
 
     FixedPlaneConstraintInternalData<DataTypes> data;
     friend class FixedPlaneConstraintInternalData<DataTypes>;
-
-    /// Forward class declaration, definition is in the .inl
-    class FCPointHandler;
-
-    /// Handler for subset Data
-    FCPointHandler* m_pointHandler {nullptr};
 
     /// whether vertices should be selected from 2 parallel planes
     bool m_selectVerticesFromPlanes {false};

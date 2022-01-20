@@ -49,8 +49,6 @@ namespace component
 namespace forcefield
 {
 
-using namespace sofa::defaulttype;
-
 template <class TCoord, class TDeriv, class TReal>
 class TetrahedronFEMForceFieldInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >
 {
@@ -67,8 +65,8 @@ public:
 
     typedef typename Main::Element Element;
     typedef typename Main::VecElement VecElement;
-    typedef Mat<6, 6, Real> MaterialStiffness;
-    typedef Mat<12, 6, Real> StrainDisplacement;
+    typedef type::Mat<6, 6, Real> MaterialStiffness;
+    typedef type::Mat<12, 6, Real> StrainDisplacement;
 
     typedef gpu::cuda::CudaKernelsTetrahedronFEMForceField<DataTypes> Kernels;
 
@@ -193,7 +191,7 @@ public:
     /// Varying data associated with each element
     struct GPUElementForce
     {
-        Vec<4,Real> fA,fB,fC,fD;
+        type::Vec<4, Real> fA, fB, fC, fD;
     };
 
     gpu::cuda::CudaVector<GPUElementState> initState;
@@ -263,10 +261,9 @@ public:
     static void reinit(Main* m);
     static void addForce(Main* m, VecDeriv& f, const VecCoord& x, const VecDeriv& /*v*/);
     static void addDForce (Main* m, VecDeriv& df, const VecDeriv& dx, SReal kFactor, SReal bFactor);
-    static void addKToMatrix (Main* m, sofa::defaulttype::BaseMatrix* mat, SReal kFactor, unsigned int& offset);
-    static void addSubKToMatrix (Main* m, sofa::defaulttype::BaseMatrix* mat, const helper::vector<unsigned> & subMatrixIndex, SReal kFactor, unsigned int& offset);
+    static void addKToMatrix (Main* m, sofa::linearalgebra::BaseMatrix* mat, SReal kFactor, unsigned int& offset);
     static void getRotations(Main* m, VecReal& rotations);
-    static void getRotations(Main* m, defaulttype::BaseMatrix * rotations,int offset);
+    static void getRotations(Main* m, linearalgebra::BaseMatrix * rotations,int offset);
 
     VecReal vecTmpRotation;
 
@@ -291,10 +288,9 @@ public:
     template<> void TetrahedronFEMForceField< T >::reinit(); \
     template<> void TetrahedronFEMForceField< T >::addForce(const core::MechanicalParams* mparams, DataVecDeriv& d_f, const DataVecCoord& d_x, const DataVecDeriv& d_v); \
     template<> void TetrahedronFEMForceField< T >::getRotations(VecReal& vecR); \
-    template<> void TetrahedronFEMForceField< T >::getRotations(defaulttype::BaseMatrix * vecR,int offset); \
+    template<> void TetrahedronFEMForceField< T >::getRotations(linearalgebra::BaseMatrix * vecR,int offset); \
     template<> void TetrahedronFEMForceField< T >::addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx); \
-    template<> void TetrahedronFEMForceField< T >::addKToMatrix(sofa::defaulttype::BaseMatrix* mat, SReal kFactor, unsigned int& offset); \
-    template<> void TetrahedronFEMForceField< T >::addSubKToMatrix(sofa::defaulttype::BaseMatrix* mat, const helper::vector<unsigned> & subMatrixIndex, SReal kFactor, unsigned int& offset);
+    template<> void TetrahedronFEMForceField< T >::addKToMatrix(sofa::linearalgebra::BaseMatrix* mat, SReal kFactor, unsigned int& offset); \
 
 
 CudaTetrahedronFEMForceField_DeclMethods(gpu::cuda::CudaVec3fTypes);

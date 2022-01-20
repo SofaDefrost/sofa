@@ -21,7 +21,7 @@
 ******************************************************************************/
 #pragma once
 #include <sofa/core/behavior/ForceField.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/core/topology/TopologyData.h>
 
 #include <SofaGeneralSimpleFem/config.h>
 
@@ -30,17 +30,15 @@ namespace  sofa::component::forcefield
 
 namespace _beamfemforcefield_
 {
-
-using topology::TopologyDataHandler;
 using core::MechanicalParams;
 using core::behavior::MultiMatrixAccessor;
 using core::behavior::ForceField;
 using core::topology::BaseMeshTopology;
-using defaulttype::Vec;
-using defaulttype::Mat;
-using defaulttype::Vector3;
-using defaulttype::Quat;
-using topology::EdgeData;
+using type::Vec;
+using type::Mat;
+using type::Vector3;
+using type::Quat;
+using core::topology::EdgeData;
 
 /** Compute Finite Element forces based on 6D beam elements.
 */
@@ -63,10 +61,8 @@ public:
     using Index = sofa::Index;
 
     typedef BaseMeshTopology::Edge Element;
-    typedef helper::vector<BaseMeshTopology::Edge> VecElement;
+    typedef type::vector<BaseMeshTopology::Edge> VecElement;
     typedef Vec<3, Real> Vec3;
-
-protected:
 
     typedef Vec<12, Real> Displacement;     ///< the displacement vector
     typedef Mat<3, 3, Real> Transformation; ///< matrix for rigid transformations like rotations
@@ -75,23 +71,23 @@ protected:
     struct BeamInfo
     {
         // 	static const double FLEXIBILITY=1.00000; // was 1.00001
-        double _E0,_E; //Young
-        double _nu; //Poisson
-        double _L; //length
-        double _r; //radius of the section
-        double _rInner; //inner radius of the section if beam is hollow
-        double _G; //shear modulus
-        double _Iy;
-        double _Iz; //Iz is the cross-section moment of inertia (assuming mass ratio = 1) about the z axis;
-        double _J;  //Polar moment of inertia (J = Iy + Iz)
-        double _A; // A is the cross-sectional area;
-        double _Asy; //_Asy is the y-direction effective shear area =  10/9 (for solid circular section) or 0 for a non-Timoshenko beam
-        double _Asz; //_Asz is the z-direction effective shear area;
+        SReal _E0,_E; //Young
+        SReal _nu; //Poisson
+        SReal _L; //length
+        SReal _r; //radius of the section
+        SReal _rInner; //inner radius of the section if beam is hollow
+        SReal _G; //shear modulus
+        SReal _Iy;
+        SReal _Iz; //Iz is the cross-section moment of inertia (assuming mass ratio = 1) about the z axis;
+        SReal _J;  //Polar moment of inertia (J = Iy + Iz)
+        SReal _A; // A is the cross-sectional area;
+        SReal _Asy; //_Asy is the y-direction effective shear area =  10/9 (for solid circular section) or 0 for a non-Timoshenko beam
+        SReal _Asz; //_Asz is the z-direction effective shear area;
         StiffnessMatrix _k_loc;
 
-        defaulttype::Quat quat;
+        type::Quat<SReal> quat;
 
-        void init(double E, double L, double nu, double r, double rInner);
+        void init(SReal E, SReal L, SReal nu, SReal r, SReal rInner);
 
         /// Output stream
         inline friend std::ostream& operator<< ( std::ostream& os, const BeamInfo& bi )
@@ -134,26 +130,13 @@ protected:
         }
     };
 
-    class BeamFFEdgeHandler : public TopologyDataHandler<BaseMeshTopology::Edge, helper::vector<BeamInfo> >
-    {
-    public:
-        typedef typename BeamFEMForceField<DataTypes>::BeamInfo BeamInfo;
-        BeamFFEdgeHandler(BeamFEMForceField<DataTypes>* ff, EdgeData<helper::vector<BeamInfo> >* data)
-            :TopologyDataHandler<BaseMeshTopology::Edge, helper::vector<BeamInfo> >(data),ff(ff) {}
+    EdgeData<type::vector<BeamInfo> > m_beamsData; ///< Internal element data
 
-        void applyCreateFunction(Index edgeIndex, BeamInfo&,
-                                 const BaseMeshTopology::Edge& e,
-                                 const helper::vector<Index> &,
-                                 const helper::vector< double > &);
-
-    protected:
-        BeamFEMForceField<DataTypes>* ff;
-
-    };
-
-    //just for draw forces
-    VecDeriv m_forces;
-    EdgeData<helper::vector<BeamInfo> > m_beamsData; ///< Internal element data
+protected:
+    void createBeamInfo(Index edgeIndex, BeamInfo&,
+        const BaseMeshTopology::Edge& e,
+        const type::vector<Index> &,
+        const type::vector< SReal > &);
 
     const VecElement *m_indexedElements;
 
@@ -169,15 +152,17 @@ public:
     SingleLink<BeamFEMForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
  protected:
+    //just for draw forces
+    VecDeriv m_forces;
+
     bool m_partialListSegment;
     bool m_updateStiffnessMatrix;
     bool m_assembling;
-    double m_lastUpdatedStep;
+    SReal m_lastUpdatedStep;
 
-    Quat& beamQuat(int i);
+    Quat<SReal>& beamQuat(int i);
 
     BaseMeshTopology* m_topology;
-    BeamFFEdgeHandler* m_edgeHandler;
 
     BeamFEMForceField();
     BeamFEMForceField(Real poissonRatio, Real youngModulus, Real radius, Real radiusInner);
@@ -198,7 +183,7 @@ public:
 
     void setUpdateStiffnessMatrix(bool val);
     void setComputeGlobalMatrix(bool val);
-    void setBeam(Index i, double E, double L, double nu, double r, double rInner);
+    void setBeam(Index i, SReal E, SReal L, SReal nu, SReal r, SReal rInner);
     void initBeams(std::size_t size);
 
 protected:
@@ -208,10 +193,10 @@ protected:
     void computeStiffness(int i, Index a, Index b);
 
     /// Large displacements method
-    helper::vector<Transformation> _nodeRotations;
+    type::vector<Transformation> _nodeRotations;
     void initLarge(int i, Index a, Index b);
     void accumulateForceLarge( VecDeriv& f, const VecCoord& x, int i, Index a, Index b);
-    void applyStiffnessLarge( VecDeriv& f, const VecDeriv& x, int i, Index a, Index b, double fact=1.0);
+    void applyStiffnessLarge( VecDeriv& f, const VecDeriv& x, int i, Index a, Index b, SReal fact=1.0);
 };
 
 #if  !defined(SOFA_COMPONENT_FORCEFIELD_BEAMFEMFORCEFIELD_CPP)

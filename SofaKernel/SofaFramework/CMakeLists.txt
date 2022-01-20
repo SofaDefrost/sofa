@@ -10,6 +10,7 @@ set(SOFAFRAMEWORK_MODULES
     Sofa.Topology
     Sofa.Geometry 
     Sofa.Helper
+    Sofa.LinearAlgebra
     Sofa.DefaultType
     Sofa.Core
     Sofa.SimulationCore
@@ -21,7 +22,8 @@ set(SOFAFRAMEWORK_LEGACYMODULES
     Sofa.Topology 
     Sofa.Geometry 
     SofaHelper 
-    SofaDefaultType 
+    Sofa.LinearAlgebra
+    SofaDefaultType
     SofaCore 
     SofaSimulationCore
 )
@@ -46,6 +48,8 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${SOFAFRAMEWORK_MODULES})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER SofaFramework)
 
 sofa_create_package_with_targets(
     PACKAGE_NAME ${PROJECT_NAME}

@@ -66,7 +66,7 @@ bool derivRigid3Vectors(const typename DataTypes::VecCoord& x0, const typename D
         if (derivRotation)
         {
             // rotations are taken into account to compute the violations
-            sofa::defaulttype::Quat q;
+            sofa::type::Quat<SReal> q;
             getVOrientation(d[i]) = x0[i].rotate(q.angularDisplacement(x1[i].getOrientation(), x0[i].getOrientation() ) ); // angularDisplacement compute the rotation vector btw the two quaternions
         }
         else
@@ -80,7 +80,7 @@ bool derivRigid3Vectors(const typename DataTypes::VecCoord& x0, const typename D
         if (derivRotation)
         {
             // rotations are taken into account to compute the violations
-            sofa::defaulttype::Quat q= x0[i].getOrientation();
+            sofa::type::Quat<SReal> q= x0[i].getOrientation();
             getVOrientation(d[i]) = -x0[i].rotate( q.quatToRotationVector() );  // Use of quatToRotationVector instead of toEulerVector:
                                                                                 // this is done to keep the old behavior (before the
                                                                                 // correction of the toEulerVector  function). If the
@@ -426,12 +426,12 @@ void LCPForceFeedback<DataTypes>::computeWrench(const sofa::defaulttype::SolidTy
 
 
 template <>
-void SOFA_SOFAHAPTICS_API LCPForceFeedback< sofa::defaulttype::Rigid3Types >::computeForce(double x, double y, double z, double, double, double, double, double& fx, double& fy, double& fz);
+void SOFA_SOFAHAPTICS_API LCPForceFeedback< sofa::defaulttype::Rigid3Types >::computeForce(SReal x, SReal y, SReal z, SReal, SReal, SReal, SReal, SReal& fx, SReal& fy, SReal& fz);
 
 template <>
-void SOFA_SOFAHAPTICS_API LCPForceFeedback< sofa::defaulttype::Rigid3Types >::computeWrench(const sofa::defaulttype::SolidTypes<double>::Transform &world_H_tool,
-        const sofa::defaulttype::SolidTypes<double>::SpatialVector &/*V_tool_world*/,
-        sofa::defaulttype::SolidTypes<double>::SpatialVector &W_tool_world );
+void SOFA_SOFAHAPTICS_API LCPForceFeedback< sofa::defaulttype::Rigid3Types >::computeWrench(const sofa::defaulttype::SolidTypes<SReal>::Transform &world_H_tool,
+        const sofa::defaulttype::SolidTypes<SReal>::SpatialVector &/*V_tool_world*/,
+        sofa::defaulttype::SolidTypes<SReal>::SpatialVector &W_tool_world );
 
 
 

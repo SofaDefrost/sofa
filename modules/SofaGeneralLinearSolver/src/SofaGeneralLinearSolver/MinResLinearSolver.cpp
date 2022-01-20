@@ -27,7 +27,9 @@
 namespace sofa::component::linearsolver
 {
 
+using namespace sofa::type;
 using namespace sofa::defaulttype;
+using namespace sofa::linearalgebra;
 
 
 int MinResLinearSolverClass = core::RegisterObject("Linear system solver using the MINRES iterative algorithm")

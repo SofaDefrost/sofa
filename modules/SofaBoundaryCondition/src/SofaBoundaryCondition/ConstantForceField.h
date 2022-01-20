@@ -24,8 +24,8 @@
 #include <SofaBoundaryCondition/config.h>
 
 #include <sofa/core/behavior/ForceField.h>
-#include <SofaBaseTopology/TopologySubsetData.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa::component::forcefield
 {
@@ -43,11 +43,11 @@ public:
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::Deriv Deriv;
     typedef typename Coord::value_type Real;
-    typedef helper::vector<unsigned int> VecIndex;
+    typedef type::vector<unsigned int> VecIndex;
     typedef core::objectmodel::Data<VecCoord> DataVecCoord;
     typedef core::objectmodel::Data<VecDeriv> DataVecDeriv;
 
-    typedef sofa::component::topology::PointSubsetData< VecIndex > SetIndex;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
 
 
     /// indices of the points the force applies to
@@ -69,7 +69,7 @@ public:
     Data< SReal > d_showArrowSize;
 
     /// display color
-    Data< sofa::helper::types::RGBAColor > d_color;
+    Data< sofa::type::RGBAColor > d_color;
 
     /// Concerned DOFs indices are numbered from the end of the MState DOFs vector
     Data< bool > indexFromEnd;
@@ -90,7 +90,7 @@ public:
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df , const DataVecDeriv& d_dx) override;
 
     /// Constant force has null variation
-    void addKToMatrix(sofa::defaulttype::BaseMatrix *mat, SReal k, unsigned int &offset) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix *mat, SReal k, unsigned int &offset) override;
 
     /// Constant force has null variation
     virtual void addKToMatrix(const sofa::core::behavior::MultiMatrixAccessor* /*matrix*/, SReal /*kFact*/) ;
@@ -99,13 +99,11 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-    void updateForceMask() override;
-
     /// Update data and internal vectors
     void doUpdateInternal() override;
 
     /// Set a force to a given particle
-    void setForce( unsigned i, const Deriv& f );
+    void setForce( unsigned i, const Deriv& force );
 
     using Inherit::addAlias ;
     using Inherit::addKToMatrix;

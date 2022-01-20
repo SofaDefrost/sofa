@@ -45,7 +45,7 @@ enum
 class SOFA_CORE_API VisualParams : public ExecParams
 {
 public:
-	typedef sofa::helper::fixed_array<int, 4> Viewport;
+	typedef sofa::type::fixed_array<int, 4> Viewport;
 
     /// The enumeration used to describe each step of the rendering.
     enum Pass
@@ -125,31 +125,31 @@ public:
     DisplayFlags& displayFlags() { return m_displayFlags; }
     const DisplayFlags& displayFlags() const { return m_displayFlags; }
 
-    sofa::defaulttype::BoundingBox&  sceneBBox()    { return m_sceneBoundingBox; }
-    const sofa::defaulttype::BoundingBox&  sceneBBox() const   { return m_sceneBoundingBox; }
+    sofa::type::BoundingBox&  sceneBBox()    { return m_sceneBoundingBox; }
+    const sofa::type::BoundingBox&  sceneBBox() const   { return m_sceneBoundingBox; }
 
     /// Store the ModelView matrix used to draw the scene. This OpenGL matrix defines the world coordinate system with respect to the camera.
-    void setModelViewMatrix( const double m[16] ) { for(unsigned i=0; i<16; i++) m_modelViewMatrix[i] = m[i]; }
+    void setModelViewMatrix( const double m[16] ) { for(unsigned i=0; i<16; i++) m_modelViewMatrix[i] = SReal(m[i]); }
 
     /// Get the ModelView matrix used to draw the scene. This OpenGL matrix defines the world coordinate system with respect to the camera.
-    void getModelViewMatrix( double m[16] ) const { for(unsigned i=0; i<16; i++) m[i] = m_modelViewMatrix[i]; }
+    void getModelViewMatrix( double m[16] ) const { for(unsigned i=0; i<16; i++) m[i] = double(m_modelViewMatrix[i]); }
 
     /// Store the projection matrix used to draw the scene. This OpenGL matrix defines the camera coordinate system with respect to the viewport, including perspective if any.
-    void setProjectionMatrix( const double m[16] ) { for(unsigned i=0; i<16; i++) m_projectionMatrix[i] = m[i]; }
+    void setProjectionMatrix( const double m[16] ) { for(unsigned i=0; i<16; i++) m_projectionMatrix[i] = SReal(m[i]); }
 
     /// Get the projection matrix used to draw the scene. This OpenGL matrix defines the camera coordinate system with respect to the viewport, including perspective if any.
-    void getProjectionMatrix( double m[16] ) const { for(unsigned i=0; i<16; i++) m[i] = m_projectionMatrix[i]; }
+    void getProjectionMatrix( double m[16] ) const { for(unsigned i=0; i<16; i++) m[i] = double(m_projectionMatrix[i]); }
 
-    SOFA_ATTRIBUTE_DEPRECATED("v21.06 (PR#1649)", "v21.12", "Use with the ModelView and Perspective Matrices instead.")
-    helper::visual::Transformation& sceneTransform() { return m_sceneTransform; }
+    SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1649)", "v21.12", "Use with the ModelView and Perspective Matrices instead.")
+    helper::visual::Transformation& sceneTransform() = delete;
     
-    SOFA_ATTRIBUTE_DEPRECATED("v21.06 (PR#1649)", "v21.12", "Use with the ModelView and Perspective Matrices instead.")
-    const helper::visual::Transformation& sceneTransform() const { return m_sceneTransform; }
+    //SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1649)", "v21.12", "Use with the ModelView and Perspective Matrices instead.")
+    //const helper::visual::Transformation& sceneTransform() = delete;
 
-    //SOFA_ATTRIBUTE_DEPRECATED("v21.06 (PR#1649)", "v21.12", "Use your rendering API instead.")
+    //SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1649)", "v21.12", "Use your rendering API instead.")
     //sofa::gl::FrameBufferObject*& frameBufferObject() { return m_boundFrameBuffer; }
 
-    //SOFA_ATTRIBUTE_DEPRECATED("v21.06 (PR#1649)", "v21.12", "Use your rendering API instead.")
+    //SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1649)", "v21.12", "Use your rendering API instead.")
     //sofa::gl::FrameBufferObject*& frameBufferObject() const { return m_boundFrameBuffer; }
 
     bool isSupported(unsigned int api) const
@@ -166,8 +166,7 @@ public:
     }
 
 protected:
-    sofa::defaulttype::BoundingBox      m_sceneBoundingBox;
-    helper::visual::Transformation          m_sceneTransform;
+    sofa::type::BoundingBox      m_sceneBoundingBox;
     Viewport                            m_viewport;
     SReal                              m_zNear;
     SReal                              m_zFar;

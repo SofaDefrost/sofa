@@ -356,7 +356,14 @@ RealGUI::RealGUI ( const char* viewername)
       m_viewerMSAANbSampling(1)
 {
     setupUi(this);
-
+    
+    ExpandAllButton->setIcon(QIcon(":/RealGUI/expandAll"));
+    CollapseAllButton->setIcon(QIcon(":/RealGUI/collapseAll"));
+    for (auto* button : {ExpandAllButton, CollapseAllButton})
+    {
+        button->setFixedWidth(button->height());
+    }
+    
     parseOptions();
 
     createPluginManager();
@@ -379,6 +386,12 @@ RealGUI::RealGUI ( const char* viewername)
     connect ( displayComputationTimeCheckBox, SIGNAL ( toggled ( bool ) ), this, SLOT ( displayComputationTime ( bool ) ) );
     connect ( exportGnuplotFilesCheckbox, SIGNAL ( toggled ( bool ) ), this, SLOT ( setExportGnuplot ( bool ) ) );
     connect ( tabs, SIGNAL ( currentChanged ( int ) ), this, SLOT ( currentTabChanged ( int ) ) );
+
+    connect ( ResetViewButton, SIGNAL ( clicked() ), this, SLOT ( resetView() ) );
+    connect ( SaveViewButton, SIGNAL ( clicked() ), this, SLOT ( saveView() ) );
+    connect ( screenshotButton, SIGNAL ( clicked() ), this, SLOT ( screenshot() ) );
+    connect ( sizeW, SIGNAL ( valueChanged ( int ) ), this, SLOT ( setSizeW ( int ) ) );
+    connect ( sizeH, SIGNAL ( valueChanged ( int ) ), this, SLOT ( setSizeH ( int ) ) );
 
     /// We activate this timer only if the interactive mode is enabled (ie livecoding+mouse mouve event).
     if(m_enableInteraction){
@@ -450,21 +463,15 @@ RealGUI::RealGUI ( const char* viewername)
     m_sofaMouseManager->hide();
     SofaVideoRecorderManager::getInstance()->hide();
 
-    //Center the application
-#if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
-    const QRect screen = QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen());
-#else
-    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
-#endif
-    this->move(  ( screen.width()- this->width()  ) / 2 - 200,  ( screen.height() - this->height()) / 2 - 50  );
+    centerWindow();
 
     tabs->removeTab(tabs->indexOf(TabVisualGraph));
 
 #ifndef SOFA_GUI_QT_NO_RECORDER
     if (recorder)
         connect( recorder, SIGNAL( RecordSimulation(bool) ), startButton, SLOT( setChecked(bool) ) );
-    if (recorder && getQtViewer())
-        connect( recorder, SIGNAL( NewTime() ), getQtViewer()->getQWidget(), SLOT( update() ) );
+    if (recorder && getSofaViewer())
+        connect( recorder, SIGNAL( NewTime() ), getSofaViewer()->getQWidget(), SLOT( update() ) );
 #endif
 
 #ifdef SOFA_GUI_INTERACTION
@@ -488,7 +495,7 @@ RealGUI::RealGUI ( const char* viewername)
     m_interactionActived = false;
 
     if(mCreateViewersOpt)
-        getQtViewer()->getQWidget()->installEventFilter(this);
+        getSofaViewer()->getQWidget()->installEventFilter(this);
 #endif
 
 #if(SOFAGUIQT_HAVE_QT5_WEBENGINE)
@@ -499,7 +506,6 @@ RealGUI::RealGUI ( const char* viewername)
 
     // Trigger QDialog for "About" section
     connect(helpAboutAction, SIGNAL(triggered()), this, SLOT(showAbout()));
-
 
     m_filelistener = new RealGUIFileListener(this);
 }
@@ -763,7 +769,7 @@ int RealGUI::closeGUI()
 {
     QSettings settings;
     QScreen* screen = widget->window()->windowHandle()->screen();
-    settings.beginGroup("viewer"); ;
+    settings.beginGroup("viewer");
     settings.setValue("screenNumber", QGuiApplication::screens().indexOf(screen));
     settings.endGroup();
     delete this;
@@ -870,7 +876,7 @@ void RealGUI::emitIdle()
     }
 
     if(isEmbeddedViewer())
-        getQtViewer()->getQWidget()->update();;
+        getSofaViewer()->getQWidget()->update();
 }
 
 /// This open popup the file selection windows.
@@ -989,13 +995,13 @@ void RealGUI::setSceneWithoutMonitor (Node::SPtr root, const char* filename, boo
     if (root)
     {
         //Check the validity of the BBox
-        const sofa::defaulttype::BoundingBox& nodeBBox = root->getContext()->f_bbox.getValue();
+        const sofa::type::BoundingBox& nodeBBox = root->getContext()->f_bbox.getValue();
         if(nodeBBox.isNegligeable())
         {
             msg_warning("RealGUI") << "Global Bounding Box seems very small; Your viewer settings (based on the bbox) are likely invalid, switching to default value of [-1,-1,-1,1,1,1]."
                                    << "This is caused by using component which does not implement properly the updateBBox function."
                                    << "You can remove this warning by manually forcing a value in the parameter bbox=\"minX minY minZ maxX maxY maxZ\" in your root node \n";
-            sofa::defaulttype::BoundingBox b(-1.0,-1.0,-1.0,1.0,1.0,1.0);
+            sofa::type::BoundingBox b(-1.0,-1.0,-1.0,1.0,1.0,1.0);
             root->f_bbox.setValue(b);
         }
 
@@ -1006,6 +1012,7 @@ void RealGUI::setSceneWithoutMonitor (Node::SPtr root, const char* filename, boo
         simulationGraph->Clear(root.get());
         simulationGraph->collapseAll();
         simulationGraph->expandToDepth(0);
+        simulationGraph->resizeColumnToContents(0);
         statWidget->CreateStats(root.get());
 
 #ifndef SOFA_GUI_QT_NO_RECORDER
@@ -1020,9 +1027,9 @@ void RealGUI::setSceneWithoutMonitor (Node::SPtr root, const char* filename, boo
 
         if( isEmbeddedViewer() )
         {
-            getQtViewer()->getQWidget()->setFocus();
-            getQtViewer()->getQWidget()->show();
-            getQtViewer()->getQWidget()->update();
+            getSofaViewer()->getQWidget()->setFocus();
+            getSofaViewer()->getQWidget()->show();
+            getSofaViewer()->getQWidget()->update();
         }
 
         resetScene();
@@ -1242,7 +1249,7 @@ void RealGUI::setViewerResolution ( int w, int h )
     if( isEmbeddedViewer() )
     {
         QSize winSize = size();
-        QSize viewSize = ( getViewer() ) ? getQtViewer()->getQWidget()->size() : QSize(0,0);
+        QSize viewSize = ( getViewer() ) ? getSofaViewer()->getQWidget()->size() : QSize(0,0);
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
         const QRect screen = QApplication::desktop()->availableGeometry(QApplication::desktop()->screenNumber(this));
@@ -1322,9 +1329,20 @@ void RealGUI::setFullScreen (bool enable)
     }
 }
 
+void RealGUI::centerWindow()
+{
+    //Center the application
+#if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
+    const QRect screen = QApplication::desktop()->availableGeometry(QApplication::desktop()->primaryScreen());
+#else
+    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
+#endif
+    this->move(  ( screen.width() - this->width()  ) / 2,  ( screen.height() - this->height()) / 2 );
+}
+
 //------------------------------------
 
-void RealGUI::setBackgroundColor(const sofa::helper::types::RGBAColor& c)
+void RealGUI::setBackgroundColor(const sofa::type::RGBAColor& c)
 {
     background[0]->setText(QString::number(c[0]));
     background[1]->setText(QString::number(c[1]));
@@ -1344,7 +1362,7 @@ void RealGUI::setBackgroundImage(const std::string& c)
 
 void RealGUI::setViewerConfiguration(sofa::component::configurationsetting::ViewerSetting* viewerConf)
 {
-    const defaulttype::Vec<2,int> &res=viewerConf->resolution.getValue();
+    const type::Vec<2,int> &res=viewerConf->resolution.getValue();
 
     if (viewerConf->fullscreen.getValue())
         setFullScreen();
@@ -1453,10 +1471,9 @@ BaseViewer* RealGUI::getViewer()
 
 //------------------------------------
 
-sofa::gui::qt::viewer::SofaViewer* RealGUI::getQtViewer()
+sofa::gui::qt::viewer::SofaViewer* RealGUI::getSofaViewer()
 {
-    sofa::gui::qt::viewer::SofaViewer* qtViewer = dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(mViewer);
-    return qtViewer ? qtViewer : nullptr;
+    return dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(mViewer);
 }
 
 //------------------------------------
@@ -1474,7 +1491,7 @@ void RealGUI::removeViewer()
     {
         if(isEmbeddedViewer())
         {
-            getQtViewer()->removeViewerTab(tabs);
+            getSofaViewer()->removeViewerTab(tabs);
         }
         delete mViewer;
         mViewer = nullptr;
@@ -1630,7 +1647,7 @@ void RealGUI::eventNewTime()
 
 void RealGUI::keyPressEvent ( QKeyEvent * e )
 {
-    sofa::gui::qt::viewer::SofaViewer* qtViewer = dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(getViewer());
+    sofa::gui::qt::viewer::SofaViewer* sofaViewer = dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(getViewer());
 
 #ifdef SOFA_GUI_INTERACTION
     if(m_interactionActived)
@@ -1642,7 +1659,7 @@ void RealGUI::keyPressEvent ( QKeyEvent * e )
         else
         {
             sofa::core::objectmodel::KeypressedEvent keyEvent(e->key());
-            Node* groot = qtViewer->getScene();
+            Node* groot = sofaViewer->getScene();
             if (groot)
                 groot->propagateEvent(core::execparams::defaultInstance(), &keyEvent);
         }
@@ -1690,10 +1707,15 @@ void RealGUI::keyPressEvent ( QKeyEvent * e )
         emit(quit());
         break;
     }
+    case Qt::Key_S:
+    {
+        screenshot();
+        break;
+    }
     default:
     {
-        if (qtViewer)
-            qtViewer->keyPressEvent(e);
+        if (sofaViewer)
+            sofaViewer->keyPressEvent(e);
         break;
     }
     }
@@ -1742,8 +1764,8 @@ void RealGUI::initViewer(BaseViewer* _viewer)
     init(); //init data member from RealGUI for the viewer initialisation in the GUI
 
     // Is our viewer embedded or not ?
-    sofa::gui::qt::viewer::SofaViewer* qtViewer = dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(_viewer);
-    if( qtViewer == nullptr )
+    sofa::gui::qt::viewer::SofaViewer* sofaViewer = dynamic_cast<sofa::gui::qt::viewer::SofaViewer*>(_viewer);
+    if( sofaViewer == nullptr )
     {
         isEmbeddedViewer(false);
         std::cout<<"initViewer: The viewer isn't embedded in the GUI"<<std::endl;
@@ -1751,65 +1773,56 @@ void RealGUI::initViewer(BaseViewer* _viewer)
     else
     {
         isEmbeddedViewer(true);
-        this->mainWidgetLayout->addWidget(qtViewer->getQWidget());
+        this->mainWidgetLayout->addWidget(sofaViewer->getQWidget());
 
-        qtViewer->getQWidget()->setFocusPolicy ( Qt::StrongFocus );
+        sofaViewer->getQWidget()->setFocusPolicy ( Qt::StrongFocus );
 
-        qtViewer->getQWidget()->setSizePolicy ( QSizePolicy ( ( QSizePolicy::Policy ) 7,
+        sofaViewer->getQWidget()->setSizePolicy ( QSizePolicy ( ( QSizePolicy::Policy ) 7,
                                                               ( QSizePolicy::Policy ) 7
                                                               //, 100, 1,
-                                                              //qtViewer->getQWidget()->sizePolicy().hasHeightForWidth() )
+                                                              //sofaViewer->getQWidget()->sizePolicy().hasHeightForWidth() )
                                                               ));
 
-        qtViewer->getQWidget()->setMinimumSize ( QSize ( 0, 0 ) );
-        qtViewer->getQWidget()->setMouseTracking ( true );
-        qtViewer->configureViewerTab(tabs);
+        sofaViewer->getQWidget()->setMinimumSize ( QSize ( 0, 0 ) );
+        sofaViewer->getQWidget()->setMouseTracking ( true );
+        sofaViewer->configureViewerTab(tabs);
 
-        connect ( qtViewer->getQWidget(), SIGNAL ( resizeW ( int ) ), sizeW, SLOT ( setValue ( int ) ) );
-        connect ( qtViewer->getQWidget(), SIGNAL ( resizeH ( int ) ), sizeH, SLOT ( setValue ( int ) ) );
-        connect ( qtViewer->getQWidget(), SIGNAL ( quit (  ) ), this, SLOT ( fileExit (  ) ) );
+        connect ( sofaViewer->getQWidget(), SIGNAL ( resizeW ( int ) ), sizeW, SLOT ( setValue ( int ) ) );
+        connect ( sofaViewer->getQWidget(), SIGNAL ( resizeH ( int ) ), sizeH, SLOT ( setValue ( int ) ) );
+        connect ( sofaViewer->getQWidget(), SIGNAL ( quit (  ) ), this, SLOT ( fileExit (  ) ) );
         connect(simulationGraph, SIGNAL(focusChanged(sofa::core::objectmodel::BaseObject*)),
-                qtViewer->getQWidget(), SLOT(fitObjectBBox(sofa::core::objectmodel::BaseObject*))
+                sofaViewer->getQWidget(), SLOT(fitObjectBBox(sofa::core::objectmodel::BaseObject*))
                 );
         connect(simulationGraph, SIGNAL( focusChanged(sofa::core::objectmodel::BaseNode*) ),
-                qtViewer->getQWidget(), SLOT( fitNodeBBox(sofa::core::objectmodel::BaseNode*) )
+                sofaViewer->getQWidget(), SLOT( fitNodeBBox(sofa::core::objectmodel::BaseNode*) )
                 );
 
         // setGUI
-        textEdit1->setText ( qtViewer->helpString() );
-        connect ( this, SIGNAL( newStep()), qtViewer->getQWidget(), SLOT( update()));
+        textEdit1->setText ( sofaViewer->helpString() );
+        connect ( this, SIGNAL( newStep()), sofaViewer->getQWidget(), SLOT( update()));
 
-        qtViewer->getQWidget()->setFocus();
-        qtViewer->getQWidget()->show();
-        qtViewer->getQWidget()->update();
+        sofaViewer->getQWidget()->setFocus();
+        sofaViewer->getQWidget()->show();
+        sofaViewer->getQWidget()->update();
 
-        qtViewer->getPickHandler()->addCallBack(&informationOnPickCallBack );
+        sofaViewer->getPickHandler()->addCallBack(&informationOnPickCallBack );
     }
 
     m_sofaMouseManager->setPickHandler(_viewer->getPickHandler());
-
-    connect ( ResetViewButton, SIGNAL ( clicked() ), this, SLOT ( resetView() ) );
-    connect ( SaveViewButton, SIGNAL ( clicked() ), this, SLOT ( saveView() ) );
-    connect ( screenshotButton, SIGNAL ( clicked() ), this, SLOT ( screenshot() ) );
-    connect ( sizeW, SIGNAL ( valueChanged ( int ) ), this, SLOT ( setSizeW ( int ) ) );
-    connect ( sizeH, SIGNAL ( valueChanged ( int ) ), this, SLOT ( setSizeH ( int ) ) );
-
 }
 
 //------------------------------------
 
 void RealGUI::parseOptions()
 {
-    if (mArgumentParser) {
-        boost::program_options::variables_map vm = mArgumentParser->getVariableMap();
-        if(vm.find("interactive") != vm.end())
-            m_enableInteraction = vm["interactive"].as<bool>();
-        if(vm.find("msaa") != vm.end())
-            m_viewerMSAANbSampling = vm["msaa"].as<unsigned int>();
 
-        if(m_enableInteraction)
+    if (mArgumentParser) {
+        mArgumentParser->getValueFromKey("interactive", m_enableInteraction);
+        mArgumentParser->getValueFromKey("msaa", m_viewerMSAANbSampling);
+
+        if (m_enableInteraction)
             msg_warning("runSofa") << "you activated the interactive mode. This is currently an experimental feature "
-                                      "that may change or be removed in the future. ";
+            "that may change or be removed in the future. ";
     }
 }
 
@@ -1893,6 +1906,8 @@ void RealGUI::createSimulationGraph()
     TabGraph->layout()->addWidget(simulationGraph);
 
     connect ( ExportGraphButton, SIGNAL ( clicked() ), simulationGraph, SLOT ( Export() ) );
+    connect ( ExpandAllButton, SIGNAL ( clicked() ), simulationGraph, SLOT ( expandAll() ) );
+    connect ( CollapseAllButton, SIGNAL ( clicked() ), simulationGraph, SLOT ( ExpandRootNodeOnly() ) );
     connect(simulationGraph, SIGNAL( RootNodeChanged(sofa::simulation::Node*, const char*) ), this, SLOT ( NewRootNode(sofa::simulation::Node* , const char*) ) );
     connect(simulationGraph, SIGNAL( NodeRemoved() ), this, SLOT( Update() ) );
     connect(simulationGraph, SIGNAL( Lock(bool) ), this, SLOT( LockAnimation(bool) ) );
@@ -1971,7 +1986,7 @@ void RealGUI::NewRootNode(sofa::simulation::Node* root, const char* path)
         getViewer()->load();
         getViewer()->resetView();
         if(isEmbeddedViewer())
-            getQtViewer()->getQWidget()->update();;
+            getSofaViewer()->getQWidget()->update();
         statWidget->CreateStats(root);
     }
 }
@@ -2269,9 +2284,9 @@ void RealGUI::screenshot()
                                  "Choose a filename to save under"
                                  );
 
-    viewer::SofaViewer* qtViewer = getQtViewer();
-    if( qtViewer )
-        qtViewer->getQWidget()->repaint();
+    viewer::SofaViewer* sofaViewer = getSofaViewer();
+    if( sofaViewer )
+        sofaViewer->getQWidget()->repaint();
 
     if ( filename != "" )
     {
@@ -2300,7 +2315,7 @@ void RealGUI::showhideElements()
 {
     displayFlag->updateDataValue();
     if(isEmbeddedViewer())
-        getQtViewer()->getQWidget()->update();;
+        getSofaViewer()->getQWidget()->update();
 }
 
 //------------------------------------
@@ -2308,7 +2323,7 @@ void RealGUI::showhideElements()
 void RealGUI::Update()
 {
     if(isEmbeddedViewer())
-        getQtViewer()->getQWidget()->update();;
+        getSofaViewer()->getQWidget()->update();
     statWidget->CreateStats(currentSimulation());
 }
 
@@ -2319,7 +2334,7 @@ void RealGUI::updateBackgroundColour()
     if(getViewer())
         getViewer()->setBackgroundColour(background[0]->text().toFloat(),background[1]->text().toFloat(),background[2]->text().toFloat());
     if(isEmbeddedViewer())
-        getQtViewer()->getQWidget()->update();;
+        getSofaViewer()->getQWidget()->update();
 }
 
 //------------------------------------
@@ -2329,7 +2344,7 @@ void RealGUI::updateBackgroundImage()
     if(getViewer())
         getViewer()->setBackgroundImage( backgroundImage->text().toStdString() );
     if(isEmbeddedViewer())
-        getQtViewer()->getQWidget()->update();;
+        getSofaViewer()->getQWidget()->update();
 }
 
 //------------------------------------
@@ -2522,18 +2537,18 @@ void RealGUI::changeViewer()
 void RealGUI::updateViewerList()
 {
     // the current list of viewer key with associate QAction
-    helper::vector< helper::SofaViewerFactory::Key > currentKeys;
+    type::vector< helper::SofaViewerFactory::Key > currentKeys;
     std::map< helper::SofaViewerFactory::Key, QAction*>::const_iterator iter_map;
     for ( iter_map = viewerMap.begin(); iter_map != viewerMap.end(); ++iter_map )
         currentKeys.push_back((*iter_map).first);
     std::sort(currentKeys.begin(),currentKeys.end());
 
     // the new list (most recent since we load/unload viewer plugin)
-    helper::vector< helper::SofaViewerFactory::Key > updatedKeys;
+    type::vector< helper::SofaViewerFactory::Key > updatedKeys;
     helper::SofaViewerFactory::getInstance()->uniqueKeys(std::back_inserter(updatedKeys));
     std::sort(updatedKeys.begin(),updatedKeys.end());
 
-    helper::vector< helper::SofaViewerFactory::Key > diffKeys;
+    type::vector< helper::SofaViewerFactory::Key > diffKeys;
     std::set_symmetric_difference(currentKeys.begin(),
                                   currentKeys.end(),
                                   updatedKeys.begin(),
@@ -2542,7 +2557,7 @@ void RealGUI::updateViewerList()
                                   );
 
     bool viewerRemoved=false;
-    helper::vector< helper::SofaViewerFactory::Key >::const_iterator it;
+    type::vector< helper::SofaViewerFactory::Key >::const_iterator it;
     for( it = diffKeys.begin(); it != diffKeys.end(); ++it)
     {
         // delete old

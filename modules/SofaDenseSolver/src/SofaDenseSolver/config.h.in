@@ -21,7 +21,7 @@
 ******************************************************************************/
 #pragma once
 
-#include <sofa/config/sharedlibrary_defines.h>
+#include <sofa/config.h>
 
 #define SOFADENSESOLVER_VERSION @PROJECT_VERSION@
 

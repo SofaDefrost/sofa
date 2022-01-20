@@ -22,13 +22,14 @@
 #include <SofaGeneralLoader/SphereLoader.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/helper/system/Locale.h>
-#include <sofa/helper/Quater.h>
-#include <sofa/defaulttype/Mat.h>
+#include <sofa/type/Quat.h>
+#include <sofa/type/Mat.h>
 #include <sofa/core/ObjectFactory.h>
 
 using namespace sofa::core::loader;
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
+using namespace sofa::type;
 
 namespace sofa::component::loader
 {
@@ -40,9 +41,9 @@ SphereLoader::SphereLoader()
     :BaseLoader(),
      d_positions(initData(&d_positions,"position","Sphere centers")),
      d_radius(initData(&d_radius,"listRadius","Radius of each sphere")),
-     d_scale(initData(&d_scale, Vec3(1.0, 1.0, 1.0), "scale","Scale applied to sphere positions & radius")),
-     d_rotation(initData(&d_rotation, Vec3(), "rotation", "Rotation of the DOFs")),
-     d_translation(initData(&d_translation, Vec3(),"translation","Translation applied to sphere positions"))
+     d_scale(initData(&d_scale, type::Vec3(1.0, 1.0, 1.0), "scale","Scale applied to sphere positions & radius")),
+     d_rotation(initData(&d_rotation, type::Vec3(), "rotation", "Rotation of the DOFs")),
+     d_translation(initData(&d_translation, type::Vec3(),"translation","Translation applied to sphere positions"))
 {
     addAlias(&d_positions,"sphere_centers");
     addAlias(&d_scale, "scale3d");
@@ -73,19 +74,19 @@ SphereLoader::SphereLoader()
 
 void SphereLoader::applyTransform()
 {
-    const Vec3& scale = d_scale.getValue();
-    const Vec3& rotation = d_rotation.getValue();
-    const Vec3& translation = d_translation.getValue();
+    const auto& scale = d_scale.getValue();
+    const auto& rotation = d_rotation.getValue();
+    const auto& translation = d_translation.getValue();
 
-    if (scale != Vec3(1.0, 1.0, 1.0) || rotation != Vec3(0.0, 0.0, 0.0) || translation != Vec3(0.0, 0.0, 0.0))
+    if (scale != type::Vec3(1.0, 1.0, 1.0) || rotation != type::Vec3(0.0, 0.0, 0.0) || translation != type::Vec3(0.0, 0.0, 0.0))
     {
-        if(scale != Vec3(1.0, 1.0, 1.0)) {
+        if(scale != type::Vec3(1.0, 1.0, 1.0)) {
             if(scale[0] == 0.0 || scale[1] == 0.0 || scale[2] == 0.0) {
                 msg_warning() << "Data scale should not be set to zero";
             }
         }
         Matrix4 transformation = Matrix4::transformTranslation(translation) *
-            Matrix4::transformRotation(helper::Quater< SReal >::createQuaterFromEuler(rotation * M_PI / 180.0)) *
+            Matrix4::transformRotation(type::Quat< SReal >::createQuaterFromEuler(rotation * M_PI / 180.0)) *
             Matrix4::transformScale(scale);
 
         auto my_positions = getWriteOnlyAccessor(d_positions);

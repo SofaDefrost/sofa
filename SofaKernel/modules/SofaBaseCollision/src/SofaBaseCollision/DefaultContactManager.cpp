@@ -47,7 +47,10 @@ sofa::helper::OptionsGroup DefaultContactManager::initializeResponseOptions(sofa
 
     sofa::simulation::Node* node = sofa::simulation::node::getNodeFrom(context);
     sofa::core::collision::Pipeline* pipeline = node->collisionPipeline;
-    if (pipeline) listResponse=pipeline->getResponseList();
+    if (pipeline)
+    {
+        listResponse=pipeline->getResponseList();
+    }
     else
     {
         core::collision::Contact::Factory::iterator it;
@@ -56,9 +59,11 @@ sofa::helper::OptionsGroup DefaultContactManager::initializeResponseOptions(sofa
             listResponse.insert(it->first);
         }
     }
+
     sofa::helper::OptionsGroup responseOptions(listResponse);
-    if (listResponse.find("default") != listResponse.end())
-        responseOptions.setSelectedItem("default");
+    if (listResponse.find("PenalityContactForceField") != listResponse.end())
+        responseOptions.setSelectedItem("PenalityContactForceField");
+
     return responseOptions;
 }
 
@@ -92,7 +97,7 @@ void DefaultContactManager::setDefaultResponseType(const std::string &responseT)
 {
     if (response.getValue().size() == 0)
     {
-        helper::vector<std::string> listResponse(1,responseT);
+        type::vector<std::string> listResponse(1,responseT);
         sofa::helper::OptionsGroup responseOptions(listResponse);
         response.setValue(responseOptions);
     }
@@ -196,7 +201,7 @@ void
 DefaultContactManager::removeInactiveContacts(const core::collision::ContactManager::DetectionOutputMap &outputsMap,
                                               Size& nbContact)
 {
-    for (ContactMap::iterator contactIt = contactMap.begin(), contactItEnd = contactMap.end();
+    for (auto contactIt = contactMap.begin(), contactItEnd = contactMap.end();
          contactIt != contactItEnd;)
     {
         core::collision::Contact::SPtr contact = contactIt->second;
@@ -313,8 +318,8 @@ void DefaultContactManager::draw(const core::visual::VisualParams* vparams)
 
 void DefaultContactManager::removeContacts(const ContactVector &c)
 {
-    ContactVector::const_iterator remove_it = c.begin();
-    ContactVector::const_iterator remove_itEnd = c.end();
+    auto remove_it = c.begin();
+    auto remove_itEnd = c.end();
 
     ContactVector::iterator it;
     ContactVector::iterator itEnd;
@@ -350,7 +355,7 @@ void DefaultContactManager::removeContacts(const ContactVector &c)
         {
             if (map_it->second == *remove_it)
             {
-                ContactMap::iterator erase_it = map_it;
+                auto erase_it = map_it;
                 ++map_it;
 
                 erase_it->second->removeResponse();

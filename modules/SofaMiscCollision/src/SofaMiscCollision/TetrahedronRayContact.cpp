@@ -23,6 +23,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaUserInteraction/RayModel.h>
 #include <SofaMiscCollision/TetrahedronModel.h>
+#include <sofa/helper/Factory.inl>
 
 namespace sofa
 {
@@ -35,7 +36,9 @@ namespace collision
 
 using namespace sofa::defaulttype;
 
-Creator<core::collision::Contact::Factory, RayContact<TetrahedronCollisionModel> > RayTetrahedronContactClass("ray",true);
+Creator<core::collision::Contact::Factory, RayContact<TetrahedronCollisionModel> > RayTetrahedronContactClass("RayContact",true);
+
+template class SOFA_MISC_COLLISION_API RayContact<TetrahedronCollisionModel>;
 
 } // namespace collision
 

@@ -24,8 +24,8 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaConstraint/BilateralInteractionConstraint.h>
 #include <SofaConstraint/UnilateralInteractionConstraint.h>
-#include <sofa/helper/types/RGBAColor.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/RGBAColor.h>
+#include <sofa/type/Vec.h>
 namespace sofa::component::constraintset
 {
 
@@ -48,7 +48,6 @@ SlidingConstraint<DataTypes>::SlidingConstraint(MechanicalState* object1, Mechan
     , d_m2a(initData(&d_m2a, 0, "axis_1","index of one end of the sliding axis"))
     , d_m2b(initData(&d_m2b, 0, "axis_2","index of the other end of the sliding axis"))
     , d_force(initData(&d_force,"force","force (impulse) used to solve the constraint"))
-    , m_yetIntegrated(false)
 {
 }
 
@@ -143,7 +142,7 @@ void SlidingConstraint<DataTypes>::buildConstraintMatrix(const core::ConstraintP
 
 
 template<class DataTypes>
-void SlidingConstraint<DataTypes>::getConstraintViolation(const core::ConstraintParams *, defaulttype::BaseVector *v, const DataVecCoord &, const DataVecCoord &
+void SlidingConstraint<DataTypes>::getConstraintViolation(const core::ConstraintParams *, linearalgebra::BaseVector *v, const DataVecCoord &, const DataVecCoord &
         , const DataVecDeriv &, const DataVecDeriv &)
 {
     v->set(m_cid, m_dist);
@@ -173,7 +172,7 @@ void SlidingConstraint<DataTypes>::getConstraintResolution(const ConstraintParam
 
 
 template<class DataTypes>
-void SlidingConstraint<DataTypes>::storeLambda(const ConstraintParams* /*cParams*/, sofa::core::MultiVecDerivId /*res*/, const sofa::defaulttype::BaseVector* lambda)
+void SlidingConstraint<DataTypes>::storeLambda(const ConstraintParams* /*cParams*/, sofa::core::MultiVecDerivId /*res*/, const sofa::linearalgebra::BaseVector* lambda)
 {
     Real lamb1,lamb2, lamb3;
 
@@ -201,22 +200,22 @@ void SlidingConstraint<DataTypes>::draw(const core::visual::VisualParams* vparam
 
     vparams->drawTool()->disableLighting();
 
-    sofa::helper::types::RGBAColor color;
+    sofa::type::RGBAColor color;
 
     if(m_thirdConstraint<0)
-        color = sofa::helper::types::RGBAColor::yellow();
+        color = sofa::type::RGBAColor::yellow();
     else if(m_thirdConstraint>0)
-        color = sofa::helper::types::RGBAColor::green();
+        color = sofa::type::RGBAColor::green();
     else
-        color = sofa::helper::types::RGBAColor::magenta();
+        color = sofa::type::RGBAColor::magenta();
 
-    std::vector<sofa::defaulttype::Vector3> vertices;
+    std::vector<sofa::type::Vector3> vertices;
     vertices.push_back(DataTypes::getCPos((this->mstate1->read(core::ConstVecCoordId::position())->getValue())[d_m1.getValue()]));
 
     vparams->drawTool()->drawPoints(vertices, 10, color);
     vertices.clear();
 
-    color = sofa::helper::types::RGBAColor::blue();
+    color = sofa::type::RGBAColor::blue();
     vertices.push_back(DataTypes::getCPos((this->mstate2->read(core::ConstVecCoordId::position())->getValue())[d_m2a.getValue()]));
     vertices.push_back(DataTypes::getCPos((this->mstate2->read(core::ConstVecCoordId::position())->getValue())[d_m2b.getValue()]));
     vparams->drawTool()->drawLines(vertices, 1, color);

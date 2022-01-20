@@ -23,7 +23,6 @@
 
 #include <SofaBoundaryCondition/ConstantForceField.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseTopology/TopologySubsetData.inl>
 #include <sofa/core/MechanicalParams.h>
 
 #include <math.h>
@@ -45,8 +44,9 @@ ConstantForceField<DataTypes>::ConstantForceField()
     , d_force(initData(&d_force, "force", "applied force to all points if forces attribute is not specified"))
     , d_totalForce(initData(&d_totalForce, "totalForce", "total force for all points, will be distributed uniformly over points"))
     , d_showArrowSize(initData(&d_showArrowSize,SReal(0.0), "showArrowSize", "Size of the drawn arrows (0->no arrows, sign->direction of drawing. (default=0)"))
-    , d_color(initData(&d_color, sofa::helper::types::RGBAColor(0.2f,0.9f,0.3f,1.0f), "showColor", "Color for object display (default: [0.2,0.9,0.3,1.0])"))
+    , d_color(initData(&d_color, sofa::type::RGBAColor(0.2f,0.9f,0.3f,1.0f), "showColor", "Color for object display (default: [0.2,0.9,0.3,1.0])"))
     , l_topology(initLink("topology", "link to the topology container"))
+    , m_systemSize(0)
 {
     d_showArrowSize.setGroup("Visualization");
     d_color.setGroup("Visualization");
@@ -65,28 +65,26 @@ void ConstantForceField<DataTypes>::init()
     }
 
     // temprory pointer to topology
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();    
 
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
         
         // Initialize functions and parameters for topology data and handler
         d_indices.createTopologyHandler(_topology);
-        d_indices.registerTopologicalData();
 
         m_systemSize = _topology->getNbPoints();
     }
     else
     {
         msg_info() << "No topology component found at path: " << l_topology.getLinkedPath() << ", nor in current context: " << this->getContext()->name;
-        core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
+        const core::behavior::BaseMechanicalState* state = this->getContext()->getMechanicalState();
         m_systemSize = state->getSize();
     }
 
 
     const VecIndex & indices = d_indices.getValue();
-    auto indicesSize = indices.size();
+    const auto indicesSize = indices.size();
 
     if (d_indices.isSet() && indicesSize!=0)
     {
@@ -194,7 +192,7 @@ void ConstantForceField<DataTypes>::doUpdateInternal()
         msg_info() << "doUpdateInternal: data indices has changed";
 
         const VecIndex & indices = d_indices.getValue();
-        size_t indicesSize = indices.size();
+        const size_t indicesSize = indices.size();
 
         this->d_componentState.setValue(sofa::core::objectmodel::ComponentState::Valid);
 
@@ -281,7 +279,7 @@ void ConstantForceField<DataTypes>::doUpdateInternal()
 template<class DataTypes>
 bool ConstantForceField<DataTypes>::checkForce(const Deriv& force)
 {
-    size_t size = Deriv::spatial_dimensions;
+    const size_t size = Deriv::spatial_dimensions;
 
     for (size_t i=0; i<size; i++)
     {
@@ -371,17 +369,17 @@ void ConstantForceField<DataTypes>::computeForceFromTotalForce()
 
 
 template<class DataTypes>
-void ConstantForceField<DataTypes>::addForce(const core::MechanicalParams* params, DataVecDeriv& f1, const DataVecCoord& x1, const DataVecDeriv& v1)
+void ConstantForceField<DataTypes>::addForce(const core::MechanicalParams* params, DataVecDeriv& f, const DataVecCoord& x1, const DataVecDeriv& v1)
 {
     SOFA_UNUSED(params);
     SOFA_UNUSED(x1);
     SOFA_UNUSED(v1);
 
-    sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f1;
+    sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f;
     const VecIndex& indices = d_indices.getValue();
     const VecDeriv& forces = d_forces.getValue();
 
-    size_t indicesSize = indices.size();
+    const size_t indicesSize = indices.size();
     m_systemSize = _f1.size();
 
     if (!d_indexFromEnd.getValue())
@@ -456,7 +454,7 @@ void ConstantForceField<DataTypes>::addDForce(const core::MechanicalParams* mpar
 
 
 template<class DataTypes>
-void ConstantForceField<DataTypes>::addKToMatrix(sofa::defaulttype::BaseMatrix * mat, SReal k, unsigned int & offset)
+void ConstantForceField<DataTypes>::addKToMatrix(sofa::linearalgebra::BaseMatrix * mat, SReal k, unsigned int & offset)
 {
     // Derivative of a constant force is null, no need to compute addKToMatrix nor addDForce
     SOFA_UNUSED(mat);
@@ -489,7 +487,7 @@ void ConstantForceField<DataTypes>::draw(const core::visual::VisualParams* vpara
 
     if( fabs(aSC)<1.0e-10 )
     {
-        std::vector<defaulttype::Vector3> points;
+        std::vector<type::Vector3> points;
         for (unsigned int i=0; i<indices.size(); i++)
         {
             Real xx = 0.0, xy = 0.0, xz = 0.0, fx = 0.0, fy = 0.0, fz = 0.0;
@@ -518,10 +516,10 @@ void ConstantForceField<DataTypes>::draw(const core::visual::VisualParams* vpara
             }
 
             DataTypes::get(fx,fy,fz, f[i] );
-            points.push_back(defaulttype::Vector3(xx, xy, xz ));
-            points.push_back(defaulttype::Vector3(xx+fx, xy+fy, xz+fz ));
+            points.push_back(type::Vector3(xx, xy, xz ));
+            points.push_back(type::Vector3(xx+fx, xy+fy, xz+fz ));
         }
-        vparams->drawTool()->drawLines(points, 2, sofa::helper::types::RGBAColor::green());
+        vparams->drawTool()->drawLines(points, 2, sofa::type::RGBAColor::green());
     }
     else
     {
@@ -556,10 +554,10 @@ void ConstantForceField<DataTypes>::draw(const core::visual::VisualParams* vpara
 
             DataTypes::get(fx,fy,fz, f[i] );
 
-            defaulttype::Vector3 p1( xx, xy, xz);
-            defaulttype::Vector3 p2( aSC*fx+xx, aSC*fy+xy, aSC*fz+xz );
+            type::Vector3 p1( xx, xy, xz);
+            type::Vector3 p2( aSC*fx+xx, aSC*fy+xy, aSC*fz+xz );
 
-            float norm = static_cast<float>((p2-p1).norm());
+            const float norm = static_cast<float>((p2-p1).norm());
 
             if( aSC > 0.0)
             {
@@ -575,17 +573,4 @@ void ConstantForceField<DataTypes>::draw(const core::visual::VisualParams* vpara
     vparams->drawTool()->restoreLastState();
 }
 
-template<class DataTypes>
-void ConstantForceField<DataTypes>::updateForceMask()
-{
-    const VecIndex& indices = d_indices.getValue();
-
-    for (size_t i=0; i<indices.size(); i++)
-    {
-        this->mstate->forceMask.insertEntry(i);
-    }
-}
-
 } // namespace sofa::component::forcefield
-
-

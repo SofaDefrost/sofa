@@ -27,7 +27,7 @@
 
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 
 #include <vector>
 
@@ -58,19 +58,19 @@ public:
     enum { N    = OutDataTypes::spatial_dimensions               };
     enum { NIn  = sofa::defaulttype::DataTypeInfo<InDeriv>::Size };
     enum { NOut = sofa::defaulttype::DataTypeInfo<Deriv>::Size   };
-    typedef defaulttype::Mat<N, N, Real> Mat;
-    typedef defaulttype::Vec<N, Real> Vector;
-    typedef defaulttype::Mat<NOut, NIn, Real> MBloc;
-    typedef sofa::component::linearsolver::CompressedRowSparseMatrix<MBloc> MatrixType;
+    typedef type::Mat<N, N, Real> Mat;
+    typedef type::Vec<N, Real> Vector;
+    typedef type::Mat<NOut, NIn, Real> MBloc;
+    typedef sofa::linearalgebra::CompressedRowSparseMatrix<MBloc> MatrixType;
 
 protected:
-    helper::vector<Coord> points;
+    type::vector<Coord> points;
     //Coord translation;
     //Real orientation[4];
     //Mat rotation;
-    sofa::helper::vector<Real> beamLength;
-    sofa::helper::vector<Coord> rotatedPoints0;
-    sofa::helper::vector<Coord> rotatedPoints1;
+    sofa::type::vector<Real> beamLength;
+    sofa::type::vector<Coord> rotatedPoints0;
+    sofa::type::vector<Coord> rotatedPoints1;
 
     std::unique_ptr<MatrixType> matrixJ;
     bool updateJ;
@@ -102,7 +102,7 @@ public:
 
     void applyJT(const core::ConstraintParams *cparams, Data< typename In::MatrixDeriv >& out, const Data< typename Out::MatrixDeriv >& in) override;
 
-    const sofa::defaulttype::BaseMatrix* getJ() override;
+    const sofa::linearalgebra::BaseMatrix* getJ() override;
 
     void draw(const core::visual::VisualParams* vparams) override;
 };

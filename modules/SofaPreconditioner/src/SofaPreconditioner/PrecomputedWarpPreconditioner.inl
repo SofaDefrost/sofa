@@ -23,31 +23,27 @@
 #define SOFA_COMPONENT_LINEARSOLVER_PPRECOMPUTEDWARPPRECONDITIONER_INL
 
 #include "PrecomputedWarpPreconditioner.h"
-//#include <SofaDenseSolver/NewMatMatrix.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <iostream>
+#include <sofa/linearalgebra/SparseMatrix.h>
 #include <sofa/helper/system/thread/CTime.h>
 #include <sofa/core/objectmodel/BaseContext.h>
 #include <sofa/core/behavior/LinearSolver.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <cmath>
 #include <sofa/helper/system/thread/CTime.h>
-#include <SofaSimpleFem/TetrahedronFEMForceField.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 #include <sofa/helper/system/thread/CTime.h>
 #include <sofa/core/behavior/RotationFinder.h>
 #include <sofa/core/behavior/LinearSolver.h>
 
-#include <sofa/helper/Quater.h>
+#include <sofa/type/Quat.h>
 
 #include <SofaImplicitOdeSolver/EulerImplicitSolver.h>
 #include <SofaBaseLinearSolver/CGLinearSolver.h>
 
 #if SOFAPRECONDITIONER_HAVE_SOFASPARSESOLVER
 #include <SofaSparseSolver/SparseCholeskySolver.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #else
 #include <SofaGeneralLinearSolver/CholeskySolver.h>
 #endif
@@ -90,10 +86,10 @@ void PrecomputedWarpPreconditioner<TDataTypes>::setSystemMBKMatrix(const core::M
         init_bFact = sofa::core::mechanicalparams::bFactor(mparams);
         init_kFact = mparams->kFactor();
         Inherit::setSystemMBKMatrix(mparams);
-        loadMatrix(*this->currentGroup->systemMatrix);
+        loadMatrix(*this->linearSystem.systemMatrix);
     }
 
-    this->currentGroup->needInvert = usePrecond;
+    this->linearSystem.needInvert = usePrecond;
 }
 
 //Solve x = R * M^-1 * R^t * b
@@ -162,7 +158,7 @@ void PrecomputedWarpPreconditioner<TDataTypes>::loadMatrix(TMatrix& M)
 
     if (share_matrix.getValue()) internalData.setMinv(internalData.getSharedMatrix(fname));
 
-    if (share_matrix.getValue() && internalData.MinvPtr->rowSize() == (defaulttype::BaseMatrix::Index)systemSize)
+    if (share_matrix.getValue() && internalData.MinvPtr->rowSize() == (linearalgebra::BaseMatrix::Index)systemSize)
     {
         msg_info() << "shared matrix : " << fname << " is already built." ;
     }
@@ -215,6 +211,8 @@ void PrecomputedWarpPreconditioner<TDataTypes>::loadMatrixWithCSparse(TMatrix& M
 {
     msg_info() << "Compute the initial invert matrix with CS_PARSE" ;
 
+    using namespace sofa::linearalgebra;
+
     FullVector<Real> r;
     FullVector<Real> b;
 
@@ -238,7 +236,7 @@ void PrecomputedWarpPreconditioner<TDataTypes>::loadMatrixWithCSparse(TMatrix& M
         {
             tmpStr.precision(2);
             tmpStr << "Precomputing constraint correction : " << std::fixed << (float)(j*dof_on_node+d)*100.0f/(float)(nb_dofs*dof_on_node) << " %   " << '\xd'
-                   << sendl;
+                   << "\n";
 
             b.set(pid_j*dof_on_node+d,1.0);
             solver.solve(M,r,b);
@@ -293,8 +291,8 @@ void PrecomputedWarpPreconditioner<TDataTypes>::loadMatrixWithSolver()
     this->getContext()->get(EulerSolver);
 
     // for the initial computation, the gravity has to be put at 0
-    const sofa::defaulttype::Vec3d gravity = this->getContext()->getGravity();
-    const sofa::defaulttype::Vec3d gravity_zero(0.0,0.0,0.0);
+    const sofa::type::Vec3d gravity = this->getContext()->getGravity();
+    const sofa::type::Vec3d gravity_zero(0.0,0.0,0.0);
     this->getContext()->setGravity(gravity_zero);
 
     CGLinearSolver<GraphScatteredMatrix,GraphScatteredVector>* CGlinearSolver;
@@ -473,41 +471,18 @@ void PrecomputedWarpPreconditioner<TDataTypes>::rotateConstraints()
     if (! use_rotations.getValue()) return;
 
     simulation::Node *node = dynamic_cast<simulation::Node *>(this->getContext());
-    sofa::component::forcefield::TetrahedronFEMForceField<TDataTypes>* forceField = nullptr;
     sofa::core::behavior::RotationFinder<TDataTypes>* rotationFinder = nullptr;
 
     if (node != nullptr)
     {
-        forceField = node->get<component::forcefield::TetrahedronFEMForceField<TDataTypes> > ();
-        if (forceField == nullptr)
-        {
-            rotationFinder = node->get< sofa::core::behavior::RotationFinder<TDataTypes> > ();
-
-            msg_info_when(rotationFinder == nullptr) << "No rotation defined : only defined for TetrahedronFEMForceField and RotationFinder!";
-        }
+        rotationFinder = node->get< sofa::core::behavior::RotationFinder<TDataTypes> > ();
+        msg_warning_when(rotationFinder == nullptr) << "No rotation defined : only applicable for components implementing RotationFinder!";
     }
 
     Transformation Rotation;
-    if (forceField != nullptr)
+    if (rotationFinder != nullptr)
     {
-        for(unsigned int k = 0; k < nb_dofs; k++)
-        {
-            int pid;
-            pid = k;
-
-            forceField->getRotation(Rotation, pid);
-            for (int j=0; j<3; j++)
-            {
-                for (int i=0; i<3; i++)
-                {
-                    R[k*9+j*3+i] = (Real)Rotation[j][i];
-                }
-            }
-        }
-    }
-    else if (rotationFinder != nullptr)
-    {
-        const helper::vector<defaulttype::Mat<3,3,Real> > & rotations = rotationFinder->getRotations();
+        const type::vector<type::Mat<3,3,Real> > & rotations = rotationFinder->getRotations();
         for(unsigned int k = 0; k < nb_dofs; k++)
         {
             int pid;
@@ -566,19 +541,19 @@ void PrecomputedWarpPreconditioner<TDataTypes>::computeActiveDofs(JMatrix& J)
 }
 
 template<class TDataTypes>
-bool PrecomputedWarpPreconditioner<TDataTypes>::addJMInvJt(defaulttype::BaseMatrix* result, defaulttype::BaseMatrix* J, double fact)
+bool PrecomputedWarpPreconditioner<TDataTypes>::addJMInvJt(linearalgebra::BaseMatrix* result, linearalgebra::BaseMatrix* J, SReal fact)
 {
     if (! _rotate) this->rotateConstraints();  //already rotate with Preconditionner
     _rotate = false;
     if (J->colSize() == 0) return true;
 
-    if (SparseMatrix<double>* j = dynamic_cast<SparseMatrix<double>*>(J))
+    if (linearalgebra::SparseMatrix<double>* j = dynamic_cast<linearalgebra::SparseMatrix<double>*>(J))
     {
         computeActiveDofs(*j);
         ComputeResult(result, *j, (float) fact);
         return true;
     }
-    else if (SparseMatrix<float>* j = dynamic_cast<SparseMatrix<float>*>(J))
+    else if (linearalgebra::SparseMatrix<float>* j = dynamic_cast<linearalgebra::SparseMatrix<float>*>(J))
     {
         computeActiveDofs(*j);
         ComputeResult(result, *j, (float) fact);
@@ -589,7 +564,7 @@ bool PrecomputedWarpPreconditioner<TDataTypes>::addJMInvJt(defaulttype::BaseMatr
 }
 
 template<class TDataTypes> template<class JMatrix>
-void PrecomputedWarpPreconditioner<TDataTypes>::ComputeResult(defaulttype::BaseMatrix * result,JMatrix& J, float fact)
+void PrecomputedWarpPreconditioner<TDataTypes>::ComputeResult(linearalgebra::BaseMatrix * result,JMatrix& J, float fact)
 {
     unsigned nl = 0;
     internalData.JRMinv.clear();
@@ -615,13 +590,13 @@ void PrecomputedWarpPreconditioner<TDataTypes>::ComputeResult(defaulttype::BaseM
         }
 
         nl=0;
-        for (typename SparseMatrix<Real>::LineConstIterator jit1 = internalData.JR.begin(); jit1 != internalData.JR.end(); jit1++)
+        for (typename linearalgebra::SparseMatrix<Real>::LineConstIterator jit1 = internalData.JR.begin(); jit1 != internalData.JR.end(); jit1++)
         {
             for (unsigned c = 0; c<internalData.idActiveDofs.size(); c++)
             {
                 int col = internalData.idActiveDofs[c];
                 Real v = (Real)0.0;
-                for (typename SparseMatrix<Real>::LElementConstIterator i1 = jit1->second.begin(); i1 != jit1->second.end(); i1++)
+                for (typename linearalgebra::SparseMatrix<Real>::LElementConstIterator i1 = jit1->second.begin(); i1 != jit1->second.end(); i1++)
                 {
                     v += (Real)(internalData.MinvPtr->element(i1->first,col) * i1->second);
                 }
@@ -691,7 +666,7 @@ void PrecomputedWarpPreconditioner<TDataTypes>::draw(const core::visual::VisualP
 
     for (unsigned int i=0; i< nb_dofs; i++)
     {
-        sofa::defaulttype::Matrix3 RotMat;
+        sofa::type::Matrix3 RotMat;
 
         for (int a=0; a<3; a++)
         {
@@ -703,9 +678,9 @@ void PrecomputedWarpPreconditioner<TDataTypes>::draw(const core::visual::VisualP
 
         int pid = i;
 
-        sofa::defaulttype::Quat q;
+        sofa::type::Quat<SReal> q;
         q.fromMatrix(RotMat);
-        vparams->drawTool()->drawFrame(DataTypes::getCPos(x[pid]), q, sofa::defaulttype::Vector3(scale,scale,scale));
+        vparams->drawTool()->drawFrame(DataTypes::getCPos(x[pid]), q, sofa::type::Vector3(scale,scale,scale));
     }
     vparams->drawTool()->restoreLastState();
 }

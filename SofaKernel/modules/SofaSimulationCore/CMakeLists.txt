@@ -25,7 +25,7 @@ set(HEADER_FILES
     ${SRC_ROOT}/DeleteVisitor.h
     ${SRC_ROOT}/ExportDotVisitor.h
     ${SRC_ROOT}/ExportGnuplotVisitor.h
-    ${SRC_ROOT}/ExportOBJVisitor.h
+    ${SRC_ROOT}/ExportVisualModelOBJVisitor.h
     ${SRC_ROOT}/InitVisitor.h
     ${SRC_ROOT}/IntegrateBeginEvent.h
     ${SRC_ROOT}/IntegrateEndEvent.h
@@ -69,7 +69,6 @@ set(HEADER_FILES
     ${SRC_ROOT}/Task.h
     ${SRC_ROOT}/InitTasks.h
     ${SRC_ROOT}/Locks.h
-    ${SRC_ROOT}/VisitorAsync.h
     ${SRC_ROOT}/WorkerThread.h
     ${SRC_ROOT}/events/SimulationInitDoneEvent.h
     ${SRC_ROOT}/events/SimulationInitStartEvent.h
@@ -79,12 +78,12 @@ set(HEADER_FILES
 
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccFromFVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateConstraint.h
+    ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateJacobian.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateMatrixDeriv.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMBKdxVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMBK_ToMatrixVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMDxVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddSeparateGravityVisitor.h
-    ${SRC_ROOT}/mechanicalvisitor/MechanicalAddSubMBK_ToMatrixVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalApplyConstraintsVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalApplyProjectiveConstraint_ToMatrixVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalBeginIntegrationVisitor.h
@@ -96,7 +95,6 @@ set(HEADER_FILES
     ${SRC_ROOT}/mechanicalvisitor/MechanicalComputeGeometricStiffness.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalEndIntegrationVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetConstraintJacobianVisitor.h
-    ${SRC_ROOT}/mechanicalvisitor/MechanicalGetDimensionVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetMatrixDimensionVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetMomentumVisitor.h
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetNonDiagonalMassesCountVisitor.h
@@ -151,7 +149,7 @@ set(SOURCE_FILES
     ${SRC_ROOT}/DeleteVisitor.cpp
     ${SRC_ROOT}/ExportDotVisitor.cpp
     ${SRC_ROOT}/ExportGnuplotVisitor.cpp
-    ${SRC_ROOT}/ExportOBJVisitor.cpp
+    ${SRC_ROOT}/ExportVisualModelOBJVisitor.cpp
     ${SRC_ROOT}/InitVisitor.cpp
     ${SRC_ROOT}/IntegrateBeginEvent.cpp
     ${SRC_ROOT}/IntegrateEndEvent.cpp
@@ -201,12 +199,12 @@ set(SOURCE_FILES
 
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccFromFVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateConstraint.cpp
+    ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateJacobian.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAccumulateMatrixDeriv.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMBKdxVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMBK_ToMatrixVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddMDxVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalAddSeparateGravityVisitor.cpp
-    ${SRC_ROOT}/mechanicalvisitor/MechanicalAddSubMBK_ToMatrixVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalApplyConstraintsVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalApplyProjectiveConstraint_ToMatrixVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalBeginIntegrationVisitor.cpp
@@ -218,7 +216,6 @@ set(SOURCE_FILES
     ${SRC_ROOT}/mechanicalvisitor/MechanicalComputeGeometricStiffness.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalEndIntegrationVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetConstraintJacobianVisitor.cpp
-    ${SRC_ROOT}/mechanicalvisitor/MechanicalGetDimensionVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetMatrixDimensionVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetMomentumVisitor.cpp
     ${SRC_ROOT}/mechanicalvisitor/MechanicalGetNonDiagonalMassesCountVisitor.cpp

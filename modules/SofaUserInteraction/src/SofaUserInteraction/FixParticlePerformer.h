@@ -28,9 +28,15 @@
 #include <SofaUserInteraction/MouseInteractor.h>
 #include <SofaBaseCollision/SphereModel.h>
 #include <SofaMeshCollision/TriangleModel.h>
+#include <sofa/simulation/Node.h>
 
 #include <unordered_map>
 #include <typeindex>
+
+namespace sofa::simulation
+{
+    class Node;
+}
 
 namespace sofa::component::collision
 {
@@ -58,18 +64,30 @@ public:
     void execute();
     void draw(const core::visual::VisualParams* vparams);
 
-    using GetFixationPointsOnModelFunction = std::function<void(sofa::core::sptr<sofa::core::CollisionModel>, const Index, helper::vector<Index>&, Coord&)>;
+    using GetFixationPointsOnModelFunction = std::function<void(sofa::core::sptr<sofa::core::CollisionModel>, const Index, type::vector<Index>&, Coord&)>;
+    using MapTypeFunction = std::unordered_map<std::type_index, GetFixationPointsOnModelFunction >;
+
+    //static std::shared_ptr<MapTypeFunction> getMapInstance()
+    static MapTypeFunction* getMapInstance()
+    {
+        if (!s_mapSupportedModels)
+        {
+            //s_mapSupportedModels = std::make_shared<MapTypeFunction>();
+            s_mapSupportedModels = new MapTypeFunction();
+        }
+        return s_mapSupportedModels;
+    }
 
     template<typename TCollisionModel>
     static int RegisterSupportedModel(GetFixationPointsOnModelFunction func)
     {
-        s_mapSupportedModels[std::type_index(typeid(TCollisionModel))] = func;
+        (*getMapInstance())[std::type_index(typeid(TCollisionModel))] = func;
 
         return 1;
     }
 
     template<typename TTriangleCollisionModel>
-    static void getFixationPointsTriangle(sofa::core::sptr<sofa::core::CollisionModel> model, const Index idx, helper::vector<Index>& points, Coord& fixPoint)
+    static void getFixationPointsTriangle(sofa::core::sptr<sofa::core::CollisionModel> model, const Index idx, type::vector<Index>& points, Coord& fixPoint)
     {
         auto* triangle = static_cast<TTriangleCollisionModel*>(model.get());
 
@@ -80,7 +98,7 @@ public:
         points.push_back(t.p3Index());
     }
 
-    static void getFixationPointsSphere(sofa::core::sptr<sofa::core::CollisionModel> model, const Index idx, helper::vector<Index>& points, Coord& fixPoint)
+    static void getFixationPointsSphere(sofa::core::sptr<sofa::core::CollisionModel> model, const Index idx, type::vector<Index>& points, Coord& fixPoint)
     {
         auto* collisionState = model->getContext()->getMechanicalState();
         fixPoint[0] = collisionState->getPX(idx);
@@ -91,17 +109,14 @@ public:
     }
 
 protected:
-    MouseContainer* getFixationPoints(const BodyPicked &b, helper::vector<unsigned int> &points, typename DataTypes::Coord &fixPoint);
+    MouseContainer* getFixationPoints(const BodyPicked &b, type::vector<unsigned int> &points, typename DataTypes::Coord &fixPoint);
 
     std::vector< simulation::Node * > fixations;
 
-    // inline initialization of templated static members works on VS2019/gcc/clang (>5?)
-    // but not on VS2017 and crash the compilation itself using clang5.
-    // TODO: once VS2017 and clang5 support is dropped, just uncomment the inline static initialization 
-    // and remove the initialization in the inl file (linux/mac) and cpp (windows)
-    //inline static std::unordered_map<std::type_index, GetFixationPointsOnModelFunction > s_mapSupportedModels;
-    static std::unordered_map<std::type_index, GetFixationPointsOnModelFunction > s_mapSupportedModels;
-
+    // VS2017 does not like inline static with classes apparently, shared_ptr provokes a linkage error
+    // (works fine with VS2019 and VS2022)
+    //inline static std::shared_ptr<MapTypeFunction> s_mapSupportedModels;
+    inline static MapTypeFunction* s_mapSupportedModels = nullptr;
 };
 
 #if  !defined(SOFA_COMPONENT_COLLISION_FIXPARTICLEPERFORMER_CPP)

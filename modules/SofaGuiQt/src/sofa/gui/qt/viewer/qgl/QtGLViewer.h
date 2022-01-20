@@ -33,8 +33,8 @@
 
 #include <sofa/gui/qt/viewer/OglModelPolicy.h>
 #include <sofa/gui/ViewerFactory.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/defaulttype/Quat.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/Quat.h>
 #include <sofa/helper/visual/Transformation.h>
 #include <sofa/helper/visual/Trackball.h>
 #include <sofa/helper/system/thread/CTime.h>
@@ -53,7 +53,7 @@ namespace sofa::gui::qt::viewer::qgl
 
 class SOFA_SOFAGUIQT_API QtGLViewer :public QGLViewer,   public sofa::gui::qt::viewer::OglModelSofaViewer
 {
-    typedef defaulttype::Vector3::value_type Real;
+    typedef type::Vector3::value_type Real;
     Q_OBJECT
 private:
 
@@ -99,9 +99,9 @@ public:
                 ;
     }
 
-    static const char* viewerName()  { return "QGLViewer"; }
+    static const char* viewerName()  { return "QGLViewer (QtGLViewer)"; }
 
-    static const char* acceleratedName()  { return "&QGLViewer"; }
+    static const char* acceleratedName()  { return "&QGLViewer (QtGLViewer)"; }
 
     virtual void drawColourPicking (ColourPickingVisitor::ColourCode code) override;
 
@@ -141,6 +141,8 @@ public:
 
     void setCameraMode(core::visual::VisualParams::CameraType mode) override;
 
+    void screenshot(const std::string& filename, int compression_level = -1) override;
+
     QString helpString() const override;
 
 
@@ -150,7 +152,7 @@ private:
     void	PrintString(void* font, char* string);
     void	Display3DText(float x, float y, float z, char* string);
     void	DrawAxis(double xpos, double ypos, double zpos, double arrowSize);
-    void	DrawBox(Real* minBBox, Real* maxBBox, Real r=0.0);
+    void	DrawBox(SReal* minBBox, SReal* maxBBox, SReal r=0.0);
     void	DrawXYPlane(double zo, double xmin, double xmax, double ymin, double ymax, double step);
     void	DrawYZPlane(double xo, double ymin, double ymax, double zmin, double zmax, double step);
     void	DrawXZPlane(double yo, double xmin, double xmax, double zmin, double zmax, double step);
@@ -186,8 +188,8 @@ public slots:
     void setSizeW(int) override;
     void setSizeH(int) override;
 
-    virtual void getView(defaulttype::Vec3d& pos, defaulttype::Quat& ori) const override;
-    virtual void setView(const defaulttype::Vec3d& pos, const defaulttype::Quat &ori) override;
+    virtual void getView(type::Vec3d& pos, type::Quat<SReal>& ori) const override;
+    virtual void setView(const type::Vec3d& pos, const type::Quat<SReal> &ori) override;
     virtual void captureEvent() override { SofaViewer::captureEvent(); }
     void fitObjectBBox(sofa::core::objectmodel::BaseObject* object) override
     {

@@ -129,6 +129,9 @@ protected:
 
     static void solveSystem(core::behavior::MultiMatrix<simulation::common::MechanicalOperations>* matrix,
                             core::MultiVecDerivId solution, core::MultiVecDerivId rhs);
+
+    SOFA_ATTRIBUTE_DISABLED__EULERSOLVER_OPTIM_DIAGONALMATRIX()
+    DeprecatedAndRemoved d_optimizedForDiagonalMatrix{};
 };
 
 } // namespace sofa::component::odesolver

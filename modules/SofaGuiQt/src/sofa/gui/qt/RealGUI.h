@@ -247,7 +247,8 @@ public:
     void setViewerResolution(int w, int h) override;
     void setFullScreen() override { setFullScreen(true); }
     virtual void setFullScreen(bool enable);
-    void setBackgroundColor(const sofa::helper::types::RGBAColor& c) override;
+    void centerWindow() override;
+    void setBackgroundColor(const sofa::type::RGBAColor& c) override;
     virtual void setBackgroundImage(const std::string& i) override;
     void setViewerConfiguration(sofa::component::configurationsetting::ViewerSetting* viewerConf) override;
     void setMouseButtonConfiguration(sofa::component::configurationsetting::MouseButtonSetting *button) override;
@@ -272,7 +273,7 @@ public:
 
     /// A way to know if our viewer is embedded or not... (see initViewer)
     /// TODO: Find a better way to do this
-    sofa::gui::qt::viewer::SofaViewer* getQtViewer();
+    sofa::gui::qt::viewer::SofaViewer* getSofaViewer();
 
     /// Our viewer is a QObject SofaViewer
     bool isEmbeddedViewer();

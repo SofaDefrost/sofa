@@ -26,13 +26,11 @@
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/core/behavior/LinearSolver.h>
 #include <sofa/core/behavior/MechanicalState.h>
-#include <SofaSimpleFem/TetrahedronFEMForceField.h>
-#include <sofa/defaulttype/Mat.h>
-#include <SofaBaseLinearSolver/FullVector.h>
+#include <sofa/type/Mat.h>
+#include <sofa/linearalgebra/FullVector.h>
 #include <cmath>
-#include <sofa/core/behavior/RotationMatrix.h>
+#include <sofa/linearalgebra/RotationMatrix.h>
 #include <sofa/core/behavior/BaseRotationFinder.h>
-#include <sofa/core/behavior/RotationMatrix.h>
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 
 #include <map>
@@ -56,7 +54,7 @@ public:
     typedef TVector Vector;
     typedef typename TMatrix::Real Real;
     typedef sofa::component::linearsolver::MatrixLinearSolver<TMatrix,TVector,ThreadManager> Inherit;
-    typedef sofa::defaulttype::MatNoInit<3, 3, Real> Transformation;
+    typedef sofa::type::MatNoInit<3, 3, Real> Transformation;
     typedef TMatrix TRotationMatrix;
     typedef typename Inherit::JMatrixType JMatrixType;
     using Index = typename TMatrix::Index;
@@ -79,13 +77,13 @@ public:
 
     void solve(Matrix& M, Vector& solution, Vector& rh) override;
 
-    bool addJMInvJt(defaulttype::BaseMatrix* result, defaulttype::BaseMatrix* J, double fact) override;
+    bool addJMInvJt(linearalgebra::BaseMatrix* result, linearalgebra::BaseMatrix* J, SReal fact) override;
 
-    bool addMInvJt(defaulttype::BaseMatrix* result, defaulttype::BaseMatrix* J, double fact) override;
+    bool addMInvJt(linearalgebra::BaseMatrix* result, linearalgebra::BaseMatrix* J, SReal fact) override;
 
     Index getSystemDimention(const sofa::core::MechanicalParams* mparams);
 
-    void computeResidual(const core::ExecParams* params, defaulttype::BaseVector* /*f*/) override;
+    void computeResidual(const core::ExecParams* params, linearalgebra::BaseVector* /*f*/) override;
 
     void updateSystemMatrix() override;
 

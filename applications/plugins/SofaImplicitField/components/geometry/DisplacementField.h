@@ -19,6 +19,8 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#pragma once
+
 #include <SofaImplicitField/config.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <SofaImplicitField/components/geometry/ScalarField.h>
@@ -33,8 +35,10 @@ namespace sofaimplicitfield
 using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofa::component::geometry::ScalarField;
-using sofa::defaulttype::Vec3d ;
-using sofa::defaulttype::Vec3Types ;
+using sofa::defaulttype::Vec3d;
+using sofa::defaulttype::Vec3Types;
+using sofa::defaulttype::Vec4d;
+//using sofa::defaulttype::Vec4Types;
 
 
 class SOFA_SOFAIMPLICITFIELD_API DisplacementField : public sofaimplicitfield::ScalarField
@@ -48,14 +52,28 @@ public:
 
    SingleLink<DisplacementField, sofa::component::visualmodel::OglShader, BaseLink::FLAG_STOREPATH> l_shader;
 
+   int getDomain(Vec3d& pos, int domain) override;   
+   double getValue(Vec3d& pos, int& domain) override;
+   Vec3d getGradient(Vec3d& pos, int& domain) override;
+   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof);
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof, Vec4d& barycentric_coefs);
+
    double getValue(Vec3d& pos, int& domain) override;
    void draw(const sofa::core::visual::VisualParams*) override;
 protected:
    DisplacementField();
    ~DisplacementField() override {}
+   
+   double determinant4x4ForVec3And1(const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3); // TODO: replace this by a call to BarycentricMapper?
+   
+   Vec4d getBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3);
 
+<<<<<<< HEAD
     class InternalData;
     std::unique_ptr<InternalData> data;
+=======
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3, Vec4d& barycentric_coefs);
+>>>>>>> defrost/stage-nicola-zotto
 };
 
 }

@@ -22,10 +22,9 @@
 #pragma once
 
 #include <SofaBoundaryCondition/OscillatingTorsionPressureForceField.h>
-#include <SofaBaseTopology/TopologySparseData.inl>
+#include <sofa/core/topology/TopologySubsetData.inl>
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseTopology/TriangleSetGeometryAlgorithms.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 #include <sofa/core/MechanicalParams.h>
 #include <vector>
 #include <set>
@@ -96,7 +95,6 @@ void OscillatingTorsionPressureForceField<DataTypes>::init()
     origCenter.resize( numPts );
 
     trianglePressureMap.createTopologyHandler(m_topology);
-    trianglePressureMap.registerTopologicalData();
 
     initTriangleInformation();
 }
@@ -106,7 +104,7 @@ template<class DataTypes>
 SReal OscillatingTorsionPressureForceField<DataTypes>::getAmplitude()
 {
     SReal t = this->getContext()->getTime();
-    SReal val = cos( 6.2831853 * frequency.getValue() * t );
+    const SReal val = cos( 6.2831853 * frequency.getValue() * t );
     return val;
 }
 
@@ -138,7 +136,7 @@ void OscillatingTorsionPressureForceField<DataTypes>::addForce(const core::Mecha
     rotationAngle = avgRotAngle;
 
     // calculate and apply penalty forces to ideal positions
-    defaulttype::Quat quat( axis.getValue(), avgRotAngle );
+    const type::Quat<SReal> quat( axis.getValue(), avgRotAngle );
     Real avgError = 0, maxError = 0;
     int pointCnt = 0;
     Real appliedMoment = 0;
@@ -192,23 +190,26 @@ SReal OscillatingTorsionPressureForceField<DataTypes>::getPotentialEnergy(const 
 template<class DataTypes>
 void OscillatingTorsionPressureForceField<DataTypes>::initTriangleInformation()
 {
-    sofa::component::topology::TriangleSetGeometryAlgorithms<DataTypes>* triangleGeo;
-    this->getContext()->get(triangleGeo);
-
-    const VecCoord x0 = triangleGeo->getDOF()->read(core::ConstVecCoordId::restPosition())->getValue();
+    const VecCoord& x0 = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
     int idx[3];
     Real d[10];
 
-    const sofa::helper::vector <Index>& my_map = trianglePressureMap.getMap2Elements();
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    const sofa::type::vector<Index>& my_map = trianglePressureMap.getMap2Elements();
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
 
     for (unsigned int i=0; i<my_map.size(); ++i)
     {
-        my_subset[i].area=triangleGeo->computeRestTriangleArea(my_map[i]);
+        const auto& t = this->m_topology->getTriangle(my_map[i]);
+
+        const auto& n0 = DataTypes::getCPos(x0[t[0]]);
+        const auto& n1 = DataTypes::getCPos(x0[t[1]]);
+        const auto& n2 = DataTypes::getCPos(x0[t[2]]);
+
+        my_subset[i].area = sofa::geometry::Triangle::area(n0, n1, n2);
         // calculate distances for corner and intermediate points
         for (int j=0; j<3; j++)
         {
-            idx[j] = m_topology->getTriangle(my_map[i])[j];
+            idx[j] = t[j];
             pointActive[idx[j]] = true;
             origVecFromCenter[idx[j]] = getVecFromRotAxis( (x0)[idx[j]] );
             origCenter[idx[j]] = (x0)[idx[j]] - origVecFromCenter[idx[j]];
@@ -243,17 +244,16 @@ void OscillatingTorsionPressureForceField<DataTypes>::selectTrianglesAlongPlane(
 {
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
     std::vector<bool> vArray;
-    unsigned int i;
 
     vArray.resize(x.size());
 
-    for( i=0; i<x.size(); ++i)
+    for( unsigned int i=0; i<x.size(); ++i)
     {
         vArray[i]=isPointInPlane(x[i]);
     }
 
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
-    helper::vector<Index> inputTriangles;
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    type::vector<Index> inputTriangles;
 
     for (size_t n=0; n<m_topology->getNbTriangles(); ++n)
     {
@@ -276,8 +276,8 @@ void OscillatingTorsionPressureForceField<DataTypes>::selectTrianglesAlongPlane(
 template <class DataTypes>
 void OscillatingTorsionPressureForceField<DataTypes>::selectTrianglesFromString()
 {
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
-    helper::vector<Index> _triangleList = triangleList.getValue();
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    type::vector<Index> _triangleList = triangleList.getValue();
 
     trianglePressureMap.setMap2Elements(_triangleList);
 
@@ -308,17 +308,17 @@ void OscillatingTorsionPressureForceField<DataTypes>::draw(const core::visual::V
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
 
     vparams->drawTool()->disableLighting();
-    sofa::helper::types::RGBAColor color = sofa::helper::types::RGBAColor::green();
-    std::vector<sofa::defaulttype::Vector3> vertices;
+    const sofa::type::RGBAColor color = sofa::type::RGBAColor::green();
+    std::vector<sofa::type::Vector3> vertices;
 
-    const sofa::helper::vector <Index>& my_map = trianglePressureMap.getMap2Elements();
+    const sofa::type::vector<Index>& my_map = trianglePressureMap.getMap2Elements();
 
     for (unsigned int i = 0; i < my_map.size(); ++i)
     {
         for(unsigned int j=0 ; j< 3 ; j++)
         {
             const Coord& c = x[m_topology->getTriangle(my_map[i])[j]];
-            vertices.push_back(sofa::defaulttype::Vector3(c[0], c[1], c[2]));
+            vertices.push_back(sofa::type::Vector3(c[0], c[1], c[2]));
         }
     }
     vparams->drawTool()->drawTriangles(vertices, color);

@@ -25,9 +25,9 @@
 
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/FullMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #include <sofa/helper/map.h>
 
 #include <assert.h>
@@ -56,7 +56,7 @@ public:
     typedef typename Matrix::Real Real;
     typedef sofa::component::linearsolver::MatrixLinearSolver<TMatrix,TVector> Inherit;
 
-    //Data< helper::vector<std::string> > f_options;
+    //Data< type::vector<std::string> > f_options;
     Data<int> f_symmetric; ///< 0 = nonsymmetric arbitrary matrix, 1 = symmetric matrix, 2 = symmetric positive definite, -1 = structurally symmetric matrix
     Data<bool> f_verbose; ///< Dump system state at each iteration
     Data<std::string> f_exportDataToDir; ///< export data (matrix, RHS, solution) to files in given directory
@@ -85,7 +85,7 @@ protected:
     class SparsePARDISOSolverInvertData : public MatrixInvertData
     {
     public :
-        CompressedRowSparseMatrix<double> Mfiltered;
+        linearalgebra::CompressedRowSparseMatrix<double> Mfiltered;
         SparsePARDISOSolver<Matrix,Vector>* solver;
         void*  pardiso_pt[64];
         int    pardiso_iparm[64];

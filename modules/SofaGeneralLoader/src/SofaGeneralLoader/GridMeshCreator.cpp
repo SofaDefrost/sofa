@@ -26,10 +26,11 @@
 namespace sofa::component::loader
 {
 
+using namespace sofa::type;
 using namespace sofa::defaulttype;
 using namespace sofa::helper;
 using namespace sofa::core::loader;
-using helper::vector;
+using type::vector;
 
 int GridMeshCreatorClass = core::RegisterObject("Procedural creation of a two-dimensional mesh.")
         .add< GridMeshCreator >()
@@ -41,6 +42,12 @@ GridMeshCreator::GridMeshCreator(): MeshLoader()
     , resolution( initData(&resolution,Vec2i(2,2),"resolution","Number of vertices in each direction"))
     , trianglePattern( initData(&trianglePattern,2,"trianglePattern","0: no triangles, 1: alternate triangles, 2: upward triangles, 3: downward triangles"))
 {
+    // doLoad() is called only if d_filename is modified
+    // but this loader in particular does not require a filename (refactoring would be needed)
+    // we force d_filename to be dirty to trigger the callback, thus calling doLoad()
+    d_filename.setDirtyValue(); 
+
+    d_filename.setReadOnly(true);
 }
 
 void GridMeshCreator::doClearBuffers()
@@ -57,27 +64,23 @@ void GridMeshCreator::insertUniqueEdge( unsigned a, unsigned b )
 
 void GridMeshCreator::insertTriangle(unsigned a, unsigned b, unsigned c)
 {
-    helper::vector<Triangle >& my_triangles = *(d_triangles.beginEdit());
+    auto my_triangles = getWriteOnlyAccessor(d_triangles);
 
     my_triangles.push_back(Triangle( a,b,c ) );
     insertUniqueEdge(a,b);
     insertUniqueEdge(b,c);
     insertUniqueEdge(c,a);
-
-    d_triangles.endEdit();
 }
 
 void GridMeshCreator::insertQuad(unsigned a, unsigned b, unsigned c, unsigned d)
 {
-    helper::vector<Quad >& my_quads = *(d_quads.beginEdit());
+    auto my_quads = getWriteOnlyAccessor(d_quads);
 
     my_quads.push_back( Quad( a,b,c,d ) );
     insertUniqueEdge(a,b);
     insertUniqueEdge(b,c);
     insertUniqueEdge(c,d);
     insertUniqueEdge(d,a);
-
-    d_quads.endEdit();
 }
 
 
@@ -141,10 +144,9 @@ bool GridMeshCreator::doLoad()
             }
         }
 
-    helper::vector<Edge >& my_edges = *(d_edges.beginEdit());
+    auto my_edges = getWriteOnlyAccessor(d_edges);
     for( std::set<Edge>::const_iterator it=uniqueEdges.begin(),itEnd=uniqueEdges.end(); it!=itEnd; ++it )
         my_edges.push_back( *it );
-    d_edges.endEdit();
 
     return true;
 }

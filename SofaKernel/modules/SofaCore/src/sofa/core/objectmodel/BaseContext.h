@@ -24,6 +24,7 @@
 #include <sofa/core/fwd.h>
 #include <sofa/core/objectmodel/Base.h>
 #include <sofa/core/objectmodel/ClassInfo.h>
+#include <sofa/core/objectmodel/TypeOfInsertion.h>
 
 namespace sofa::simulation
 {
@@ -50,7 +51,7 @@ public:
     SOFA_CLASS(BaseContext, Base);
     SOFA_BASE_CAST_IMPLEMENTATION(BaseContext)
 
-    typedef defaulttype::Vector3 Vec3;
+    using Vec3 = sofa::type::Vec3;
 
 protected:
     BaseContext();
@@ -169,17 +170,17 @@ public:
     /// Returns a list of object of type passed as a parameter.
     template<class Container>
     Container* getObjects(Container* result, SearchDirection dir = SearchUp){
-        this->get<typename std::remove_pointer<typename Container::value_type>::type, Container>(result, dir);
+        this->get<std::remove_pointer_t<typename Container::value_type>, Container>(result, dir);
         return result ;
     }
 
     /// Returns a list of object of type passed as a parameter.
     /// eg:
-    ///       sofa::helper::vector<VisualModel*> results;
+    ///       sofa::type::vector<VisualModel*> results;
     ///       context->getObjects(results) ;
     template<class Container>
     Container& getObjects(Container& result, SearchDirection dir = SearchUp){
-        this->get<typename std::remove_pointer<typename Container::value_type>::type, Container>(&result, dir);
+        this->get<std::remove_pointer_t<typename Container::value_type>, Container>(&result, dir);
         return result ;
     }
 
@@ -369,7 +370,7 @@ public:
     /// @{
 
     /// Add an object, or return false if not supported
-    virtual bool addObject( sptr<BaseObject> /*obj*/ )
+    virtual bool addObject( sptr<BaseObject> /*obj*/, TypeOfInsertion = TypeOfInsertion::AtEnd)
     {
         return false;
     }

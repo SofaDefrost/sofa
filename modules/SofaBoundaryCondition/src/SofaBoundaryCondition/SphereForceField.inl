@@ -27,7 +27,7 @@
 #include <sofa/helper/rmath.h>
 #include <cassert>
 #include <iostream>
-#include <sofa/defaulttype/BaseMatrix.h>
+#include <sofa/linearalgebra/BaseMatrix.h>
 
 namespace sofa::component::forcefield
 {
@@ -55,8 +55,8 @@ SphereForceField<DataTypes>::SphereForceField()
     , sphereRadius(initData(&sphereRadius, (Real)1, "radius", "sphere radius"))
     , stiffness(initData(&stiffness, (Real)500, "stiffness", "force stiffness"))
     , damping(initData(&damping, (Real)5, "damping", "force damping"))
-    , color(initData(&color, sofa::helper::types::RGBAColor(0.0f,0.0f,1.0f, 1.0f), "color", "sphere color. (default=[0,0,1,1])"))
-    , localRange( initData(&localRange, defaulttype::Vec<2,int>(-1,-1), "localRange", "optional range of local DOF indices. Any computation involving only indices outside of this range are discarded (useful for parallelization using mesh partitionning)" ) )
+    , color(initData(&color, sofa::type::RGBAColor(0.0f,0.0f,1.0f, 1.0f), "color", "sphere color. (default=[0,0,1,1])"))
+    , localRange( initData(&localRange, type::Vec<2,int>(-1,-1), "localRange", "optional range of local DOF indices. Any computation involving only indices outside of this range are discarded (useful for parallelization using mesh partitionning)" ) )
     , bilateral( initData(&bilateral, false, "bilateral", "if true the sphere force field is applied on both sides"))
 {
 }
@@ -107,7 +107,7 @@ void SphereForceField<DataTypes>::addForce(const core::MechanicalParams* /* mpar
 }
 
 template<class DataTypes>
-void SphereForceField<DataTypes>::addKToMatrix(sofa::defaulttype::BaseMatrix * mat, SReal kFactor, unsigned int &offset)
+void SphereForceField<DataTypes>::addKToMatrix(sofa::linearalgebra::BaseMatrix * mat, SReal kFactor, unsigned int &offset)
 {
     const Real fact = (Real)(-this->stiffness.getValue()*kFactor);
     for (unsigned int i=0; i<this->contacts.getValue().size(); i++)
@@ -185,7 +185,7 @@ void SphereForceField<DataTypes>::draw(const core::visual::VisualParams* vparams
 
     vparams->drawTool()->saveLastState();
 
-    defaulttype::Vec3d center;
+    type::Vec3d center;
     DataTypes::get(center[0], center[1], center[2], sphereCenter.getValue());
     const Real& r = sphereRadius.getValue();
 

@@ -19,28 +19,27 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+/******************************************************************************
+* Contributors:
+*   - jeremie.allard@insimo.fr (InSimo)
+*******************************************************************************/
+
 #ifndef SOFA_COMPONENT_LINEARSOLVER_SPARSELDLSOLVER_H
 #define SOFA_COMPONENT_LINEARSOLVER_SPARSELDLSOLVER_H
 #include <SofaSparseSolver/config.h>
 
 #include <sofa/core/behavior/LinearSolver.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/FullMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #include <sofa/helper/map.h>
 #include <cmath>
 #include <SofaSparseSolver/SparseLDLSolverImpl.h>
-#include <sofa/defaulttype/BaseMatrix.h>
+#include <sofa/linearalgebra/BaseMatrix.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace linearsolver
+namespace sofa::component::linearsolver
 {
 
 /// Direct linear solver based on Sparse LDL^T factorization, implemented with the CSPARSE library
@@ -56,11 +55,11 @@ public :
     typedef sofa::component::linearsolver::SparseLDLSolverImpl<TMatrix,TVector,TThreadManager> Inherit;
     typedef typename Inherit::ResMatrixType ResMatrixType;
     typedef typename Inherit::JMatrixType JMatrixType;
-    typedef SparseLDLImplInvertData<helper::vector<int>, helper::vector<Real> > InvertData;
+    typedef SparseLDLImplInvertData<type::vector<int>, type::vector<Real> > InvertData;
 
     void solve (Matrix& M, Vector& x, Vector& b) override;
     void invert(Matrix& M) override;
-    bool addJMInvJtLocal(TMatrix * M, ResMatrixType * result,const JMatrixType * J, double fact) override;
+    bool addJMInvJtLocal(TMatrix * M, ResMatrixType * result,const JMatrixType * J, SReal fact) override;
     int numStep;
 
     Data<bool> f_saveMatrixToFile;      ///< save matrix to a text file (can be very slow, as full matrix is stored)
@@ -71,24 +70,40 @@ public :
         return new InvertData();
     }
 
+    // Override canCreate in order to analyze if template has been set or not.
+    template<class T>
+    static bool canCreate(T*& obj, core::objectmodel::BaseContext* context, core::objectmodel::BaseObjectDescription* arg)
+    {
+        const std::string_view templateString = arg->getAttribute("template", "");
+
+        if (templateString.empty())
+        {
+            const std::string header = "SparseLDLSolver(" + std::string(arg->getAttribute("name", "")) + ")";
+            msg_warning(header) << "Template is empty\n"
+                                << "By default SparseLDLSolver uses blocks with a single double (to handle all cases of simulations).\n"
+                                << "If you are using only 3D DOFs, you may consider using blocks of Matrix3 to speedup the calculations.\n"
+                                << "If it is the case, add " << "template=\"CompressedRowSparseMatrixMat3x3d\" " << "to this object in your scene\n"
+                                << "Otherwise, if you want to disable this message, add " << "template=\"CompressedRowSparseMatrixd\" " << ".";
+        }
+
+        return Inherit::canCreate(obj, context, arg);
+    }
+
 protected :
     SparseLDLSolver();
 
-    FullMatrix<Real> Jminv,Jdense;
-    sofa::component::linearsolver::CompressedRowSparseMatrix<Real> Mfiltered;
+    type::vector<int> Jlocal2global;
+    sofa::linearalgebra::FullMatrix<Real> JLinvDinv, JLinv;
+    sofa::linearalgebra::CompressedRowSparseMatrix<Real> Mfiltered;
 };
 
 #if  !defined(SOFA_COMPONENT_LINEARSOLVER_SPARSELDLSOLVER_CPP)
-extern template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< CompressedRowSparseMatrix< double>,FullVector<double> >;
-extern template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< CompressedRowSparseMatrix< defaulttype::Mat<3,3,double> >,FullVector<double> >;
+extern template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< sofa::linearalgebra::CompressedRowSparseMatrix< double>, sofa::linearalgebra::FullVector<double> >;
+extern template class SOFA_SOFASPARSESOLVER_API SparseLDLSolver< sofa::linearalgebra::CompressedRowSparseMatrix< type::Mat<3,3,double> >, sofa::linearalgebra::FullVector<double> >;
 
 #endif
 
 
-} // namespace linearsolver
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::linearsolver
 
 #endif

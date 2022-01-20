@@ -29,6 +29,9 @@
 #include <sofa/simulation/IntegrateBeginEvent.h>
 #include <sofa/simulation/IntegrateEndEvent.h>
 #include <sofa/simulation/Node.h>
+#include <sofa/core/BehaviorModel.h>
+#include <sofa/core/behavior/BaseInteractionForceField.h>
+#include <sofa/core/collision/Pipeline.h>
 
 #include <sofa/helper/AdvancedTimer.h>
 
@@ -52,10 +55,7 @@ using sofa::simulation::mechanicalvisitor::MechanicalEndIntegrationVisitor;
 
 using namespace sofa::core;
 
-namespace sofa
-{
-
-namespace simulation
+namespace sofa::simulation
 {
 
 
@@ -64,21 +64,6 @@ AnimateVisitor::AnimateVisitor(const core::ExecParams* params, SReal dt)
     , dt(dt)
     , firstNodeVisited(false)
 {
-}
-
-AnimateVisitor::AnimateVisitor(const core::ExecParams* params)
-    : Visitor(params)
-    , dt(0)
-    , firstNodeVisited(false)
-{
-}
-
-void AnimateVisitor::processBehaviorModel(simulation::Node*, core::BehaviorModel* obj)
-{
-    sofa::helper::AdvancedTimer::stepBegin("BehaviorModel",obj);
-
-    obj->updatePosition(getDt());
-    sofa::helper::AdvancedTimer::stepEnd("BehaviorModel",obj);
 }
 
 void AnimateVisitor::fwdInteractionForceField(simulation::Node*, core::behavior::BaseInteractionForceField* obj)
@@ -119,16 +104,6 @@ void AnimateVisitor::processCollisionPipeline(simulation::Node* node, core::coll
     sofa::helper::AdvancedTimer::stepEnd("Collision",obj);
 }
 
-void AnimateVisitor::processOdeSolver(simulation::Node* node, core::behavior::OdeSolver* solver)
-{
-    sofa::helper::AdvancedTimer::stepBegin("Mechanical",node);
-    /*    MechanicalIntegrationVisitor act(getDt());
-        node->execute(&act);*/
-
-    solver->solve(params, getDt());
-    sofa::helper::AdvancedTimer::stepEnd("Mechanical",node);
-}
-
 Visitor::Result AnimateVisitor::processNodeTopDown(simulation::Node* node)
 {
     if (!node->isActive()) return Visitor::RESULT_PRUNE;
@@ -152,7 +127,7 @@ Visitor::Result AnimateVisitor::processNodeTopDown(simulation::Node* node)
     if (!node->solver.empty() )
     {
         sofa::helper::AdvancedTimer::StepVar timer("Mechanical",node);
-        SReal nextTime = node->getTime() + dt;
+        const SReal nextTime = node->getTime() + dt;
         {
             IntegrateBeginEvent evBegin;
             PropagateEventVisitor eventPropagation( this->params, &evBegin);
@@ -183,7 +158,7 @@ Visitor::Result AnimateVisitor::processNodeTopDown(simulation::Node* node)
                                                     ).execute( node );
         MechanicalPropagateOnlyPositionAndVelocityVisitor(&m_mparams, nextTime,
                                                           VecCoordId::position(),
-                                                          VecDerivId::velocity(), true).execute( node );
+                                                          VecDerivId::velocity()).execute( node );
 
         MechanicalEndIntegrationVisitor endVisitor(this->params, dt);
         node->execute(&endVisitor);
@@ -196,14 +171,11 @@ Visitor::Result AnimateVisitor::processNodeTopDown(simulation::Node* node)
 
         return RESULT_PRUNE;
     }
-    {
-        // process InteractionForceFields
-        for_each(this, node, node->interactionForceField, &AnimateVisitor::fwdInteractionForceField);
-        return RESULT_CONTINUE;
-    }
+
+    // process InteractionForceFields
+    for_each(this, node, node->interactionForceField, &AnimateVisitor::fwdInteractionForceField);
+    return RESULT_CONTINUE;
 }
 
-} // namespace simulation
-
-} // namespace sofa
+} // namespace sofa::simulation
 

@@ -53,16 +53,11 @@ Base::Base()
     , f_bbox(initData( &f_bbox, "bbox", "this object bounding box"))
     , d_componentState(initData(&d_componentState, ComponentState::Undefined, "componentState", "The state of the component among (Dirty, Valid, Undefined, Loading, Invalid)."))
 {
-    name.setOwnerClass("Base");
     name.setAutoLink(false);
     d_componentState.setAutoLink(false);
     d_componentState.setReadOnly(true);
-    d_componentState.setOwnerClass("Base");
-    f_printLog.setOwnerClass("Base");
     f_printLog.setAutoLink(false);
-    f_tags.setOwnerClass("Base");
     f_tags.setAutoLink(false);
-    f_bbox.setOwnerClass("Base");
     f_bbox.setReadOnly(true);
     f_bbox.setDisplayed(false);
     f_bbox.setAutoLink(false);
@@ -176,10 +171,13 @@ void Base::addData(BaseData* f)
 /// Note that this method should only be called if the field was not initialized with the initData method
 void Base::addData(BaseData* f, const std::string& name)
 {
-    if (name.size() > 0 && (findData(name) || findLink(name)))
+    if (!name.empty())
     {
-        msg_warning() << "Data field name " << name
-                << " already used in this class or in a parent class !";
+        msg_warning_when(findData(name)) << "Data field name '" << name
+            << "' already used as a Data in this class or in a parent class";
+
+        msg_warning_when(findLink(name)) << "Data field name '" << name
+            << "' already used as a Link in this class or in a parent class";
     }
     m_vecData.push_back(f);
     m_aliasData.insert(std::make_pair(name, f));
@@ -197,10 +195,13 @@ void Base::addAlias( BaseData* field, const char* alias)
 void Base::addLink(BaseLink* l)
 {
     const std::string& name = l->getName();
-    if (name.size() > 0 && (findData(name) || findLink(name)))
+    if (!name.empty())
     {
-        msg_warning() << "Link name '" << name
-                << "' already used in this class or in a parent class !";
+        msg_warning_when(findData(name)) << "Link name '" << name
+            << "' already used as a Data in this class or in a parent class";
+
+        msg_warning_when(findLink(name)) << "Link name '" << name
+            << "' already used as a Link in this class or in a parent class";
     }
     m_vecLink.push_back(l);
     m_aliasLink.insert(std::make_pair(name, l));
@@ -475,8 +476,14 @@ bool Base::parseField( const std::string& attribute, const std::string& value)
             }
             else
             {
-                BaseData* parentData = dataVec[d]->getParent();
-                msg_info() << "Link from parent Data " << value << " (" << parentData->getValueTypeInfo()->name() << ") to Data " << attribute << "(" << dataVec[d]->getValueTypeInfo()->name() << ") OK";
+                if (BaseData* parentData = dataVec[d]->getParent())
+                {
+                    msg_info() << "Link from parent Data "
+                                    << value << " (" << parentData->getValueTypeInfo()->name() << ") "
+                                    << "to Data "
+                                    << attribute << " (" << dataVec[d]->getValueTypeInfo()->name() << ") "
+                                    << "OK";
+                }
             }
             /* children Data cannot be modified changing the parent Data value */
             dataVec[d]->setReadOnly(true);

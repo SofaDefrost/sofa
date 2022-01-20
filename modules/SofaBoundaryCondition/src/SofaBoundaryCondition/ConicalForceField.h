@@ -26,7 +26,7 @@
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/objectmodel/Data.h>
 
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa::component::forcefield
 {
@@ -62,7 +62,8 @@ protected:
         int index;
         Coord normal;
         Coord pos;
-        Contact( int index=0, Coord normal=Coord(),Coord pos=Coord())
+
+        explicit Contact( int index=0, Coord normal=Coord(),Coord pos=Coord())
             : index(index),normal(normal),pos(pos)
         {
         }
@@ -81,7 +82,7 @@ protected:
 
     };
 
-    Data<sofa::helper::vector<Contact> > contacts;
+    Data<sofa::type::vector<Contact> > contacts;
 
     ConicalForceFieldInternalData<DataTypes> data;
 
@@ -93,7 +94,7 @@ public:
 
     Data<Real> stiffness; ///< force stiffness
     Data<Real> damping; ///< force damping
-    Data<sofa::helper::types::RGBAColor> color; ///< cone color. (default=0.0,0.0,0.0,1.0,1.0)
+    Data<sofa::type::RGBAColor> color; ///< cone color. (default=0.0,0.0,0.0,1.0,1.0)
 protected:
     ConicalForceField();
 

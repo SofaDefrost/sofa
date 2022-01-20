@@ -25,9 +25,10 @@
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/Mass.h>
 #include <sofa/core/behavior/MechanicalState.h>
-#include <sofa/defaulttype/BaseVector.h>
+#include <sofa/linearalgebra/BaseVector.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 
 namespace sofa::component::mass
 {
@@ -47,6 +48,8 @@ public:
     typedef typename Coord::value_type Real;
     typedef core::objectmodel::Data<VecCoord> DataVecCoord;
     typedef core::objectmodel::Data<VecDeriv> DataVecDeriv;
+    typedef type::vector<Index> SetIndexArray;
+    typedef sofa::core::topology::TopologySubsetIndices DataSetIndex;
     typedef TMassType MassType;
 
     Data<MassType> d_vertexMass;   ///< single value defining the mass of each particle
@@ -64,10 +67,8 @@ public:
     /// optional range of local DOF indices. Any computation involving only
     /// indices outside of this range are discarded (useful for parallelization
     /// using mesh partitionning)
-    Data< defaulttype::Vec<2,int> > d_localRange;
-    Data< helper::vector<int> >     d_indices; ///< optional local DOF indices. Any computation involving only indices outside of this list are discarded
-
-    Data<bool> d_handleTopologicalChanges; ///< The mass and totalMass are recomputed on particles add/remove.
+    Data< type::Vec<2,int> > d_localRange;
+    DataSetIndex     d_indices; ///< optional local DOF indices. Any computation involving only indices outside of this list are discarded
     Data<bool> d_preserveTotalMass; ///< Prevent totalMass from decreasing when removing particles.
 
     ////////////////////////// Inherited attributes ////////////////////////////
@@ -111,7 +112,6 @@ public:
     void init() override;
     void initDefaultImpl() ;
     void doUpdateInternal() override;
-    void handleEvent(sofa::core::objectmodel::Event *event) override;
 
     /// @name Check and standard initialization functions from mass information
     /// @{
@@ -123,24 +123,22 @@ public:
     virtual void initFromTotalMass();
     /// @}
 
-    void handleTopologyChange() override;
-
     void addMDx(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecDeriv& dx, SReal factor) override;
     void accFromF(const core::MechanicalParams* mparams, DataVecDeriv& a, const DataVecDeriv& f) override;
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
 
     SReal getKineticEnergy(const core::MechanicalParams* mparams, const DataVecDeriv& d_v) const override;  ///< vMv/2 using dof->getV() override
     SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;   ///< Mgx potential in a uniform gravity field, null at origin
-    defaulttype::Vector6 getMomentum(const core::MechanicalParams* mparams, const DataVecCoord& x, const DataVecDeriv& v) const override;  ///< (Mv,cross(x,Mv)+Iw) override
+    type::Vector6 getMomentum(const core::MechanicalParams* mparams, const DataVecCoord& x, const DataVecDeriv& v) const override;  ///< (Mv,cross(x,Mv)+Iw) override
 
-    void addMDxToVector(defaulttype::BaseVector *resVect, const VecDeriv *dx, SReal mFact, unsigned int& offset);
+    void addMDxToVector(linearalgebra::BaseVector *resVect, const VecDeriv *dx, SReal mFact, unsigned int& offset);
 
     void addGravityToV(const core::MechanicalParams* mparams, DataVecDeriv& d_v) override;
 
     void addMToMatrix(const core::MechanicalParams *mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override; /// Add Mass contribution to global Matrix assembling
 
     SReal getElementMass(sofa::Index index) const override;
-    void getElementMass(sofa::Index index, defaulttype::BaseMatrix *m) const override;
+    void getElementMass(sofa::Index index, linearalgebra::BaseMatrix *m) const override;
 
     bool isDiagonal() const override {return true;}
 
@@ -148,6 +146,7 @@ public:
 
 
 private:
+    void updateMassOnResize(sofa::Size newSize);
 
     template<class T>
     void drawRigid3DImpl(const core::visual::VisualParams* vparams) ;
@@ -165,11 +164,11 @@ private:
 
 
     template<class T>
-    defaulttype::Vector6 getMomentumRigid3DImpl(const core::MechanicalParams* mparams,
+    type::Vector6 getMomentumRigid3DImpl(const core::MechanicalParams* mparams,
                                                 const DataVecCoord& x,
                                                 const DataVecDeriv& v) const;  ///< (Mv,cross(x,Mv)+Iw)
     template<class T>
-    defaulttype::Vector6 getMomentumVec3DImpl(const core::MechanicalParams* mparams,
+    type::Vector6 getMomentumVec3DImpl(const core::MechanicalParams* mparams,
                                               const DataVecCoord& x,
                                               const DataVecDeriv& v) const;  ///< (Mv,cross(x,Mv)+Iw)
 
@@ -177,7 +176,7 @@ private:
     void loadFromFileRigidImpl(const std::string& filename) ;
 
     template <class T>
-    void addMDxToVectorVecImpl(defaulttype::BaseVector *resVect,
+    void addMDxToVectorVecImpl(linearalgebra::BaseVector *resVect,
                                const VecDeriv* dx,
                                SReal mFact,
                                unsigned int& offset);
@@ -194,17 +193,17 @@ void UniformMass<defaulttype::Rigid3Types, defaulttype::Rigid3Mass>::draw(const 
 template <>
 void UniformMass<defaulttype::Rigid2Types, defaulttype::Rigid2Mass>::draw(const core::visual::VisualParams* vparams);
 template <>
-double UniformMass<defaulttype::Rigid3Types,defaulttype::Rigid3Mass>::getPotentialEnergy ( const core::MechanicalParams*, const DataVecCoord& x ) const;
+SReal UniformMass<defaulttype::Rigid3Types,defaulttype::Rigid3Mass>::getPotentialEnergy ( const core::MechanicalParams*, const DataVecCoord& x ) const;
 template <>
-double UniformMass<defaulttype::Rigid2Types,defaulttype::Rigid2Mass>::getPotentialEnergy ( const core::MechanicalParams*, const DataVecCoord& x ) const;
+SReal UniformMass<defaulttype::Rigid2Types,defaulttype::Rigid2Mass>::getPotentialEnergy ( const core::MechanicalParams*, const DataVecCoord& x ) const;
 template <>
 void UniformMass<defaulttype::Vec6Types,double>::draw(const core::visual::VisualParams* vparams);
 
 #if !defined(SOFA_COMPONENT_MASS_UNIFORMMASS_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec3Types, double>;
-extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec2Types, double>;
-extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec1Types, double>;
-extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec6Types, double>;
+extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec3Types, SReal>;
+extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec2Types, SReal>;
+extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec1Types, SReal>;
+extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Vec6Types, SReal>;
 extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Rigid3Types, defaulttype::Rigid3Mass>;
 extern template class SOFA_SOFABASEMECHANICS_API UniformMass<defaulttype::Rigid2Types, defaulttype::Rigid2Mass>;
 #endif

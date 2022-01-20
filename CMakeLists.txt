@@ -4,7 +4,7 @@ project(Sofa) # Cannot use VERSION with patch like "00"
 include(CMakeDependentOption)
 
 # Manually define VERSION
-set(Sofa_VERSION_MAJOR 21)
+set(Sofa_VERSION_MAJOR 22)
 set(Sofa_VERSION_MINOR 06)
 set(Sofa_VERSION_PATCH 99)
 set(Sofa_VERSION ${Sofa_VERSION_MAJOR}.${Sofa_VERSION_MINOR}.${Sofa_VERSION_PATCH})
@@ -175,17 +175,17 @@ endif()
 ### Ninja build pools
 option(SOFA_NINJA_BUILD_POOLS "Activate the Ninja build pools feature, to limit the cores used by specific targets" OFF)
 
-# This option is useful to compile SOFA + internal plugins without SofaPython soft dependencies (Compliant, image, ...)
-# it simplifies binaries generation and cohabitation between SofaPython and SofaPython3
-option(SOFA_ENABLE_SOFT_DEPS_TO_SOFAPYTHON "Enable all soft dependencies to SofaPython" ON)
-
 ### Extlibs
 add_subdirectory(extlibs)
 
 ### Main Sofa subdirectories
+option(SOFA_ENABLE_LEGACY_HEADERS "Enable the compatibility layer (headers located in legacy folders)." ON)
+if(SOFA_ENABLE_LEGACY_HEADERS)
+    message("Using legacy headers is enabled.")
+    message("Headers from v21.06 are usable, but it is advised to change your code to use the new headers introduced in v21.12.")
 
-# TODO: add an option once the sofa code has been converted
-add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/modules/Sofa.Compat)
+    add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/modules/Sofa.Compat)
+endif()
 
 add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/SofaFramework)
 add_subdirectory(${SOFA_KERNEL_SOURCE_DIR}/SofaSimulation)
@@ -249,6 +249,12 @@ if(SOFA_BUILD_TUTORIALS)
     add_subdirectory(applications/tutorials)
 endif()
 
+## SOFA scenes
+option(SOFA_BUILD_ADD_SCENES "Add SOFA scenes as a project of the build." OFF)
+if (SOFA_BUILD_ADD_SCENES)
+    add_subdirectory(examples)
+endif()
+
 ## Build external projects at the same time
 set(SOFA_EXTERNAL_DIRECTORIES "" CACHE STRING "list of paths separated by ';'")
 if(NOT "${SOFA_EXTERNAL_DIRECTORIES}" STREQUAL "")
@@ -291,6 +297,8 @@ endif()
 
 file(WRITE "${CMAKE_BINARY_DIR}/plugins/README.txt" "This folder will be automatically scanned by the Plugin Manager.")
 install(DIRECTORY ${CMAKE_BINARY_DIR}/plugins/ DESTINATION plugins COMPONENT resources)
+
+sofa_install_git_infos(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Post-install scripts (must be the last add_subdirectory)
 add_subdirectory(tools/postinstall-fixup)

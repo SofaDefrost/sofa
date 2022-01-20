@@ -21,14 +21,12 @@
 ******************************************************************************/
 #pragma once
 #include <SofaBaseMechanics/BarycentricMappers/BarycentricMapper.h>
-#include <SofaBaseTopology/PointSetTopologyContainer.h>
 #include <sofa/core/behavior/BaseMechanicalState.h>
 
 namespace sofa::component::mapping::_topologybarycentricmapper_
 {
 
-using sofa::defaulttype::Vec3dTypes;
-using sofa::defaulttype::Vec3fTypes;
+using sofa::defaulttype::Vec3Types;
 
 /// Template class for barycentric mapping topology-specific mappers.
 template<class In, class Out>
@@ -39,12 +37,8 @@ public:
                SOFA_TEMPLATE2(BarycentricMapper,In,Out));
 
     typedef typename Inherit1::Real Real;
-    typedef typename core::behavior::BaseMechanicalState::ForceMask ForceMask;
 
     using Index = sofa::Index;
-
-    ForceMask *maskFrom;
-    ForceMask *maskTo;
 
     virtual Index addPointInLine(const Index lineIndex, const SReal* baryCoords);
     virtual Index setPointInLine(const Index pointIndex, const Index lineIndex, const SReal* baryCoords);
@@ -66,10 +60,9 @@ public:
     virtual Index setPointInCube(const Index pointIndex, const Index cubeIndex, const SReal* baryCoords);
     virtual Index createPointInCube(const typename Out::Coord& p, Index cubeIndex, const typename In::VecCoord* points);
 
-    virtual void setToTopology( topology::PointSetTopologyContainer* toTopology) {this->m_toTopology = toTopology;}
-    const topology::PointSetTopologyContainer *getToTopology() const {return m_toTopology;}
+    virtual void setToTopology(core::topology::BaseMeshTopology* toTopology) {this->m_toTopology = toTopology;}
+    const core::topology::BaseMeshTopology*getToTopology() const {return m_toTopology;}
 
-    virtual void updateForceMask(){/*mask is already filled in the mapper's applyJT*/}
     virtual void resize( core::State<Out>* toModel ) = 0;
 
     void processTopologicalChanges(const typename Out::VecCoord& out, const typename In::VecCoord& in, core::topology::Topology* t) {
@@ -80,7 +73,7 @@ public:
 
 protected:
     TopologyBarycentricMapper(core::topology::BaseMeshTopology* fromTopology,
-                              topology::PointSetTopologyContainer* toTopology = nullptr)
+        core::topology::BaseMeshTopology* toTopology = nullptr)
         : m_fromTopology(fromTopology)
         , m_toTopology(toTopology)
     {}
@@ -88,11 +81,11 @@ protected:
     ~TopologyBarycentricMapper() override {}
 
     core::topology::BaseMeshTopology*    m_fromTopology;
-    topology::PointSetTopologyContainer* m_toTopology;
+    core::topology::BaseMeshTopology*    m_toTopology;
 };
 
 #if !defined(SOFA_COMPONENT_MAPPING_TOPOLOGYBARYCENTRICMAPPER_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API TopologyBarycentricMapper< Vec3dTypes, Vec3dTypes >;
+extern template class SOFA_SOFABASEMECHANICS_API TopologyBarycentricMapper< Vec3Types, Vec3Types >;
 
 
 #endif

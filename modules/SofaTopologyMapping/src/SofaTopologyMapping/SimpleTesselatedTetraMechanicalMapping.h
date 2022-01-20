@@ -25,7 +25,7 @@
 #include <sofa/core/Mapping.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <SofaTopologyMapping/SimpleTesselatedTetraTopologicalMapping.h>
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
 
@@ -88,7 +88,7 @@ protected:
 
 #if  !defined(SOFA_COMPONENT_MAPPING_SIMPLETESSELATEDTETRAMECHANICALMAPPING_CPP)
 
-extern template class SOFA_SOFATOPOLOGYMAPPING_API SimpleTesselatedTetraMechanicalMapping< defaulttype::Vec3dTypes, defaulttype::Vec3dTypes >;
+extern template class SOFA_SOFATOPOLOGYMAPPING_API SimpleTesselatedTetraMechanicalMapping< defaulttype::Vec3Types, defaulttype::Vec3Types >;
 
 
 

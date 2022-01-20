@@ -27,7 +27,7 @@
 #include "Sofa_test.h"
 #include <SofaSimulationGraph/DAGSimulation.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaEigen2Solver/EigenBaseSparseMatrix.h>
+#include <sofa/linearalgebra/EigenBaseSparseMatrix.h>
 #include <SofaBaseLinearSolver/SingleMatrixAccessor.h>
 #include <SceneCreator/SceneCreator.h>
 #include <SceneCreator/SceneUtils.h>
@@ -287,16 +287,6 @@ struct ForceField_test : public Sofa_test<typename _ForceFieldType::DataTypes::R
         data_traits<DataTypes>::VecDeriv_to_Vector( df, changeOfForce );
         if( this->vectorMaxDiff(Kdx,df)> errorMax*this->epsilon() )
             ADD_FAILURE()<<"Kdx differs from change of force"<< std::endl << "Failed seed number = " << BaseSofa_test::seed << std::endl;;
-
-
-        // =================== test updateForceMask
-        // ensure that each dof receiving a force is in the mask
-        for( unsigned i=0; i<xdof.size(); i++ ) {
-            if( newF[i] != Deriv() && !dof->forceMask.getEntry(i) ){
-                ADD_FAILURE() << "updateForceMask did not set mask to every dof influenced by the ForceField" << std::endl;
-                break;
-            }
-        }
 
 
     }

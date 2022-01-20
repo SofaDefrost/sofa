@@ -24,9 +24,9 @@
 
 #include <sofa/helper/config.h>
 
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 #include <sofa/helper/rmath.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 #include <string>
 //#include <sofa/helper/OptionsGroup.h>
 
@@ -41,14 +41,13 @@ class SOFA_HELPER_API ColorMap
 {
 public:
 
-    typedef defaulttype::Vec3f Color3;  // Color tripplet
-    typedef defaulttype::Vec4f Color;   // ... with alpha value
-    typedef sofa::helper::vector<Color> VecColor;
+    typedef type::Vec3f Color3;  // Color tripplet
+    typedef type::Vec4f Color;   // ... with alpha value
+    typedef sofa::type::vector<Color> VecColor;
     
     ColorMap(unsigned int paletteSize = 256, const std::string& colorScheme = "HSV");
     virtual ~ColorMap();
 
-public:
     template<class Real>
     class evaluator
     {
@@ -87,16 +86,16 @@ public:
     void init();
     void reinit();
     
-    unsigned int getPaletteSize() { return m_paletteSize;  }
+    unsigned int getPaletteSize() const { return m_paletteSize;  }
     void setPaletteSize(unsigned int paletteSize) { m_paletteSize = paletteSize; }
 
-    const std::string& getColorScheme() { return m_colorScheme;  }
+    const std::string& getColorScheme() const { return m_colorScheme;  }
     void setColorScheme(const std::string& colorScheme) { m_colorScheme = colorScheme; }
 
-    unsigned int getNbColors() { return (unsigned int) entries.size(); }
+    unsigned int getNbColors() const { return (unsigned int) entries.size(); }
     Color getColor(unsigned int i) {
         if (i < entries.size()) return entries[i];
-        return Color(0.0, 0.0, 0.0, 0.0);
+        return Color(0.f, 0.f, 0.f, 0.f);
     }
 
     static ColorMap* getDefault();

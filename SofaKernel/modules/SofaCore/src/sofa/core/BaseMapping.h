@@ -67,12 +67,12 @@ public:
     virtual void applyJ(const MechanicalParams* mparams = mechanicalparams::defaultInstance(), MultiVecDerivId outVel = VecDerivId::velocity(), ConstMultiVecDerivId inVel = ConstVecDerivId::velocity() ) = 0;
 
     /// Accessor to the input model of this mapping
-    virtual helper::vector<BaseState*> getFrom() = 0;
+    virtual type::vector<BaseState*> getFrom() = 0;
     /// If the type is compatible set the input model and return true, otherwise do nothing and return false.
     virtual bool setFrom( BaseState* from );
 
     /// Accessor to the output model of this mapping
-    virtual helper::vector<BaseState*> getTo() = 0;
+    virtual type::vector<BaseState*> getTo() = 0;
     /// If the type is compatible set the output model and return true, otherwise do nothing and return false.
     virtual bool setTo( BaseState* to );
 
@@ -121,22 +121,22 @@ public:
     /// @todo Note that if the mapping provides this matrix, then a default implementation
     /// of all other related methods could be provided, or optionally used to verify the
     /// provided implementations for debugging.
-    virtual const sofa::defaulttype::BaseMatrix* getJ(const MechanicalParams* /*mparams*/);
+    virtual const sofa::linearalgebra::BaseMatrix* getJ(const MechanicalParams* /*mparams*/);
 
     /// @deprecated
-    virtual const sofa::defaulttype::BaseMatrix* getJ();
+    virtual const sofa::linearalgebra::BaseMatrix* getJ();
 
 
-    typedef sofa::defaulttype::BaseMatrix* (*func_createMappedMatrix)(const behavior::BaseMechanicalState* , const behavior::BaseMechanicalState* );
+    typedef sofa::linearalgebra::BaseMatrix* (*func_createMappedMatrix)(const behavior::BaseMechanicalState* , const behavior::BaseMechanicalState* );
     /// Create a matrix for mapped mechanical objects
     /// If the two mechanical objects is identical, create a new stiffness matrix for this mapped objects
     /// If the two mechanical objects is different, create a new interaction matrix
-    virtual sofa::defaulttype::BaseMatrix* createMappedMatrix(const behavior::BaseMechanicalState* state1, const behavior::BaseMechanicalState* state2, func_createMappedMatrix);
+    virtual sofa::linearalgebra::BaseMatrix* createMappedMatrix(const behavior::BaseMechanicalState* state1, const behavior::BaseMechanicalState* state2, func_createMappedMatrix);
 
     /// Get the source (upper) mechanical state.
-    virtual helper::vector<behavior::BaseMechanicalState*> getMechFrom() = 0;
+    virtual type::vector<behavior::BaseMechanicalState*> getMechFrom() = 0;
     /// Get the destination (lower, mapped) mechanical state.
-    virtual helper::vector<behavior::BaseMechanicalState*> getMechTo() = 0;
+    virtual type::vector<behavior::BaseMechanicalState*> getMechTo() = 0;
 
     /// Disable the mapping to get the original coordinates of the mapped model.
     virtual void disable()=0;
@@ -146,7 +146,7 @@ public:
 
     /// Returns pointers to Jacobian matrices associated with parent states, consistently with getFrom(). Most mappings have only one parent, however Multimappings have several parents.
     /// For efficiency concerns, please return pointers to defaulttype::EigenBaseSparseMatrix
-    virtual const helper::vector<sofa::defaulttype::BaseMatrix*>* getJs() { dmsg_error() << "Calling a virtual method not implemented."; return nullptr; }
+    virtual const type::vector<sofa::linearalgebra::BaseMatrix*>* getJs() { dmsg_error() << "Calling a virtual method not implemented."; return nullptr; }
 
     /// Compute the geometric stiffness matrix based on given child forces
     /// K = dJ^T * outForce
@@ -157,26 +157,12 @@ public:
     /// This is the equivalent of applyDJT, for matrix assembly instead of matrix-vector product.
     /// This matrix is associated with the parent DOFs. It is a square matrix with a size of the total number of parent DOFs.
     /// For efficiency concerns, please return a pointer to a defaulttype::EigenBaseSparseMatrix
-    virtual const defaulttype::BaseMatrix* getK() { return nullptr; }
+    virtual const linearalgebra::BaseMatrix* getK() { return nullptr; }
 
     /// @}
 
 protected:
     bool testMechanicalState(BaseState* state);
-
-#ifdef SOFA_USE_MASK
-    /// must be set to true each time Apply is called
-    /// and to false each time updateForceMask() is called
-    /// in order to call updateForceMask() only once per step
-    bool m_forceMaskNewStep;
-#endif
-
-    /// Useful when the mapping is applied only on a subset of parent dofs.
-    /// It is automatically called by applyJT.
-    ///
-    /// That way, we can optimize Jacobian sparsity.
-    /// Every Dofs are inserted by default. The mappings using only a subset of dofs should only insert these dofs in the mask.
-    virtual void updateForceMask() = 0;
 
 public:
     bool insertInNode( objectmodel::BaseNode* node ) override;

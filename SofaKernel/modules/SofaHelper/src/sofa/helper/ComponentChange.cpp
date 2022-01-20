@@ -22,20 +22,19 @@
 #include "ComponentChange.h"
 
 
-namespace sofa
-{
-namespace helper
-{
-namespace lifecycle
+namespace sofa::helper::lifecycle
 {
 
-std::map<std::string, Deprecated> deprecatedComponents = {
+const std::map<std::string, Deprecated, std::less<> > deprecatedComponents = {
     // SofaMiscForceField
     {"MatrixMass", Deprecated("v19.06", "v19.12")},
-
+    {"RayTraceDetection", Deprecated("v21.06", "v21.12")},
+    {"BruteForceDetection", Deprecated("v21.06", "v21.12")},
+    {"DirectSAP", Deprecated("v21.06", "v21.12")},
+    {"PointConstraint", Deprecated("v21.12", "v22.06")},
 };
 
-std::map<std::string, ComponentChange> uncreatableComponents = {
+const std::map<std::string, ComponentChange, std::less<> > uncreatableComponents = {
     // SofaDistanceGrid was pluginized in #389
     {"BarycentricPenalityContact", Pluginized("v17.12", "SofaMeshCollision")},
     {"DistanceGridCollisionModel", Pluginized("v17.12", "SofaDistanceGrid")},
@@ -388,7 +387,6 @@ std::map<std::string, ComponentChange> uncreatableComponents = {
     { "GenericConstraintSolver", Pluginized("v20.12", "SofaConstraint") },
     { "LCPConstraintSolver", Pluginized("v20.12", "SofaConstraint") },
     { "LinearSolverConstraintCorrection", Pluginized("v20.12", "SofaConstraint") },
-    { "LMDNewProximityIntersection", Pluginized("v20.12", "SofaConstraint") },
     { "LocalMinDistance", Pluginized("v20.12", "SofaConstraint") },
     { "MappingGeometricStiffnessForceField", Pluginized("v20.12", "SofaConstraint") },
     { "PrecomputedConstraintCorrection", Pluginized("v20.12", "SofaConstraint") },
@@ -452,11 +450,8 @@ std::map<std::string, ComponentChange> uncreatableComponents = {
     { "PenalityContactForceField", Pluginized("v20.12", "SofaObjectInteraction") },
 
     // SofaMeshCollision was pluginized in #1602
-    { "LineLocalMinDistanceFilter", Pluginized("v20.12", "SofaMeshCollision") },
     { "LineCollisionModel", Pluginized("v20.12", "SofaMeshCollision") },
-    { "PointLocalMinDistanceFilter", Pluginized("v20.12", "SofaMeshCollision") },
     { "PointCollisionModel", Pluginized("v20.12", "SofaMeshCollision") },
-    { "TriangleLocalMinDistanceFilter", Pluginized("v20.12", "SofaMeshCollision") },
     { "TriangleCollisionModel", Pluginized("v20.12", "SofaMeshCollision") },
 
     // SofaEngine was pluginized in #1603
@@ -470,7 +465,7 @@ std::map<std::string, ComponentChange> uncreatableComponents = {
     { "StaticSolver", Pluginized("v20.12", "SofaImplicitOdeSolver") },
 
     // SofaLoader was pluginized in #1608
-    { "MeshObjLoader", Pluginized("v20.12", "SofaLoader") },
+    { "MeshOBJLoader", Pluginized("v20.12", "SofaLoader") },
     { "MeshVTKLoader", Pluginized("v20.12", "SofaLoader") },
 
     // SofaEigen2Solver was pluginized in #1635
@@ -544,7 +539,14 @@ std::map<std::string, ComponentChange> uncreatableComponents = {
     //{ "SubsetMapping", Pluginized("v20.12", "SofaBaseMechanics") },
     //{ "UniformMass", Pluginized("v20.12", "SofaBaseMechanics") },
 
+    /***********************/
+    // REMOVED SINCE v21.12
 
+    { "LMDNewProximityIntersection", Removed("v21.12", "v21.12") },
+    { "LocalMinDistanceFilter", Removed("v21.12", "v21.12") },
+    { "LineLocalMinDistanceFilter", Removed("v21.12", "v21.12") },
+    { "PointLocalMinDistanceFilter", Removed("v21.12", "v21.12") },
+    { "TriangleLocalMinDistanceFilter", Removed("v21.12", "v21.12") },
 
     /***********************/
     // REMOVED SINCE v21.06
@@ -668,9 +670,16 @@ std::map<std::string, ComponentChange> uncreatableComponents = {
     { "CapsuleModel", Moved("v21.06", "SofaBaseCollision", "SofaMiscCollision") },
     { "SpatialGridPointModel", Moved("v21.06", "SofaMiscCollision", "SofaSphFluid") },
 
+    // MOVED SINCE v21.12
+    { "LULinearSolver", Moved("v21.12", "SofaDenseSolver", "SofaNewmat") },
+    //{"NewMatCholeskySolver", Moved("v21.12", "SofaDenseSolver", "SofaNewmat") },
+    //{"NewMatCGLinearSolver", Moved("v21.12", "SofaDenseSolver", "SofaNewmat") },
+
+    // MOVED SINCE v22.06
+    { "GlobalSystemMatrixExporter", Moved("v22.06", "SofaBaseLinearSolver", "SofaMatrix") },
+
 };
 
-} // namespace lifecycle
-} // namespace helper
-} // namespace sofa
+const std::map< std::string, CreatableMoved, std::less<> > movedComponents = {};
 
+} // namespace sofa::helper::lifecycle

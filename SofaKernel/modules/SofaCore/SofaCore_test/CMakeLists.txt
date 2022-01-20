@@ -7,6 +7,7 @@ set(SOURCE_FILES
     loader/MeshLoader_test.cpp
     objectmodel/AspectPool_test.cpp
     objectmodel/BaseClass_test.cpp
+    objectmodel/BaseData_test.cpp
     objectmodel/BaseLink_test.cpp
     objectmodel/BaseObjectDescription_test.cpp
     objectmodel/Data_test.cpp
@@ -16,6 +17,8 @@ set(SOURCE_FILES
     objectmodel/DDGNode_test.cpp
     objectmodel/MultiLink_test.cpp
     objectmodel/SingleLink_test.cpp
+    objectmodel/VectorData_test.cpp
+    objectmodel/DataFileNameVector_test.cpp
     DataEngine_test.cpp
     TrackedData_test.cpp
     PathResolver_test.cpp

@@ -22,7 +22,7 @@
 #include <SofaImplicitOdeSolver/StaticSolver.h>
 
 #include <sofa/core/ObjectFactory.h>
-#include <sofa/helper/AdvancedTimer.h>
+#include <sofa/helper/ScopedAdvancedTimer.h>
 #include <sofa/simulation/MechanicalOperations.h>
 #include <sofa/simulation/VectorOperations.h>
 #include <sofa/core/behavior/MultiMatrix.h>
@@ -128,7 +128,7 @@ void StaticSolver::parse(sofa::core::objectmodel::BaseObjectDescription* arg)
     sofa::core::behavior::OdeSolver::parse(arg) ;
 }
 
-void StaticSolver::solve(const sofa::core::ExecParams* params, double dt, sofa::core::MultiVecCoordId xResult, sofa::core::MultiVecDerivId vResult)
+void StaticSolver::solve(const sofa::core::ExecParams* params, SReal dt, sofa::core::MultiVecCoordId xResult, sofa::core::MultiVecDerivId vResult)
 {
     using namespace sofa::helper::logging;
     using namespace std::chrono;
@@ -275,7 +275,7 @@ void StaticSolver::solve(const sofa::core::ExecParams* params, double dt, sofa::
             //       is called on every BaseProjectiveConstraintSet objects. An example of such constraint set is the
             //       FixedConstraint. In this case, it will set to 0 every column (_, i) and row (i, _) of the assembled
             //       matrix for the ith degree of freedom.
-            matrix = MechanicalMatrix::K * -1.0;
+            matrix.setSystemMBKMatrix(MechanicalMatrix::K * -1.0);
         }
 
         // Part II. Solve the unknown increment.

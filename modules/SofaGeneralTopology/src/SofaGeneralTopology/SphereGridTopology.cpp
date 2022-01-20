@@ -26,6 +26,7 @@
 namespace sofa::component::topology
 {
 
+using namespace sofa::type;
 using namespace sofa::defaulttype;
 
 
@@ -67,7 +68,7 @@ void SphereGridTopology::setRadius(SReal radius)
 }
 
 
-Vector3 SphereGridTopology::getPoint(Index i) const
+sofa::type::Vec3 SphereGridTopology::getPoint(Index i) const
 {
     int x = i%d_n.getValue()[0]; i/=d_n.getValue()[0];
     int y = i%d_n.getValue()[1]; i/=d_n.getValue()[1];
@@ -75,7 +76,7 @@ Vector3 SphereGridTopology::getPoint(Index i) const
     return getPointInGrid(x,y,z);
 }
 
-Vector3 SphereGridTopology::getPointInGrid(int i, int j, int k) const
+sofa::type::Vec3 SphereGridTopology::getPointInGrid(int i, int j, int k) const
 {
     //return p0+dx*x+dy*y+dz*z;
     SReal r = d_radius.getValue();

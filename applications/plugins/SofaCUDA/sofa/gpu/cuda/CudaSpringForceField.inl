@@ -169,7 +169,7 @@ void SpringForceFieldInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TRea
 {
     Data& data = m->data;
     m->Inherit::init();
-    const sofa::helper::vector<Spring>& springs = m->springs.getValue();
+    const sofa::type::vector<Spring>& springs = m->springs.getValue();
     if (!springs.empty())
     {
         bool external = (m->mstate1!=m->mstate2);
@@ -287,17 +287,19 @@ void SpringForceFieldInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TRea
         f2.resize(x2.size());
         int d1 = data.springs1.vertex0;
         int d2 = data.springs2.vertex0;
+
         if (data.springs1.nbSpringPerVertex > 0)
         {
-            if (!stiff)
+            if (!stiff) {
                 Kernels::addExternalForce(data.springs1.nbVertex,
-                        data.springs1.nbSpringPerVertex,
-                        data.springs1.springs.deviceRead(),
-                        (      Deriv*)f1.deviceWrite() + d1,
-                        (const Coord*)x1.deviceRead()  + d1,
-                        (const Deriv*)v1.deviceRead()  + d1,
-                        (const Coord*)x2.deviceRead()  + d2,
-                        (const Deriv*)v2.deviceRead()  + d2);
+                    data.springs1.nbSpringPerVertex,
+                    data.springs1.springs.deviceRead(),
+                    (Deriv*)f1.deviceWrite() + d1,
+                    (const Coord*)x1.deviceRead() + d1,
+                    (const Deriv*)v1.deviceRead() + d1,
+                    (const Coord*)x2.deviceRead() + d2,
+                    (const Deriv*)v2.deviceRead() + d2);
+            }
             else
                 Kernels::addExternalForce(data.springs1.nbVertex,
                         data.springs1.nbSpringPerVertex,

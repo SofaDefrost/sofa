@@ -22,12 +22,10 @@
 #pragma once
 
 #include <SofaBoundaryCondition/TrianglePressureForceField.h>
-#include <SofaBaseTopology/TriangleSetTopologyContainer.h>
-#include <SofaBaseTopology/CommonAlgorithms.h>
-#include <SofaBaseTopology/TopologySparseData.inl>
+#include <sofa/core/topology/TopologySubsetData.inl>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/MechanicalParams.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 #include <vector>
 #include <set>
 
@@ -46,7 +44,7 @@ template <class DataTypes>  TrianglePressureForceField<DataTypes>::TrianglePress
         , dmin(initData(&dmin,(Real)0.0, "dmin", "Minimum distance from the origin along the normal direction"))
         , dmax(initData(&dmax,(Real)0.0, "dmax", "Maximum distance from the origin along the normal direction"))
         , p_showForces(initData(&p_showForces, (bool)false, "showForces", "draw triangles which have a given pressure"))
-		, p_useConstantForce(initData(&p_useConstantForce, (bool)true, "useConstantForce", "applied force is computed as the the pressure vector times the area at rest"))
+		, p_useConstantForce(initData(&p_useConstantForce, (bool)true, "useConstantForce", "applied force is computed as the pressure vector times the area at rest"))
         , l_topology(initLink("topology", "link to the topology container"))
         , trianglePressureMap(initData(&trianglePressureMap, "trianglePressureMap", "map between edge indices and their pressure"))
         , m_topology(nullptr)
@@ -84,7 +82,6 @@ template <class DataTypes> void TrianglePressureForceField<DataTypes>::init()
     }
 
     trianglePressureMap.createTopologyHandler(m_topology);
-    trianglePressureMap.registerTopologicalData();
 	
     initTriangleInformation();
 		
@@ -95,17 +92,16 @@ void TrianglePressureForceField<DataTypes>::addForce(const core::MechanicalParam
 {
 
     VecDeriv& f = *d_f.beginEdit();
-    Deriv force;
 
-    const sofa::helper::vector <Index>& my_map = trianglePressureMap.getMap2Elements();
+    const sofa::type::vector<Index>& my_map = trianglePressureMap.getMap2Elements();
 
 	if (p_useConstantForce.getValue()) {
-		const sofa::helper::vector<TrianglePressureInformation>& my_subset = trianglePressureMap.getValue();
+		const sofa::type::vector<TrianglePressureInformation>& my_subset = trianglePressureMap.getValue();
 
 
 		for (unsigned int i=0; i<my_map.size(); ++i)
 		{
-			force=my_subset[i].force/3;
+			const auto force=my_subset[i].force/3;
 			f[m_topology->getTriangle(my_map[i])[0]]+=force;
 			f[m_topology->getTriangle(my_map[i])[1]]+=force;
 			f[m_topology->getTriangle(my_map[i])[2]]+=force;
@@ -113,16 +109,16 @@ void TrianglePressureForceField<DataTypes>::addForce(const core::MechanicalParam
 		}
 	} else {
         typedef core::topology::BaseMeshTopology::Triangle Triangle;
-		const sofa::helper::vector<Triangle> &ta = m_topology->getTriangles();
+		const sofa::type::vector<Triangle> &ta = m_topology->getTriangles();
 		const  VecDeriv p = d_x.getValue();
 		MatSym3 cauchy=cauchyStress.getValue();
-		Deriv areaVector,force;
+		Deriv areaVector;
 
 		for (unsigned int i=0; i<my_map.size(); ++i)
 		{
 			const Triangle &t=ta[my_map[i]];
 			areaVector=cross(p[t[1]]-p[t[0]],p[t[2]]-p[t[0]])/6.0f;
-			force=cauchy*areaVector;
+			const auto force=cauchy*areaVector;
 			for (size_t j=0;j<3;++j) {
 				f[t[j]]+=force;
 			}
@@ -144,25 +140,22 @@ void TrianglePressureForceField<DataTypes>::addDForce(const core::MechanicalPara
 template<class DataTypes>
 void TrianglePressureForceField<DataTypes>::initTriangleInformation()
 {
-   this->getContext()->get(triangleGeo);
+    const sofa::type::vector<Index>& my_map = trianglePressureMap.getMap2Elements();
+    auto my_subset = sofa::helper::getWriteOnlyAccessor(trianglePressureMap);
 
-   if (!triangleGeo)
-   {
-       msg_error() << "Missing component: Unable to get TriangleSetGeometryAlgorithms from the current context.";
-       sofa::core::objectmodel::BaseObject::d_componentState.setValue(sofa::core::objectmodel::ComponentState::Invalid);
-       return;
-   }
-
-    const sofa::helper::vector <Index>& my_map = trianglePressureMap.getMap2Elements();
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    const VecCoord& x0 = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
 
     for (unsigned int i=0; i<my_map.size(); ++i)
     {
-        my_subset[i].area=triangleGeo->computeRestTriangleArea(my_map[i]);
+        const auto& t = this->m_topology->getTriangle(my_map[i]);
+
+        const auto& n0 = DataTypes::getCPos(x0[t[0]]);
+        const auto& n1 = DataTypes::getCPos(x0[t[1]]);
+        const auto& n2 = DataTypes::getCPos(x0[t[2]]);
+
+        my_subset[i].area = sofa::geometry::Triangle::area(n0, n1, n2);
         my_subset[i].force=pressure.getValue()*my_subset[i].area;
     }
-
-    trianglePressureMap.endEdit();
 }
 
 template<class DataTypes>
@@ -178,7 +171,7 @@ bool TrianglePressureForceField<DataTypes>::isPointInPlane(Coord p)
 template<class DataTypes>
 void TrianglePressureForceField<DataTypes>::updateTriangleInformation()
 {
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
 
     for (unsigned int i=0; i<my_subset.size(); ++i)
         my_subset[i].force=(pressure.getValue()*my_subset[i].area);
@@ -192,17 +185,16 @@ void TrianglePressureForceField<DataTypes>::selectTrianglesAlongPlane()
 {
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
     std::vector<bool> vArray;
-    unsigned int i;
 
     vArray.resize(x.size());
 
-    for( i=0; i<x.size(); ++i)
+    for( unsigned int i=0; i<x.size(); ++i)
     {
         vArray[i]=isPointInPlane(x[i]);
     }
 
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
-    helper::vector<Index> inputTriangles;
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    type::vector<Index> inputTriangles;
 
     for (size_t n=0; n<m_topology->getNbTriangles(); ++n)
     {
@@ -225,8 +217,8 @@ void TrianglePressureForceField<DataTypes>::selectTrianglesAlongPlane()
 template <class DataTypes>
 void TrianglePressureForceField<DataTypes>::selectTrianglesFromString()
 {
-    sofa::helper::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
-    helper::vector<Index> _triangleList = triangleList.getValue();
+    sofa::type::vector<TrianglePressureInformation>& my_subset = *(trianglePressureMap).beginEdit();
+    type::vector<Index> _triangleList = triangleList.getValue();
 
     trianglePressureMap.setMap2Elements(_triangleList);
 
@@ -258,25 +250,25 @@ void TrianglePressureForceField<DataTypes>::draw(const core::visual::VisualParam
 
     vparams->drawTool()->disableLighting();
 
-    const sofa::helper::types::RGBAColor&  color = sofa::helper::types::RGBAColor::green();
-    std::vector< sofa::defaulttype::Vector3 > vertices;
+    const sofa::type::RGBAColor&  color = sofa::type::RGBAColor::green();
+    std::vector< sofa::type::Vector3 > vertices;
 
-    const sofa::helper::vector <Index>& my_map = trianglePressureMap.getMap2Elements();
-    const sofa::helper::vector<TrianglePressureInformation>& my_subset = trianglePressureMap.getValue();
-    std::vector< sofa::defaulttype::Vector3 > forceVectors;
+    const sofa::type::vector<Index>& my_map = trianglePressureMap.getMap2Elements();
+    const sofa::type::vector<TrianglePressureInformation>& my_subset = trianglePressureMap.getValue();
+    std::vector< sofa::type::Vector3 > forceVectors;
     for (unsigned int i=0; i<my_map.size(); ++i)
     {
         Deriv force = my_subset[i].force / 3;
         for (unsigned int j = 0; j < 3; j++)
         {
-            sofa::defaulttype::Vector3 p = x[m_topology->getTriangle(my_map[i])[j]];
+            sofa::type::Vector3 p = x[m_topology->getTriangle(my_map[i])[j]];
             vertices.push_back(p);
             forceVectors.push_back(p);
             forceVectors.push_back(p + force);
         }
     }
     vparams->drawTool()->drawTriangles(vertices, color);
-    vparams->drawTool()->drawLines(forceVectors, 1, sofa::helper::types::RGBAColor::red());
+    vparams->drawTool()->drawLines(forceVectors, 1, sofa::type::RGBAColor::red());
 
     if (vparams->displayFlags().getShowWireFrame())
         vparams->drawTool()->setPolygonMode(0, false);

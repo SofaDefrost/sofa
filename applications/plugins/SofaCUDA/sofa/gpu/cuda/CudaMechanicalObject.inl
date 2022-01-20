@@ -1461,7 +1461,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TRea
 }
 
 template<class TCoord, class TDeriv, class TReal>
-void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::copyToBaseVector(Main* m, defaulttype::BaseVector * dest, ConstVecId src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::copyToBaseVector(Main* m, linearalgebra::BaseVector * dest, ConstVecId src, unsigned int &offset)
 {
     if (src.type == sofa::core::V_COORD)
     {
@@ -1523,7 +1523,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TRea
 }
 
 template<class TCoord, class TDeriv, class TReal>
-void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::copyFromBaseVector(Main* m, VecId dest, const defaulttype::BaseVector * src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::copyFromBaseVector(Main* m, VecId dest, const linearalgebra::BaseVector * src, unsigned int &offset)
 {
 
     if (dest.type == sofa::core::V_COORD)
@@ -1592,7 +1592,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TRea
 }
 
 template<class TCoord, class TDeriv, class TReal>
-void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::addFromBaseVectorSameSize(Main* m, VecId dest, const defaulttype::BaseVector *src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaVectorTypes<TCoord,TDeriv,TReal> >::addFromBaseVectorSameSize(Main* m, VecId dest, const linearalgebra::BaseVector *src, unsigned int &offset)
 {
     if (dest.type == sofa::core::V_COORD)
     {
@@ -2157,7 +2157,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::resetFo
 }
 
 template<int N, class real>
-void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyToBaseVector(Main* m, defaulttype::BaseVector * dest, ConstVecId src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyToBaseVector(Main* m, linearalgebra::BaseVector * dest, ConstVecId src, unsigned int &offset)
 {
     if (src.type == sofa::core::V_COORD)
     {
@@ -2219,7 +2219,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyToC
 }
 
 template<int N, class real>
-void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyFromBaseVector(Main* m, VecId dest, const defaulttype::BaseVector * src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyFromBaseVector(Main* m, VecId dest, const linearalgebra::BaseVector * src, unsigned int &offset)
 {
     if (dest.type == sofa::core::V_COORD)
     {
@@ -2287,7 +2287,7 @@ void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::copyFro
 }
 
 template<int N, class real>
-void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::addFromBaseVectorSameSize(Main* m, VecId dest, const defaulttype::BaseVector *src, unsigned int &offset)
+void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::addFromBaseVectorSameSize(Main* m, VecId dest, const linearalgebra::BaseVector *src, unsigned int &offset)
 {
     if (dest.type == sofa::core::V_COORD)
     {
@@ -2305,8 +2305,8 @@ void MechanicalObjectInternalData< gpu::cuda::CudaRigidTypes<N, real> >::addFrom
                 DataTypeInfo<Coord>::setValue((*vDest)[i],j,tmp + src->element(offset + i * coordDim + j));
             }
 
-            helper::Quater<double> q_src;
-            helper::Quater<double> q_dest;
+            type::Quat<double> q_src;
+            type::Quat<double> q_dest;
             for (unsigned int j=0; j<4; j++)
             {
                 Real tmp;
@@ -2389,13 +2389,13 @@ template<> SReal MechanicalObject< T >::vDot(const core::ExecParams* /* params *
 { return data.vDot(this, a, b); }				    \
 template<> void MechanicalObject< T >::resetForce(const core::ExecParams* params, core::VecDerivId fid) \
 { if( fid==core::VecDerivId::force() ) data.resetForce(this); else core::behavior::BaseMechanicalState::resetForce(params,fid); } \
-template<> void MechanicalObject< T >::copyToBaseVector(defaulttype::BaseVector * dest, core::ConstVecId src, unsigned int &offset) \
+template<> void MechanicalObject< T >::copyToBaseVector(linearalgebra::BaseVector * dest, core::ConstVecId src, unsigned int &offset) \
 { if (CudaBaseVectorType<Real> * vec = dynamic_cast<CudaBaseVectorType<Real> *>(dest)) data.copyToCudaBaseVector(this, vec,src,offset); \
 else data.copyToBaseVector(this, dest,src,offset); } \
-template<> void MechanicalObject< T >::copyFromBaseVector(core::VecId dest, const defaulttype::BaseVector * src, unsigned int &offset) \
+template<> void MechanicalObject< T >::copyFromBaseVector(core::VecId dest, const linearalgebra::BaseVector * src, unsigned int &offset) \
 { if (const CudaBaseVectorType<Real> * vec = dynamic_cast<const CudaBaseVectorType<Real> *>(src)) data.copyFromCudaBaseVector(this, dest,vec,offset); \
 else data.copyFromBaseVector(this, dest,src,offset); } \
-template<> void MechanicalObject< T >::addFromBaseVectorSameSize(core::VecId dest, const defaulttype::BaseVector *src, unsigned int &offset) \
+template<> void MechanicalObject< T >::addFromBaseVectorSameSize(core::VecId dest, const linearalgebra::BaseVector *src, unsigned int &offset) \
 { if (const CudaBaseVectorType<Real> * vec = dynamic_cast<const CudaBaseVectorType<Real> *>(src)) data.addFromCudaBaseVectorSameSize(this, dest,vec,offset); \
 else data.addFromBaseVectorSameSize(this, dest,src,offset); }
 

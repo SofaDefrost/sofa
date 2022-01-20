@@ -25,13 +25,13 @@
 #include <sofa/core/Mapping.h>
 #include <sofa/core/objectmodel/DataFileName.h>
 
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
-#include <SofaEigen2Solver/EigenSparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/EigenSparseMatrix.h>
 
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
 
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 
 namespace sofa::component::mapping
 {
@@ -78,11 +78,10 @@ public:
     {
         NOut = sofa::defaulttype::DataTypeInfo<Deriv>::Size
     };
-    typedef defaulttype::Mat<N, N, Real> Mat;
-    typedef defaulttype::Vec<N, Real> Vector;
-    typedef defaulttype::Mat<NOut, NIn, Real> MBloc;
-    typedef sofa::component::linearsolver::CompressedRowSparseMatrix<MBloc> MatrixType;
-    typedef typename Inherit::ForceMask ForceMask;
+    typedef type::Mat<N, N, Real> Mat;
+    typedef type::Vec<N, Real> Vector;
+    typedef type::Mat<NOut, NIn, Real> MBloc;
+    typedef sofa::linearalgebra::CompressedRowSparseMatrix<MBloc> MatrixType;
 
     Data<VecCoord> points;    ///< mapped points in local coordinates
     VecCoord rotatedPoints;   ///< vectors from frame origin to mapped points, projected to world coordinates
@@ -92,7 +91,7 @@ public:
     Data<bool> useX0; ///< Use x0 instead of local copy of initial positions (to support topo changes)
     Data<bool> indexFromEnd; ///< input DOF index starts from the end of input DOFs vector
 
-    Data< helper::vector<unsigned int> > rigidIndexPerPoint; ///< For each mapped point, the index of the Rigid it is mapped from
+    Data< type::vector<unsigned int> > rigidIndexPerPoint; ///< For each mapped point, the index of the Rigid it is mapped from
     Data<bool> globalToLocalCoords; ///< are the output DOFs initially expressed in global coordinates
 
     Data<int> geometricStiffness; ///< assemble (and use) geometric stiffness (0=no GS, 1=non symmetric, 2=symmetrized)
@@ -122,12 +121,12 @@ public:
 
     void applyDJT(const core::MechanicalParams* mparams, core::MultiVecDerivId parentForce, core::ConstMultiVecDerivId  childForce ) override;
 
-    const sofa::defaulttype::BaseMatrix* getJ() override;
+    const sofa::linearalgebra::BaseMatrix* getJ() override;
 
-    virtual const helper::vector<sofa::defaulttype::BaseMatrix*>* getJs() override;
+    virtual const type::vector<sofa::linearalgebra::BaseMatrix*>* getJs() override;
 
     void updateK( const core::MechanicalParams* mparams, core::ConstMultiVecDerivId childForceId ) override;
-    const defaulttype::BaseMatrix* getK() override;
+    const linearalgebra::BaseMatrix* getK() override;
 
 
     void draw(const core::visual::VisualParams* vparams) override;
@@ -138,7 +137,7 @@ public:
     /// @warning the mapped points must be sorted by their parent frame indices
     /// for backward compatibility with previous data structure
     void setRepartition(sofa::Size value);
-    void setRepartition(sofa::helper::vector<sofa::Size> values);
+    void setRepartition(sofa::type::vector<sofa::Size> values);
 
     void parse(core::objectmodel::BaseObjectDescription* arg) override;
 
@@ -152,11 +151,11 @@ protected:
     std::unique_ptr<MatrixType> matrixJ;
     bool updateJ;
 
-    typedef linearsolver::EigenSparseMatrix<In,Out> SparseMatrixEigen;
+    typedef linearalgebra::EigenSparseMatrix<In,Out> SparseMatrixEigen;
     SparseMatrixEigen eigenJacobian;                      ///< Jacobian of the mapping used by getJs
-    helper::vector<sofa::defaulttype::BaseMatrix*> eigenJacobians; /// used by getJs
+    type::vector<sofa::linearalgebra::BaseMatrix*> eigenJacobians; /// used by getJs
 
-    typedef linearsolver::EigenSparseMatrix<In,In> StiffnessSparseMatrixEigen;
+    typedef linearalgebra::EigenSparseMatrix<In,In> StiffnessSparseMatrixEigen;
     StiffnessSparseMatrixEigen geometricStiffnessMatrix;
 };
 
@@ -166,7 +165,7 @@ struct RigidMappingMatrixHelper;
 template<>
 void RigidMapping< sofa::defaulttype::Rigid2Types, sofa::defaulttype::Vec2Types >::updateK( const core::MechanicalParams* mparams, core::ConstMultiVecDerivId childForceId );
 template<>
-const defaulttype::BaseMatrix* RigidMapping< sofa::defaulttype::Rigid2Types, sofa::defaulttype::Vec2Types >::getK();
+const linearalgebra::BaseMatrix* RigidMapping< sofa::defaulttype::Rigid2Types, sofa::defaulttype::Vec2Types >::getK();
 
 #if  !defined(SOFA_COMPONENT_MAPPING_RIGIDMAPPING_CPP)
 extern template class SOFA_SOFARIGID_API RigidMapping< sofa::defaulttype::Rigid3Types, sofa::defaulttype::Vec3Types >;

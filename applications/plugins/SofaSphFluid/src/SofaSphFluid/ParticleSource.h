@@ -25,8 +25,9 @@
 
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/objectmodel/Event.h>
-#include <SofaBaseTopology/TopologySubsetData.inl>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/type/trait/Rebind.h>
 
 namespace sofa
 {
@@ -51,13 +52,15 @@ public:
     typedef typename DataTypes::VecDeriv VecDeriv;
     typedef typename DataTypes::MatrixDeriv MatrixDeriv;
     typedef typename DataTypes::MatrixDeriv::RowType MatrixDerivRowType;
-    typedef helper::vector<Real> VecDensity;
+    typedef type::vector<Real> VecDensity;
 
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
     typedef Data<MatrixDeriv> DataMatrixDeriv;
     //int lastparticle;
-    typedef typename VecCoord::template rebind<Index>::other VecIndex;
+    using VecIndex = type::rebind_to<VecCoord, Index>;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
+    typedef typename SetIndex::container_type SetIndexArray;
 
     typedef core::behavior::MechanicalState<DataTypes> MechanicalModel;
 
@@ -75,17 +78,17 @@ public:
         return (Real)(rand()*1.0 / RAND_MAX);
     }
 
-    class PSPointHandler : public sofa::component::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, VecIndex >
+    class PSPointHandler : public sofa::core::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, type::vector<sofa::Index> >
     {
     public:
-        typedef typename ParticleSource<DataTypes>::VecIndex VecIndex;
-        typedef VecIndex container_type;
-        typedef typename container_type::value_type value_type;
+        typedef type::vector<sofa::Index> VecIndex;
+        typedef sofa::Index value_type;
+        
 
-        PSPointHandler(ParticleSource<DataTypes>* _ps, sofa::component::topology::PointSubsetData<VecIndex >* _data)
-            : sofa::component::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, VecIndex >(_data), ps(_ps) {}
+        PSPointHandler(ParticleSource<DataTypes>* _ps, sofa::core::topology::TopologySubsetIndices* _data)
+            : sofa::core::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, VecIndex >(_data), ps(_ps) {}
 
-        void applyDestroyFunction(Index index, value_type& /*T*/)
+        void applyDestroyFunction(sofa::Index index, value_type& /*T*/)
         {
             dmsg_info("ParticleSource") << "PSRemovalFunction";
             if(ps)
@@ -97,7 +100,7 @@ public:
                     //ps->lastparticles.getArray().erase(it);
                      helper::removeValue(ps->lastparticles,(Index)index);
                  }*/
-                VecIndex& _lastparticles = *ps->m_lastparticles.beginEdit();
+                SetIndexArray& _lastparticles = *ps->m_lastparticles.beginEdit();
 
                 size_t size = _lastparticles.size();
                 for (unsigned int i = 0; i < size; ++i)
@@ -118,10 +121,6 @@ public:
             }
         }
 
-
-        bool applyTestCreateFunction(Index /*index*/,
-                const sofa::helper::vector< Index > & /*ancestors*/,
-                const sofa::helper::vector< double > & /*coefs*/) {return false;}
 
     protected:
         ParticleSource<DataTypes> *ps;
@@ -176,7 +175,7 @@ public:
 public:
     Data< Coord > d_translation; ///< translation applied to center(s)
     Data< Real > d_scale; ///< scale applied to center(s)
-    Data< helper::vector<Coord> > d_center; ///< Source center(s)
+    Data< type::vector<Coord> > d_center; ///< Source center(s)
     Data< Coord > d_radius; ///< Source radius
     Data< Deriv > d_velocity; ///< Particle initial velocity
     Data< Real > d_delay; ///< Delay between particles creation
@@ -189,7 +188,7 @@ protected:
     Real m_lastTime; ///< Last time particle have been computed
     Real m_maxdist;
 
-    sofa::component::topology::PointSubsetData< VecIndex > m_lastparticles; ///< lastparticles indices
+    sofa::core::topology::TopologySubsetIndices m_lastparticles; ///< lastparticles indices
     VecCoord m_lastpos;
 
     PSPointHandler* m_pointHandler;

@@ -35,8 +35,6 @@ namespace sofa::component::collision
 template<class DataTypes>
 class TriangleCollisionModel;
 
-class TriangleLocalMinDistanceFilter;
-
 template<class DataTypes>
 class PointCollisionModel;
 
@@ -91,7 +89,7 @@ public:
 	TTriangle& shape() { return *this; }
     const TTriangle& shape() const { return *this; }
 
-    Coord interpX(defaulttype::Vec<2,Real> bary) const
+    Coord interpX(type::Vec<2,Real> bary) const
     {
 		return (p1()*(1-bary[0]-bary[1])) + (p2()*bary[0]) + (p3()*bary[1]);
 	}
@@ -163,8 +161,6 @@ protected:
 
     PointCollisionModel<sofa::defaulttype::Vec3Types>* m_pointModels;
 
-    TriangleLocalMinDistanceFilter *m_lmdFilter;
-
 protected:
 
     TriangleCollisionModel();
@@ -181,7 +177,7 @@ public:
 
     void computeBoundingTree(int maxDepth=0) override;
 
-    void computeContinuousBoundingTree(double dt, int maxDepth=0) override;
+    void computeContinuousBoundingTree(SReal dt, int maxDepth=0) override;
 
     void draw(const core::visual::VisualParams*, Index index) override;
 
@@ -196,10 +192,6 @@ public:
     const sofa::core::topology::BaseMeshTopology::SeqTriangles& getTriangles() const { return *m_triangles; }
     const VecDeriv& getNormals() const { return m_normals; }
     int getTriangleFlags(sofa::core::topology::BaseMeshTopology::TriangleID i);
-
-    TriangleLocalMinDistanceFilter *getFilter() const;
-
-    void setFilter(TriangleLocalMinDistanceFilter * /*lmdFilter*/);
 
     Deriv velocity(Index index)const;
 

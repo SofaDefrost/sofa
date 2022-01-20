@@ -39,7 +39,7 @@ using sofa::core::visual::VisualParams;
 #include <SofaGeneralEngine/ComplementaryROI.h>
 using sofa::component::engine::ComplementaryROI ;
 
-using sofa::helper::vector;
+using sofa::type::vector;
 
 namespace sofa
 {
@@ -56,7 +56,7 @@ struct ComplementaryROI_test : public BaseSimulationTest,
     typename ThisClass::SPtr m_thisObject;
 
 
-    void SetUp()
+    void SetUp() override
     {
         setSimulation(m_simu = new DAGSimulation());
         m_node = m_simu->createNewGraph("root");

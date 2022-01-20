@@ -33,8 +33,6 @@ namespace sofa::component::collision
 template<class DataTypes>
 class LineCollisionModel;
 
-class LineLocalMinDistanceFilter;
-
 template<class DataTypes>
 class PointCollisionModel;
 
@@ -97,7 +95,7 @@ protected:
 //		int tRight, tLeft;
     };
 
-    sofa::helper::vector<LineData> elems;
+    sofa::type::vector<LineData> elems;
     bool needsUpdate;
     virtual void updateFromTopology();
 
@@ -122,7 +120,7 @@ public:
 
     void computeBoundingTree(int maxDepth=0) override;
 
-    void computeContinuousBoundingTree(double dt, int maxDepth=0) override;
+    void computeContinuousBoundingTree(SReal dt, int maxDepth=0) override;
 
     /// Import the draw(param, index) method from the parent scope, this is needed to make it accessible
     /// in the current and child class. Otherwise the draw(param) will prevent name resolution
@@ -138,13 +136,9 @@ public:
 
     Deriv velocity(Index index)const;
 
-    LineLocalMinDistanceFilter *getFilter() const;
-
     virtual Index getElemEdgeIndex(Index index) const { return index; }
     
     int getLineFlags(Index i);
-
-    void setFilter(LineLocalMinDistanceFilter * /*lmdFilter*/);
 
     Data<bool> bothSide; ///< to activate collision on both-side of the both side of the line model (when surface normals are defined on these lines)
 
@@ -179,8 +173,6 @@ protected:
     Topology* topology;
     PointCollisionModel<sofa::defaulttype::Vec3Types>* mpoints;
     int meshRevision;
-    LineLocalMinDistanceFilter *m_lmdFilter;
-
 };
 
 template<class DataTypes>
@@ -196,7 +188,7 @@ inline TLine<DataTypes>::TLine(const core::CollisionElementIterator& i)
 }
 
 #if !defined(SOFA_COMPONENT_COLLISION_LINECOLLISIONMODEL_CPP)
-extern template class SOFA_SOFAMESHCOLLISION_API TLine<sofa::defaulttype::Vec3dTypes>;
+extern template class SOFA_SOFAMESHCOLLISION_API TLine<sofa::defaulttype::Vec3Types>;
 extern template class SOFA_SOFAMESHCOLLISION_API LineCollisionModel<sofa::defaulttype::Vec3Types>;
 #endif
 

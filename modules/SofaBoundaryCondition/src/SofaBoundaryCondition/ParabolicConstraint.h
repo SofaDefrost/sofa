@@ -24,8 +24,8 @@
 
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/behavior/MechanicalState.h>
-#include <sofa/helper/vector.h>
-#include <SofaBaseTopology/TopologySubsetData.h>
+#include <sofa/type/vector.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 
 
 namespace sofa::component::projectiveconstraintset
@@ -51,10 +51,10 @@ public:
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
     typedef Data<MatrixDeriv> DataMatrixDeriv;
-    typedef helper::vector<sofa::Index> SetIndexArray;
-    typedef sofa::component::topology::PointSubsetData< SetIndexArray > SetIndex;
-    typedef defaulttype::Vec<3, Real> Vec3R;
-    typedef helper::Quater<Real> QuatR;
+    typedef type::vector<sofa::Index> SetIndexArray;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
+    typedef type::Vec<3, Real> Vec3R;
+    typedef type::Quat<Real> QuatR;
 
 protected:
     ///indices of the DOFs constraints
@@ -80,7 +80,7 @@ protected:
     /// the quaternion doing the projection
     QuatR m_projection;
 
-    ParabolicConstraint(core::behavior::MechanicalState<DataTypes>* mstate = nullptr);
+    explicit ParabolicConstraint(core::behavior::MechanicalState<DataTypes>* mstate = nullptr);
 
     ~ParabolicConstraint();
 public:

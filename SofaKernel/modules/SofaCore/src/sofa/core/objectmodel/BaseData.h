@@ -153,11 +153,11 @@ public:
     void setHelp(const std::string& val) { help = val; }
 
     /// Get owner class
-    SOFA_ATTRIBUTE_REMOVAL_OF_BASEDATA_OWNERCLASS_ACCESSOR("Replace getOwnerClass() by getOwner()->className")
+    SOFA_ATTRIBUTE_DEPRECATED__BASEDATA_OWNERCLASS_ACCESSOR("Replace getOwnerClass() by getOwner()->getClassName().")
     const std::string& getOwnerClass() const { return ownerClass; }
 
     /// Set owner class
-    SOFA_ATTRIBUTE_REMOVAL_OF_BASEDATA_OWNERCLASS_ACCESSOR("The function will be totally removed. The owner's class name being using getOwner()->className")
+    SOFA_ATTRIBUTE_DEPRECATED__BASEDATA_OWNERCLASS_ACCESSOR("This feature will be totally removed. You are not supposed to change Owner's type name.")
     void setOwnerClass(const char* val) { ownerClass = val; }
 
     /// Get group
@@ -209,7 +209,7 @@ public:
     /// @}
 
     /// If we use the Data as a link and not as value directly
-    virtual std::string getLinkPath() const { return parentData.getPath(); }
+    virtual std::string getLinkPath() const;
 
     /// Return whether this %Data can be used as a linkPath.
     ///
@@ -235,6 +235,8 @@ public:
     /// This method should not be called directly, the %Data registration methods in Base should be used instead.
     void setName(const std::string& name) { m_name=name; }
 
+    /// Return whether the Data has a default value or not
+    bool hasDefaultValue() const { return m_hasDefaultValue; }
 
     /// @name Optimized edition and retrieval API (for multi-threading performances)
     /// @{
@@ -306,14 +308,14 @@ public:
     Base* m_owner {nullptr};
     /// Data name within the Base component
     std::string m_name;
+    /// True if this %Data has a default value
+    bool m_hasDefaultValue = false;
 
     /// Parent Data
     DataLink<BaseData> parentData;
 
     /// Helper method to decode the type name to a more readable form if possible
     static std::string decodeTypeName(const std::type_info& t);
-
-public:
 
     /// Helper method to get the type name of type T
     template<class T>

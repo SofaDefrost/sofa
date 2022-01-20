@@ -44,9 +44,10 @@ namespace modeling {
 
 
 /////////////////// IMPORTING THE DEPENDENCIES INTO THE NAMESPACE ///////////////////////////
+using namespace sofa::type;
 using namespace sofa::defaulttype ;
 
-using helper::vector;
+using type::vector;
 
 using sofa::simulation::graph::DAGSimulation ;
 using sofa::simulation::GetAssembledSizeVisitor ;
@@ -133,7 +134,7 @@ Node::SPtr createObstacle(Node::SPtr  parent, const std::string &filenameCollisi
 {
     Node::SPtr nodeFixed = simpleapi::createChild(parent, "Fixed") ;
 
-    simpleapi::createObject(nodeFixed, "MeshObjLoader", {
+    simpleapi::createObject(nodeFixed, "MeshOBJLoader", {
                                 {"name","loader"},
                                 {"filename", DataRepository.getFile(filenameCollision)}
                             });
@@ -193,7 +194,7 @@ Node::SPtr createCollisionNodeVec3(Node::SPtr  parent, BaseObject::SPtr  dof,
 {
     SOFA_UNUSED(dof) ;
     Node::SPtr  node = simpleapi::createChild(parent, "Collision");
-    simpleapi::createObject(node, "MeshObjLoader", {
+    simpleapi::createObject(node, "MeshOBJLoader", {
                                 {"name", "loader"},
                                 {"filename", DataRepository.getFile(filename)}});
 
@@ -272,7 +273,7 @@ Node::SPtr createCollisionNodeRigid(Node::SPtr  parent, BaseObject::SPtr  dofRig
 
     Node::SPtr node=simpleapi::createChild(parent, "Collision");
 
-    simpleapi::createObject(node, "MeshObjLoader", {
+    simpleapi::createObject(node, "MeshOBJLoader", {
                                 {"name","loader"},
                                 {"filename", DataRepository.getFile(filename)}}) ;
 
@@ -432,8 +433,6 @@ simulation::Node::SPtr addCube(simulation::Node::SPtr parent, const std::string&
 
     //Node VISUAL
     createVisualNodeVec3(cube, dofFEM, "", "red", Deriv3(), Deriv3(), MT_Identity);
-
-    simpleapi::dumpScene(parent) ;
 
     return cube;
 }

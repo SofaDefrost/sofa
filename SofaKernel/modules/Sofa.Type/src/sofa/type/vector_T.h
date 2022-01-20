@@ -63,19 +63,19 @@ public:
     /// const reference to a value (read only)
     typedef typename std::vector<T,Alloc>::const_reference const_reference;
 
-    template<class T2> struct rebind
+    template<class T2>
+    using rebind_to = vector< T2, CPUMemoryManager<T2> >;
+
+    template<class T2> struct SOFA_ATTRIBUTE_DEPRECATED__REBIND() rebind
     {
-        typedef vector< T2,CPUMemoryManager<T2> > other;
+        using other = rebind_to<T2>;
     };
+
 
     /// Basic constructor
     vector() : std::vector<T,Alloc>() {}
     /// Constructor
     vector(Size n, const T& value): std::vector<T,Alloc>(n,value) {}
-    /// Constructor
-    vector(int n, const T& value): std::vector<T,Alloc>(n,value) {}
-    /// Constructor
-    vector(long n, const T& value): std::vector<T,Alloc>(n,value) {}
     /// Constructor
     explicit vector(Size n): std::vector<T,Alloc>(n) {}
     /// Constructor
@@ -166,7 +166,7 @@ public:
     }
 
     /// this function is usefull for vector_device because it resize the vector without device operation (if device is not valid).
-    /// Therefore the function is used in asynchronous code to safly resize a vector which is either cuda of helper::vector
+    /// Therefore the function is used in asynchronous code to safly resize a vector which is either cuda of type::vector
     void fastResize(Size n)
     {
         this->resize(n);

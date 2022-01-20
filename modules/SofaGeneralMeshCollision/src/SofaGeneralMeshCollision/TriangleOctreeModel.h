@@ -41,10 +41,10 @@ protected:
 public:
 
     /// the normals for each point
-    helper::vector<defaulttype::Vector3> pNorms;
+    type::vector<type::Vector3> pNorms;
     void draw(const core::visual::VisualParams* vparams) override;
     void computeBoundingTree(int maxDepth=0) override;
-    void computeContinuousBoundingTree(double dt, int maxDepth=0) override;
+    void computeContinuousBoundingTree(SReal dt, int maxDepth=0) override;
     /// init the octree creation
     void buildOctree ();
 };

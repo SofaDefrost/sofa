@@ -22,12 +22,10 @@
 #pragma once
 
 #include <SofaBoundaryCondition/QuadPressureForceField.h>
-#include <SofaBaseTopology/TopologySparseData.inl>
+#include <sofa/core/topology/TopologySubsetData.inl>
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseTopology/QuadSetGeometryAlgorithms.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 #include <vector>
-#include <set>
 
 namespace sofa::component::forcefield
 {
@@ -82,7 +80,6 @@ void QuadPressureForceField<DataTypes>::init()
     }
 
     quadPressureMap.createTopologyHandler(m_topology);
-    quadPressureMap.registerTopologicalData();
 
     initQuadInformation();
 }
@@ -93,8 +90,8 @@ void QuadPressureForceField<DataTypes>::addForce(const core::MechanicalParams* /
     VecDeriv& f = *d_f.beginEdit();
     Deriv force;
 
-    const sofa::helper::vector <Index>& my_map = quadPressureMap.getMap2Elements();
-    const sofa::helper::vector<QuadPressureInformation>& my_subset = quadPressureMap.getValue();
+    const sofa::type::vector<Index>& my_map = quadPressureMap.getMap2Elements();
+    const sofa::type::vector<QuadPressureInformation>& my_subset = quadPressureMap.getValue();
 
     for (unsigned int i=0; i<my_map.size(); ++i)
     {
@@ -126,35 +123,30 @@ void QuadPressureForceField<DataTypes>::addDForce(const core::MechanicalParams* 
 template<class DataTypes>
 void QuadPressureForceField<DataTypes>::initQuadInformation()
 {
-    sofa::component::topology::QuadSetGeometryAlgorithms<DataTypes>* quadGeo;
-    this->getContext()->get(quadGeo);
+    const sofa::type::vector<Index>& my_map = quadPressureMap.getMap2Elements();
+    auto my_subset = sofa::helper::getWriteOnlyAccessor(quadPressureMap);
 
-    if (!quadGeo)
-    {
-        msg_error() << "Missing component: Unable to get QuadSetGeometryAlgorithms from the current context.";
-    }
-
-    // FIXME: a dirty way to avoid a crash
-    if(!quadGeo)
-        return;
-
-    const sofa::helper::vector <Index>& my_map = quadPressureMap.getMap2Elements();
-    sofa::helper::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
+    const VecCoord& x0 = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
 
     for (unsigned int i=0; i<my_map.size(); ++i)
     {
-        my_subset[i].area=quadGeo->computeRestQuadArea(my_map[i]);
+        const auto& q = this->m_topology->getQuad(my_map[i]);
+
+        const auto& n0 = DataTypes::getCPos(x0[q[0]]);
+        const auto& n1 = DataTypes::getCPos(x0[q[1]]);
+        const auto& n2 = DataTypes::getCPos(x0[q[2]]);
+        const auto& n3 = DataTypes::getCPos(x0[q[3]]);
+
+        my_subset[i].area = sofa::geometry::Quad::area(n0, n1, n2, n3);
         my_subset[i].force=pressure.getValue()*my_subset[i].area;
     }
-
-    quadPressureMap.endEdit();
 }
 
 
 template<class DataTypes>
 void QuadPressureForceField<DataTypes>::updateQuadInformation()
 {
-    sofa::helper::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
+    sofa::type::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
 
     for (unsigned int i=0; i<my_subset.size(); ++i)
         my_subset[i].force=(pressure.getValue()*my_subset[i].area);
@@ -168,17 +160,16 @@ void QuadPressureForceField<DataTypes>::selectQuadsAlongPlane()
 {
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::restPosition())->getValue();
     std::vector<bool> vArray;
-    unsigned int i;
 
     vArray.resize(x.size());
 
-    for( i=0; i<x.size(); ++i)
+    for( unsigned int i=0; i<x.size(); ++i)
     {
         vArray[i]=isPointInPlane(x[i]);
     }
 
-    sofa::helper::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
-    helper::vector<Index> inputQuads;
+    sofa::type::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
+    type::vector<Index> inputQuads;
 
     for (size_t n=0; n<m_topology->getNbQuads(); ++n)
     {
@@ -201,8 +192,8 @@ void QuadPressureForceField<DataTypes>::selectQuadsAlongPlane()
 template <class DataTypes>
 void QuadPressureForceField<DataTypes>::selectQuadsFromString()
 {
-    sofa::helper::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
-    helper::vector<Index> _quadList = quadList.getValue();
+    sofa::type::vector<QuadPressureInformation>& my_subset = *(quadPressureMap).beginEdit();
+    type::vector<Index> _quadList = quadList.getValue();
 
     quadPressureMap.setMap2Elements(_quadList);
 
@@ -242,10 +233,10 @@ void QuadPressureForceField<DataTypes>::draw(const core::visual::VisualParams* v
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
 
     vparams->drawTool()->disableLighting();
-    std::vector<sofa::defaulttype::Vector3> vertices;
-    sofa::helper::types::RGBAColor color = sofa::helper::types::RGBAColor::green();
+    std::vector<sofa::type::Vector3> vertices;
+    const sofa::type::RGBAColor color = sofa::type::RGBAColor::green();
 
-    const sofa::helper::vector <Index>& my_map = quadPressureMap.getMap2Elements();
+    const sofa::type::vector<Index>& my_map = quadPressureMap.getMap2Elements();
 
     for (unsigned int i=0; i<my_map.size(); ++i)
     {

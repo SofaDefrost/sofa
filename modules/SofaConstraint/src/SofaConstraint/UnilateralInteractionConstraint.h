@@ -126,8 +126,6 @@ public:
     typedef core::behavior::BaseConstraint::ConstraintBlockInfo ConstraintBlockInfo;
     typedef core::behavior::BaseConstraint::PersistentID PersistentID;
     typedef core::behavior::BaseConstraint::ConstCoord ConstCoord;
-    typedef core::behavior::BaseConstraint::ConstDeriv ConstDeriv;
-    typedef core::behavior::BaseConstraint::ConstArea ConstArea;
 
     typedef core::behavior::BaseConstraint::VecConstraintBlockInfo VecConstraintBlockInfo;
     typedef core::behavior::BaseConstraint::VecPersistentID VecPersistentID;
@@ -161,7 +159,7 @@ protected:
         mutable Real dfree;
     };
 
-    sofa::helper::vector<Contact> contacts;
+    sofa::type::vector<Contact> contacts;
     Real epsilon;
     bool yetIntegrated;
     double customTolerance;
@@ -172,12 +170,12 @@ protected:
     /// Computes constraint violation in position and stores it into resolution global vector
     ///
     /// @param v Global resolution vector
-    virtual void getPositionViolation(defaulttype::BaseVector *v);
+    virtual void getPositionViolation(linearalgebra::BaseVector *v);
 
     ///Computes constraint violation in velocity and stores it into resolution global vector
     ///
     /// @param v Global resolution vector
-    virtual void getVelocityViolation(defaulttype::BaseVector *v);
+    virtual void getVelocityViolation(linearalgebra::BaseVector *v);
 
 public:
 
@@ -199,7 +197,7 @@ public:
     void buildConstraintMatrix(const core::ConstraintParams* cParams, DataMatrixDeriv &c1, DataMatrixDeriv &c2, unsigned int &cIndex
             , const DataVecCoord &x1, const DataVecCoord &x2) override;
 
-    void getConstraintViolation(const core::ConstraintParams* cParams, defaulttype::BaseVector *v, const DataVecCoord &x1, const DataVecCoord &x2
+    void getConstraintViolation(const core::ConstraintParams* cParams, linearalgebra::BaseVector *v, const DataVecCoord &x1, const DataVecCoord &x2
             , const DataVecDeriv &v1, const DataVecDeriv &v2) override;
 
 

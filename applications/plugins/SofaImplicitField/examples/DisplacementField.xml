@@ -4,6 +4,7 @@
     <RequiredPlugin name="SofaImplicitField"/>
     <RequiredPlugin name='SofaLoader'/>
     <RequiredPlugin name='SofaGeneralSimpleFem'/>
+    <RequiredPlugin name="SofaImplicitOdeSolver"/> <!-- Needed to use components [EulerImplicitSolver] -->  
     <VisualStyle displayFlags="showForceFields"/>
    
     <Node name="DisplacementField">

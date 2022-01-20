@@ -51,7 +51,7 @@ void SpatialGridPointModel::init()
 
     if (grid==NULL)
     {
-        serr <<"SpatialGridPointModel requires a Vec3 SpatialGridContainer" << sendl;
+        msg_error() <<"Requires a Vec3 SpatialGridContainer";
         return;
     }
 }
@@ -163,13 +163,13 @@ void SpatialGridPointModel::computeBoundingTree(int maxDepth)
     }
     if (!sorted)
     {
-        serr << "ERROR(SpatialGridPointModel): points are not sorted in spatial grid."<<sendl;
+        msg_error() << "Points are not sorted in spatial grid.";
     }
     //sout << sendl;
     cubeModel->resize(cells.size());
     if (cells.empty()) return;
     OctreeSorter s(maxDepth);
-    defaulttype::Vector3::value_type cellSize = g->getCellWidth()*ldim; // *GRIDDIM;
+    type::Vector3::value_type cellSize = g->getCellWidth()*ldim; // *GRIDDIM;
     std::sort(cells.begin(), cells.end(), s);
 
     //sout << "sorted: ";
@@ -179,7 +179,7 @@ void SpatialGridPointModel::computeBoundingTree(int maxDepth)
         //sout << "  " << k;
         int pfirst = cells[i].pfirst;
         int plast = cells[i].plast;
-        defaulttype::Vector3 minElem, maxElem;
+        type::Vector3 minElem, maxElem;
         for (unsigned int c=0; c<k.size(); ++c)
         {
             minElem[c] = k[c]*cellSize;
@@ -192,7 +192,7 @@ void SpatialGridPointModel::computeBoundingTree(int maxDepth)
     int depth = 0;
     while (depth < maxDepth && cells.size() > 8)
     {
-        msg_info() << "SpatialGridPointModel: cube depth "<<depth<<": "<<cells.size()<<" cells ("<<(size*100/cells.size())*0.01<<" points/cell)."<<sendl;
+        msg_info() << "SpatialGridPointModel: cube depth "<<depth<<": "<<cells.size()<<" cells ("<<(size*100/cells.size())*0.01<<" points/cell).";
         // compact cells inplace
         int parent = -1;
         for (unsigned int i=0; i<cells.size(); ++i)

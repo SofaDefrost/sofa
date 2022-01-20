@@ -22,12 +22,11 @@
 #pragma once
 
 #include "LinearForceField.h"
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/BaseVector.h>
+#include <sofa/linearalgebra/BaseVector.h>
 #include <sofa/core/MechanicalParams.h>
-#include <SofaBaseTopology/TopologySubsetData.inl>
 
 namespace sofa::component::forcefield
 {
@@ -55,15 +54,12 @@ void LinearForceField<DataTypes>::init()
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
-    
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
         
         // Initialize functions and parameters for topology data and handler
         points.createTopologyHandler(_topology);
-        points.registerTopologicalData();
     }
     else
     {
@@ -115,9 +111,9 @@ void LinearForceField<DataTypes>::clearKeyForces()
 }
 
 template<class DataTypes>
-void LinearForceField<DataTypes>::addForce(const core::MechanicalParams* /*mparams*/, DataVecDeriv& f1, const DataVecCoord& /*p1*/, const DataVecDeriv&)
+void LinearForceField<DataTypes>::addForce(const core::MechanicalParams* /*mparams*/, DataVecDeriv& f, const DataVecCoord& /*p1*/, const DataVecDeriv&)
 {
-    sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f1;
+    sofa::helper::WriteAccessor< core::objectmodel::Data< VecDeriv > > _f1 = f;
 
     Real cT = (Real) this->getContext()->getTime();
 
@@ -131,7 +127,7 @@ void LinearForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
 
             bool finished = false;
 
-            typename helper::vector< Real >::const_iterator it_t = d_keyTimes.getValue().begin();
+            typename type::vector< Real >::const_iterator it_t = d_keyTimes.getValue().begin();
             typename VecDeriv::const_iterator it_f = d_keyForces.getValue().begin();
 
             // WARNING : we assume that the key-events are in chronological order
@@ -149,8 +145,8 @@ void LinearForceField<DataTypes>::addForce(const core::MechanicalParams* /*mpara
                     nextF = *it_f;
                     finished = true;
                 }
-                it_t++;
-                it_f++;
+                ++it_t;
+                ++it_f;
             }
             if (finished)
             {
@@ -179,7 +175,7 @@ void LinearForceField<DataTypes>::addDForce(const core::MechanicalParams* mparam
 }
 
 template<class DataTypes>
-void LinearForceField<DataTypes>::addKToMatrix(defaulttype::BaseMatrix* matrix, SReal kFact, unsigned int& offset)
+void LinearForceField<DataTypes>::addKToMatrix(linearalgebra::BaseMatrix* matrix, SReal kFact, unsigned int& offset)
 {
     SOFA_UNUSED(matrix);
     SOFA_UNUSED(kFact);

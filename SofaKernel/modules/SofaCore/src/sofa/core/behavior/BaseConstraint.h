@@ -19,19 +19,12 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_CORE_BEHAVIOR_BASECONSTRAINT_H
-#define SOFA_CORE_BEHAVIOR_BASECONSTRAINT_H
+#pragma once
 
 #include <sofa/core/behavior/BaseConstraintSet.h>
 #include <sofa/core/fwd.h>
 
-namespace sofa
-{
-
-namespace core
-{
-
-namespace behavior
+namespace sofa::core::behavior
 {
 
 /**
@@ -57,24 +50,24 @@ protected:
     ~BaseConstraint() override {}
 
 private:
-    BaseConstraint(const BaseConstraint& n) ;
-    BaseConstraint& operator=(const BaseConstraint& n) ;
+    BaseConstraint(const BaseConstraint& n) = delete ;
+    BaseConstraint& operator=(const BaseConstraint& n) = delete ;
 
 public:
     /// Get the ID of the group containing this constraint. This ID is used to specify which constraints are solved by which solver, by specifying in each solver which groups of constraints it should handle.
-    int getGroup() const { return group.getValue(); }
+    int getGroup() const;
 
     /// Set the ID of the group containing this constraint. This ID is used to specify which constraints are solved by which solver, by specifying in each solver which groups of constraints it should handle.
-    void setGroup(int g) { group.setValue(g); }
+    void setGroup(int g);
 
     typedef long long PersistentID;
-    typedef helper::vector<PersistentID> VecPersistentID;
-    typedef defaulttype::Vec<3,int> ConstCoord;
-    typedef helper::vector<ConstCoord> VecConstCoord;
-    typedef defaulttype::Vec<3,double> ConstDeriv;
-    typedef helper::vector<ConstDeriv> VecConstDeriv;
+    typedef type::vector<PersistentID> VecPersistentID;
+    typedef type::Vec<3,int> ConstCoord;
+    typedef type::vector<ConstCoord> VecConstCoord;
+    typedef type::Vec<3,double> ConstDeriv;
+    typedef type::vector<ConstDeriv> VecConstDeriv;
     typedef double ConstArea;
-    typedef helper::vector<ConstArea> VecConstArea;
+    typedef type::vector<ConstArea> VecConstArea;
 
     class ConstraintBlockInfo
     {
@@ -94,38 +87,18 @@ public:
         ConstraintBlockInfo() : parent(nullptr), const0(0), nbLines(1), nbGroups(0), hasId(false), hasPosition(false), hasDirection(false), hasArea(false), offsetId(0), offsetPosition(0), offsetDirection(0), offsetArea(0)
         {}
     };
-    typedef helper::vector<ConstraintBlockInfo> VecConstraintBlockInfo;
+    typedef type::vector<ConstraintBlockInfo> VecConstraintBlockInfo;
 
     /// Get information for each constraint: pointer to parent BaseConstraint, unique persistent ID, 3D position
     /// \param cParams defines the state vectors to use for positions and velocities. Also defines the order of the constraint (POS, VEL, ACC) and resolution parameters (smoothness, ...)
-    virtual void getConstraintInfo(const ConstraintParams* cParams, VecConstraintBlockInfo& blocks, VecPersistentID& ids, VecConstCoord& positions, VecConstDeriv& directions, VecConstArea& areas)
-    {
-        SOFA_UNUSED(cParams);
-        SOFA_UNUSED(blocks);
-        SOFA_UNUSED(ids);
-        SOFA_UNUSED(positions);
-        SOFA_UNUSED(directions);
-        SOFA_UNUSED(areas);
-
-    }
+    virtual void getConstraintInfo(const ConstraintParams* cParams, VecConstraintBlockInfo& blocks, VecPersistentID& ids, VecConstCoord& positions, VecConstDeriv& directions, VecConstArea& areas);
 
     /// Add the corresponding ConstraintResolution using the offset parameter
     /// \param cParams defines the state vectors to use for positions and velocities. Also defines the order of the constraint (POS, VEL, ACC) and resolution parameters (smoothness, ...)
     /// \param resTab is the result vector that contains the contraint resolution algorithms
-    virtual void getConstraintResolution(const ConstraintParams* cParams, std::vector<ConstraintResolution*> &resTab, unsigned int &offset)
-    {
+    virtual void getConstraintResolution(const ConstraintParams* cParams, std::vector<ConstraintResolution*> &resTab, unsigned int &offset);
 
-        getConstraintResolution(resTab, offset);
-        SOFA_UNUSED(cParams);
-
-    }
-
-    virtual void getConstraintResolution(std::vector<ConstraintResolution*> &resTab, unsigned int &offset)
-    {
-        SOFA_UNUSED(resTab);
-        SOFA_UNUSED(offset);
-    }
-
+    virtual void getConstraintResolution(std::vector<ConstraintResolution*> &resTab, unsigned int &offset);
 
 
     /// Store the constraint lambda at the constraint dofs at the given VecDerivId location. 
@@ -135,13 +108,7 @@ public:
     ///        the constraint jacobian J is stored.
     /// \param res is the state vector Id where to store the result.
     /// \param lambda is the vector of scalar constraint impulses. The direction are stored in the MatrixDerivId stored in the cParams.
-    virtual void storeLambda(const ConstraintParams* cParams, MultiVecDerivId res, const sofa::defaulttype::BaseVector* lambda) = 0;
+    virtual void storeLambda(const ConstraintParams* cParams, MultiVecDerivId res, const sofa::linearalgebra::BaseVector* lambda) = 0;
 };
 
-} // namespace behavior
-
-} // namespace core
-
-} // namespace sofa
-
-#endif
+} // namespace sofa::core::behavior

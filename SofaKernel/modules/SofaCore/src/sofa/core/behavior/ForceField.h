@@ -19,26 +19,21 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_CORE_BEHAVIOR_FORCEFIELD_H
-#define SOFA_CORE_BEHAVIOR_FORCEFIELD_H
+#pragma once
 
 #include <sofa/core/config.h>
 #include <sofa/core/behavior/BaseForceField.h>
 #include <sofa/core/behavior/MechanicalState.h>
-#include <sofa/defaulttype/BaseMatrix.h>
-namespace sofa
-{
+#include <sofa/linearalgebra/BaseMatrix.h>
+#include <sofa/core/behavior/SingleStateAccessor.h>
 
-namespace core
-{
-
-namespace behavior
+namespace sofa::core::behavior
 {
 
 /**
  *  \brief Component computing forces within a simulated body.
  *
- *  This class define the abstract API common to force fields using a
+ *  This class defines the abstract API common to force fields using a
  *  given type of DOFs.
  *  A force field computes forces applied to one simulated body
  *  given its current position and velocity.
@@ -47,10 +42,10 @@ namespace behavior
  *  ( df, given a displacement dx ).
  */
 template<class TDataTypes>
-class ForceField : public BaseForceField
+class ForceField : public BaseForceField, public SingleStateAccessor<TDataTypes>
 {
 public:
-    SOFA_CLASS(SOFA_TEMPLATE(ForceField, TDataTypes), BaseForceField);
+    SOFA_CLASS2(SOFA_TEMPLATE(ForceField, TDataTypes), BaseForceField, SOFA_TEMPLATE(SingleStateAccessor, TDataTypes));
 
     typedef TDataTypes DataTypes;
     typedef typename DataTypes::Real             Real;
@@ -61,16 +56,10 @@ public:
     typedef core::objectmodel::Data<VecCoord>    DataVecCoord;
     typedef core::objectmodel::Data<VecDeriv>    DataVecDeriv;
 protected:
-    ForceField(MechanicalState<DataTypes> *mm = nullptr);
+    explicit ForceField(MechanicalState<DataTypes> *mm = nullptr);
 
     ~ForceField() override;
 public:
-    void init() override;
-
-    /// Retrieve the associated MechanicalState
-    MechanicalState<DataTypes>* getMState() { return mstate.get(); }
-    const MechanicalState<DataTypes>* getMState() const { return mstate.get(); }
-
 
     /// @name Vector operations
     /// @{
@@ -80,7 +69,7 @@ public:
     /// ForceField.
     ///
     /// If the ForceField can be represented as a matrix, this method computes
-    /// $ f += B v + K x $
+    /// \f$ f += B v + K x \f$
     ///
     /// This method retrieves the force, x and v vector from the MechanicalState
     /// and call the internal addForce(const MechanicalParams*, DataVecDeriv&,const DataVecCoord&,const DataVecDeriv&)
@@ -92,7 +81,7 @@ public:
     /// ForceField.
     ///
     /// If the ForceField can be represented as a matrix, this method computes
-    /// $ f += B v + K x $
+    /// \f$ f += B v + K x \f$
     ///
     /// This is the method that should be implemented by the component
     virtual void addForce(const MechanicalParams* /*mparams*/, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) = 0;
@@ -105,33 +94,36 @@ public:
     /// explicitly (i.e. using its value at the beginning of the timestep).
     ///
     /// If the ForceField can be represented as a matrix, this method computes
-    /// $ df += kFactor K dx + bFactor B dx $
+    /// \f$ df += kFactor K dx + bFactor B dx \f$
     ///
     /// This method retrieves the force and dx vector from the MechanicalState
     /// and call the internal addDForce(VecDeriv&,const VecDeriv&,SReal,SReal)
     /// method implemented by the component.
     void addDForce(const MechanicalParams* mparams, MultiVecDerivId dfId ) override;
 
+    /// Internal addDForce
+    /// Overloaded function, usually called from the generic addDForce version.
+    /// This addDForce version directly gives access to df and dx vectors through its parameters.
+    /// @param mparams
+    /// @param df Output vector to fill, result of \f$ kFactor K dx + bFactor B dx \f$
+    /// @param dx Input vector used to compute \f$ df = kFactor K dx + bFactor B dx \f$
     virtual void addDForce(const MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& dx ) = 0;
 
     /// Compute the product of the Compliance matrix C
     /// with the Lagrange multipliers lambda
-    /// res += cFactor * C * lambda
-    /// used by the graph-scattered (unassembledà API when the ForceField is handled as a constraint
+    /// \f$ res += cFactor * C * lambda \f$
+    /// used by the graph-scattered (unassembled API when the ForceField is handled as a constraint)
     void addClambda(const MechanicalParams* mparams, MultiVecDerivId resId, MultiVecDerivId lambdaId, SReal cFactor ) override;
 
     virtual void addClambda(const MechanicalParams* mparams, DataVecDeriv& df, const DataVecDeriv& lambda, SReal cFactor );
 
-
-
     /// Get the potential energy associated to this ForceField.
     ///
-    /// Used to extimate the total energy of the system by some
+    /// Used to estimate the total energy of the system by some
     /// post-stabilization techniques.
     ///
     /// This method must be implemented by the component, and is usually called
     /// by the generic ForceField::getPotentialEnergy(const MechanicalParams* mparams) method.
-
     SReal getPotentialEnergy(const MechanicalParams* mparams) const override;
 
     virtual SReal getPotentialEnergy(const MechanicalParams* /*mparams*/, const DataVecCoord& x) const = 0;
@@ -144,18 +136,19 @@ public:
 
     void addKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix ) override;
 
-    /// addToMatrix only on the subMatrixIndex
-    void addSubKToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix, const helper::vector<unsigned> & subMatrixIndex) override;
-
-    virtual void addKToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal kFact, unsigned int &offset);
-
-    /// addToMatrix only on the subMatrixIndex
-    virtual void addSubKToMatrix(sofa::defaulttype::BaseMatrix * matrix, const helper::vector<unsigned> & subMatrixIndex, SReal kFact, unsigned int &offset);
+    /// Internal addKToMatrix
+    /// Overloaded function, usually called from the generic addKToMatrix version.
+    /// This addKToMatrix version directly gives access to the matrix to fill, the stiffness factor and
+    /// the offset used to identify where the force field must add its contributions in the matrix.
+    /// @param matrix the global stiffness matrix in which the force field adds its contribution. The matrix is global,
+    /// i.e. different objects can add their contribution into the same large matrix. Each object adds its contribution
+    /// to a different section of the matrix. That is why, an offset is used to identify where in the matrix the force
+    /// field must start adding its contribution.
+    /// @param kFact stiffness factor that needs to be multiplied to each matrix entry.
+    /// @param offset Starting index of the submatrix to fill in the global matrix.
+    virtual void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset);
 
     void addBToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix) override;
-
-    /// addBToMatrix only on the subMatrixIndex
-    void addSubBToMatrix(const MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix, const helper::vector<unsigned> & subMatrixIndex ) override;
 
     /** Accumulate an element matrix to a global assembly matrix. This is a helper for addKToMatrix, to accumulate each (square) element matrix in the (square) assembled matrix.
     \param bm the global assembly matrix
@@ -165,22 +158,22 @@ public:
     \param scale weight applied to the matrix, typically ±params->kfactor() for a stiffness matrix
     */
     template<class IndexArray, class ElementMat>
-    void addToMatrix(sofa::defaulttype::BaseMatrix* bm, unsigned offset, const IndexArray& nodeIndex, const ElementMat& em, SReal scale )
+    void addToMatrix(sofa::linearalgebra::BaseMatrix* bm, unsigned offset, const IndexArray& nodeIndex, const ElementMat& em, SReal scale )
     {
-        const unsigned  S = DataTypes::deriv_total_size; // size of node blocks
+        constexpr auto S = DataTypes::deriv_total_size; // size of node blocks
         for (unsigned n1=0; n1<nodeIndex.size(); n1++)
         {
             for(unsigned i=0; i<S; i++)
             {
-                unsigned ROW = offset + S*nodeIndex[n1] + i;  // i-th row associated with node n1 in BaseMatrix
-                unsigned row = S*n1+i;                        // i-th row associated with node n1 in the element matrix
+                const unsigned ROW = offset + S*nodeIndex[n1] + i;  // i-th row associated with node n1 in BaseMatrix
+                const unsigned row = S*n1+i;                        // i-th row associated with node n1 in the element matrix
 
                 for (unsigned n2=0; n2<nodeIndex.size(); n2++)
                 {
                     for (unsigned j=0; j<S; j++)
                     {
-                        unsigned COLUMN = offset + S*nodeIndex[n2] +j; // j-th column associated with node n2 in BaseMatrix
-                        unsigned column = 3*n2+j;                      // j-th column associated with node n2 in the element matrix
+                        const unsigned COLUMN = offset + S*nodeIndex[n2] +j; // j-th column associated with node n2 in BaseMatrix
+                        const unsigned column = S*n2+j;                      // j-th column associated with node n2 in the element matrix
                         bm->add( ROW,COLUMN, em[row][column]* scale );
                     }
                 }
@@ -188,19 +181,34 @@ public:
         }
     }
 
-    virtual void addBToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal bFact, unsigned int &offset);
-
-    /// addBToMatrix only on the subMatrixIndex
-    virtual void addSubBToMatrix(sofa::defaulttype::BaseMatrix * matrix, const helper::vector<unsigned> & subMatrixIndex, SReal bFact, unsigned int &offset);
+    virtual void addBToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal bFact, unsigned int &offset);
+    /// @}
 
     /// Pre-construction check method called by ObjectFactory.
     /// Check that DataTypes matches the MechanicalState.
     template<class T>
     static bool canCreate(T*& obj, objectmodel::BaseContext* context, objectmodel::BaseObjectDescription* arg)
     {
-        if (dynamic_cast<MechanicalState<DataTypes>*>(context->getMechanicalState()) == nullptr) {
-            arg->logError(std::string("No mechanical state with the datatype '") + DataTypes::Name() + "' found in the context node.");
-            return false;
+        const std::string attributeName {"mstate"};
+        std::string mstateLink = arg->getAttribute(attributeName,"");
+        if (mstateLink.empty())
+        {
+            if (dynamic_cast<MechanicalState<DataTypes>*>(context->getMechanicalState()) == nullptr)
+            {
+                arg->logError("Since the attribute '" + attributeName + "' has not been specified, a mechanical state "
+                    "with the datatype '" + DataTypes::Name() + "' has been searched in the current context, but not found.");
+                return false;
+            }
+        }
+        else
+        {
+            MechanicalState<DataTypes>* mstate = nullptr;
+            context->findLinkDest(mstate, mstateLink, nullptr);
+            if (!mstate)
+            {
+                arg->logError("Data attribute '" + attributeName + "' does not point to a valid mechanical state of datatype '" + std::string(DataTypes::Name()) + "'.");
+                return false;
+            }
         }
         return BaseObject::canCreate(obj, context, arg);
     }
@@ -212,17 +220,6 @@ public:
         sofa::helper::replaceAll(name, "ForceField", "FF");
         return name;
     }
-
-    /// Useful when the forcefield is applied only on a subset of dofs.
-    /// It is automatically called by addForce.
-    ///
-    /// That way, we can optimize the time spent to transfer quantities through the mechanical mappings.
-    /// Every Dofs are inserted by default. The forcefields using only a subset of dofs should only insert these dofs in the mask.
-    void updateForceMask() override;
-
-
-protected:
-    SingleLink<ForceField<DataTypes>,MechanicalState<DataTypes>,BaseLink::FLAG_STRONGLINK> mstate;
 
 };
 
@@ -237,10 +234,4 @@ extern template class SOFA_CORE_API ForceField<defaulttype::Rigid2Types>;
 
 #endif
 
-} // namespace behavior
-
-} // namespace core
-
-} // namespace sofa
-
-#endif
+} // namespace sofa::core::behavior

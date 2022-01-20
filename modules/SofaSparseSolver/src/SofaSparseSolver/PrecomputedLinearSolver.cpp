@@ -32,13 +32,13 @@ namespace component
 namespace linearsolver
 {
 
-using namespace sofa::component::linearsolver;
+using namespace sofa::linearalgebra;
 
 int PrecomputedLinearSolverClass = core::RegisterObject("Linear system solver based on a precomputed inverse matrix")
-        .add< PrecomputedLinearSolver< CompressedRowSparseMatrix<double> , FullVector<double> > >()
+        .add< PrecomputedLinearSolver< CompressedRowSparseMatrix<SReal> , FullVector<SReal> > >()
         ;
 
-template class SOFA_SOFASPARSESOLVER_API PrecomputedLinearSolver< CompressedRowSparseMatrix<double> , FullVector<double> >;
+template class SOFA_SOFASPARSESOLVER_API PrecomputedLinearSolver< CompressedRowSparseMatrix<SReal> , FullVector<SReal> >;
 
 } // namespace linearsolver
 

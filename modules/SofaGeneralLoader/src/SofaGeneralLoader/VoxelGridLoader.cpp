@@ -32,6 +32,7 @@
 namespace sofa::component::loader
 {
 
+using namespace sofa::type;
 using namespace sofa::defaulttype;
 using namespace sofa::core::loader;
 using namespace sofa::core;
@@ -100,8 +101,9 @@ void VoxelGridLoader::reinit()
     clear();
     const Vec6i&	ROI = roi.getValue();
 
-    helper::vector<unsigned int>& _idxInRegularGrid = *idxInRegularGrid.beginEdit();
-    helper::vector<Vector3>& seqPoints = *positions.beginEdit();
+    auto _idxInRegularGrid = sofa::helper::getWriteOnlyAccessor(idxInRegularGrid);
+    auto seqPoints = sofa::helper::getWriteOnlyAccessor(positions);
+
     if(generateHexa.getValue())
     {
         const unsigned int numVoxelsX = dataResolution.getValue()[0];
@@ -148,7 +150,7 @@ void VoxelGridLoader::reinit()
                     if ( keepPoint.find ( pidx ) != keepPoint.end() )
                     {
                         renumberingMap[pidx] = pointIdx;
-                        Vector3& pnt = seqPoints[pointIdx];
+                        auto& pnt = seqPoints[pointIdx];
                         pnt[0] = i*voxelSize.getValue()[0];
                         pnt[1] = j*voxelSize.getValue()[1];
                         pnt[2] = k*voxelSize.getValue()[2];
@@ -159,7 +161,7 @@ void VoxelGridLoader::reinit()
 
         msg_info() << " done. ";
 
-        helper::vector<Hexahedron>& seqHexahedra = *hexahedra.beginEdit();
+        type::vector<Hexahedron>& seqHexahedra = *hexahedra.beginEdit();
 
         msg_info() << "inserting hexahedras...please wait... " ;
         for ( unsigned int k=(unsigned)ROI[2]; k<=(unsigned)ROI[5]; ++k )
@@ -209,23 +211,18 @@ void VoxelGridLoader::reinit()
         msg_info() << "inserting (" << seqPoints.size() << ") points done." ;
 
     }
-    idxInRegularGrid.endEdit();
-    positions.endEdit();
 }
 
 void VoxelGridLoader::clear()
 {
-    helper::vector<Vector3>& seqPoints = *positions.beginEdit();
+    auto seqPoints = sofa::helper::getWriteOnlyAccessor(positions);
     seqPoints.clear();
-    positions.endEdit();
 
-    helper::vector<Hexahedron>& seqHexahedra = *hexahedra.beginEdit();
+    auto seqHexahedra = sofa::helper::getWriteOnlyAccessor(hexahedra);
     seqHexahedra.clear();
-    hexahedra.endEdit();
 
-    helper::vector<unsigned int>& _idxInRegularGrid = *idxInRegularGrid.beginEdit();
+    auto _idxInRegularGrid = sofa::helper::getWriteOnlyAccessor(idxInRegularGrid);
     _idxInRegularGrid.clear();
-    idxInRegularGrid.endEdit();
 
 }
 
@@ -313,20 +310,20 @@ void VoxelGridLoader::getResolution ( Vec3i& res ) const
     res = dataResolution.getValue();
 }
 
-void VoxelGridLoader::setVoxelSize ( const defaulttype::Vector3 vSize )
+void VoxelGridLoader::setVoxelSize ( const type::Vector3 vSize )
 {
     ( *voxelSize.beginEdit() ) = vSize;
     voxelSize.endEdit();
 }
 
-defaulttype::Vector3 VoxelGridLoader::getVoxelSize () const
+type::Vector3 VoxelGridLoader::getVoxelSize () const
 {
     return voxelSize.getValue();
 }
 
 void VoxelGridLoader::addBackgroundValue ( const int value )
 {
-    helper::vector<int>& vecVal = ( *backgroundValue.beginEdit() );
+    type::vector<int>& vecVal = ( *backgroundValue.beginEdit() );
     vecVal.push_back(value);
     std::sort(vecVal.begin(), vecVal.end());
     vecVal.erase( std::unique(vecVal.begin(), vecVal.end()), vecVal.end() ); // remove non-unique values
@@ -336,7 +333,7 @@ void VoxelGridLoader::addBackgroundValue ( const int value )
 
 int VoxelGridLoader::getBackgroundValue(const unsigned int idx) const
 {
-    const helper::vector<int>& vecVal = backgroundValue.getValue();
+    const type::vector<int>& vecVal = backgroundValue.getValue();
     if(idx < vecVal.size())
         return vecVal[idx];
     else
@@ -345,7 +342,7 @@ int VoxelGridLoader::getBackgroundValue(const unsigned int idx) const
 
 void VoxelGridLoader::addActiveDataValue(const int value)
 {
-    helper::vector<int>& vecVal = ( *activeValue.beginEdit() );
+    type::vector<int>& vecVal = ( *activeValue.beginEdit() );
     vecVal.push_back(value);
     std::sort(vecVal.begin(), vecVal.end());
     vecVal.erase( std::unique(vecVal.begin(), vecVal.end()), vecVal.end() ); // remove non-unique values
@@ -355,7 +352,7 @@ void VoxelGridLoader::addActiveDataValue(const int value)
 
 int VoxelGridLoader::getActiveDataValue(const unsigned int idx) const
 {
-    const helper::vector<int>& vecVal = activeValue.getValue();
+    const type::vector<int>& vecVal = activeValue.getValue();
     if(idx < vecVal.size())
         return vecVal[idx];
     else
@@ -385,8 +382,8 @@ VoxelGridLoader::Vec6i VoxelGridLoader::getROI() const
 
 bool VoxelGridLoader::isActive(const unsigned int idx) const
 {
-    const helper::vector<int>& activeVal = activeValue.getValue();
-    const helper::vector<int>& bgVal = backgroundValue.getValue();
+    const type::vector<int>& activeVal = activeValue.getValue();
+    const type::vector<int>& bgVal = backgroundValue.getValue();
 
     if(activeVal.empty() && bgVal.empty())
         return true;
@@ -430,7 +427,7 @@ void VoxelGridLoader::createSegmentation3DTexture( unsigned char **textureData, 
         *(--ptr) = (unsigned char) 0;
 
     const unsigned char *data = getData();
-    const helper::vector<unsigned int>& _idxInRegularGrid = idxInRegularGrid.getValue();
+    const type::vector<unsigned int>& _idxInRegularGrid = idxInRegularGrid.getValue();
     // for all "active" data voxels
     for(unsigned i=0; i<_idxInRegularGrid.size(); ++i)
     {
@@ -443,7 +440,7 @@ void VoxelGridLoader::createSegmentation3DTexture( unsigned char **textureData, 
     }
 }
 
-helper::vector<unsigned int> VoxelGridLoader::getHexaIndicesInGrid() const
+type::vector<unsigned int> VoxelGridLoader::getHexaIndicesInGrid() const
 {
     return idxInRegularGrid.getValue();
 }
