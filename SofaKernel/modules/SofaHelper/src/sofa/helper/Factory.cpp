@@ -19,90 +19,33 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
+#define SOFAHELPER_FACTORY_CPP
 #include <sofa/helper/Factory.inl>
-#include <typeinfo>
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-#include <cstdlib>
+#include <sofa/helper/NameDecoder.h>
 
-namespace sofa
-{
-
-namespace helper
+namespace sofa::helper
 {
 
 /// Decode the type's name to a more readable form if possible
-std::string SOFA_HELPER_API gettypename(const std::type_info& t)
+SOFA_HELPER_API std::string gettypename(const std::type_info& t)
 {
-    std::string name;
-#ifdef __GNUC__
-    char* realname = nullptr;
-    int status;
-    realname = abi::__cxa_demangle(t.name(), 0, 0, &status);
-    if (realname!=nullptr)
-    {
-        int length = 0;
-        while(realname[length] != '\0')
-        {
-            length++;
-        }
-        name.resize(length);
-        for(int i=0; i<(int)length; i++)
-            name[i] = realname[i];
-        free(realname);
-    }
-#else
-    name = t.name();
-#endif
-    // Remove namespaces
-    for(;;)
-    {
-        std::string::size_type pos = name.find("::");
-        if (pos == std::string::npos) break;
-        std::string::size_type first = name.find_last_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_",pos-1);
-        if (first == std::string::npos) first = 0;
-        else first++;
-        name.erase(first,pos-first+2);
-    }
-    //Remove "class "
-    for(;;)
-    {
-        std::string::size_type pos = name.find("class ");
-        if (pos == std::string::npos) break;
-        name.erase(pos,6);
-    }
-	//Remove "struct "
-    for(;;)
-    {
-        std::string::size_type pos = name.find("struct ");
-        if (pos == std::string::npos) break;
-        name.erase(pos,7);
-    }
-    return name;
+    return NameDecoder::decodeTypeName(t);
 }
 
-static std::string& getFactoryLog()
+SOFA_HELPER_API std::string& getFactoryLog()
 {
     static std::string s;
     return s;
 }
 
-/// Log classes registered in the factory
-void SOFA_HELPER_API logFactoryRegister(std::string baseclass, std::string classname, std::string key, bool multi)
-{
-    getFactoryLog() += baseclass + (multi?" template class ":" class ")
-            + classname + " registered as " + key + "\n";
-}
-
 /// Print factory log
-void SOFA_HELPER_API printFactoryLog(std::ostream& out)
+SOFA_HELPER_API void printFactoryLog(std::ostream& out)
 {
     out << getFactoryLog();
 }
 
+//explicit instantiation for std::string
+template SOFA_HELPER_API void logFactoryRegister<std::string>(const std::string& baseclass, const std::string& classname, std::string key, bool multi);
 
-} // namespace helper
-
-} // namespace sofa
+} // namespace sofa::helper
 

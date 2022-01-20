@@ -26,7 +26,7 @@
 #include <sofa/core/CollisionElement.h>
 
 //todo(dmarchal 2018-06-19) I really wonder why a collision model has a dependency to a RGBAColors.
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa
 {
@@ -94,7 +94,7 @@ public:
 
     typedef CollisionElementIterator Iterator;
     typedef topology::BaseMeshTopology Topology;
-    typedef sofa::defaulttype::Vector3::value_type Real;
+    typedef sofa::type::Vector3::value_type Real;
     using Index = sofa::Index;
     using Size = sofa::Size;
 
@@ -212,7 +212,7 @@ public:
     /// within the given timestep.
     ///
     /// Default to computeBoundingTree().
-    virtual void computeContinuousBoundingTree(double /*dt*/, int maxDepth=0) { computeBoundingTree(maxDepth); }
+    virtual void computeContinuousBoundingTree(SReal /*dt*/, int maxDepth=0) { computeBoundingTree(maxDepth); }
 
     /// \brief Return the list (as a pair of iterators) of <i>internal children</i> of
     /// an element.
@@ -403,7 +403,7 @@ protected:
     Data<std::string> contactResponse;
 
     /// color used to display the collision model if requested
-    Data<sofa::helper::types::RGBAColor> color;
+    Data<sofa::type::RGBAColor> color;
 
     /// No collision can occur between collision
     /// models included in a common group (i.e. sharing a common id)

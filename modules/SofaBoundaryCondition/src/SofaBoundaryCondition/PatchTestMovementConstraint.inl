@@ -24,34 +24,14 @@
 #include <sofa/simulation/Node.h>
 #include "PatchTestMovementConstraint.h"
 #include <sofa/core/visual/VisualParams.h>
-#include <SofaBaseTopology/TopologySubsetData.inl>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/simulation/Simulation.h>
 #include <iostream>
-#include <sofa/helper/vector_algorithm.h>
+#include <sofa/type/vector_algorithm.h>
 #include <sofa/helper/cast.h>
 
 namespace sofa::component::projectiveconstraintset
 {
-
-// Define TestFunction
-template< class DataTypes>
-bool PatchTestMovementConstraint<DataTypes>::FCPointHandler::applyTestCreateFunction(Index, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    return fc != 0;
-}
-
-
-// Define RemovalFunction
-template< class DataTypes>
-void PatchTestMovementConstraint<DataTypes>::FCPointHandler::applyDestroyFunction(Index pointIndex, value_type &)
-{
-    if (fc)
-    {
-        fc->removeConstraint((Index) pointIndex);
-    }
-}
-
 
 template <class DataTypes>
 PatchTestMovementConstraint<DataTypes>::PatchTestMovementConstraint()
@@ -66,7 +46,6 @@ PatchTestMovementConstraint<DataTypes>::PatchTestMovementConstraint()
     , d_cornerPoints(  initData(&d_cornerPoints,"cornerPoints","corner points for computing constraint") )
     , d_drawConstrainedPoints(  initData(&d_drawConstrainedPoints,"drawConstrainedPoints","draw constrained points") )
     , l_topology(initLink("topology", "link to the topology container"))
-    , m_pointHandler(nullptr)
 {
     if(!d_beginConstraintTime.isSet())
      d_beginConstraintTime = 0;
@@ -79,8 +58,7 @@ PatchTestMovementConstraint<DataTypes>::PatchTestMovementConstraint()
 template <class DataTypes>
 PatchTestMovementConstraint<DataTypes>::~PatchTestMovementConstraint()
 {
-    if (m_pointHandler)
-        delete m_pointHandler;
+
 }
 
 template <class DataTypes>
@@ -100,7 +78,7 @@ void PatchTestMovementConstraint<DataTypes>::addConstraint(Index index)
 template <class DataTypes>
 void PatchTestMovementConstraint<DataTypes>::removeConstraint(Index index)
 {
-    sofa::helper::removeValue(*d_indices.beginEdit(),index);
+    sofa::type::removeValue(*d_indices.beginEdit(),index);
     d_indices.endEdit();
 }
 
@@ -118,16 +96,12 @@ void PatchTestMovementConstraint<DataTypes>::init()
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
-
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
 
-        // Initialize functions and parameters
-        m_pointHandler = new FCPointHandler(this, &d_indices);
-        d_indices.createTopologyHandler(_topology, m_pointHandler);
-        d_indices.registerTopologicalData();
+        // Initialize topological changes support
+        d_indices.createTopologyHandler(_topology);
     }
     else
     {
@@ -136,7 +110,7 @@ void PatchTestMovementConstraint<DataTypes>::init()
 
     const SetIndexArray & indices = d_indices.getValue();
 
-    Index maxIndex=this->mstate->getSize();
+    const Index maxIndex=this->mstate->getSize();
     for (unsigned int i=0; i<indices.size(); ++i)
     {
         const Index index=indices[i];
@@ -270,7 +244,7 @@ void PatchTestMovementConstraint<DataTypes>::projectVelocity(const core::Mechani
 template <class DataTypes>
 void PatchTestMovementConstraint<DataTypes>::projectPosition(const core::MechanicalParams* /*mparams*/, DataVecCoord& xData)
 {
-    sofa::simulation::Node::SPtr root = down_cast<sofa::simulation::Node>( this->getContext()->getRootContext() );
+    const sofa::simulation::Node::SPtr root = down_cast<sofa::simulation::Node>( this->getContext()->getRootContext() );
     helper::WriteAccessor<DataVecCoord> x = xData;
     const SetIndexArray & indices = d_indices.getValue();
 
@@ -314,14 +288,14 @@ void PatchTestMovementConstraint<DataTypes>::projectPosition(const core::Mechani
 }
 
 template <class DataTypes>
-void PatchTestMovementConstraint<DataTypes>::projectMatrix( sofa::defaulttype::BaseMatrix* M, unsigned offset )
+void PatchTestMovementConstraint<DataTypes>::projectMatrix( sofa::linearalgebra::BaseMatrix* M, unsigned offset )
 {
     // clears the rows and columns associated with constrained particles
-    unsigned blockSize = DataTypes::deriv_total_size;
+    const unsigned blockSize = DataTypes::deriv_total_size;
 
-    for(SetIndexArray::const_iterator it= d_indices.getValue().begin(), iend=d_indices.getValue().end(); it!=iend; it++ )
+    for (const auto id : d_indices.getValue())
     {
-        M->clearRowsCols( offset + (*it) * blockSize, offset + (*it+1) * (blockSize) );
+        M->clearRowsCols( offset + id * blockSize, offset + (id+1) * blockSize );
     }
 
 }
@@ -454,18 +428,18 @@ template <class DataTypes>
 void PatchTestMovementConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 {
     const SetIndexArray & indices = d_indices.getValue();
-    std::vector< defaulttype::Vector3 > points;
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
-    defaulttype::Vector3 point;
+    type::Vector3 point;
 
     if(d_drawConstrainedPoints.getValue())
     {
+        std::vector< type::Vector3 > points;
         for (unsigned int index : indices)
         {
             point = DataTypes::getCPos(x[index]);
             points.push_back(point);
         }
-        vparams->drawTool()->drawPoints(points, 10, sofa::helper::types::RGBAColor(1,0.5,0.5,1));
+        vparams->drawTool()->drawPoints(points, 10, sofa::type::RGBAColor(1,0.5,0.5,1));
     }
 }
 

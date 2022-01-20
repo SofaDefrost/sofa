@@ -29,11 +29,11 @@
 namespace sofa::component::mapping
 {
 
-using sofa::defaulttype::Vector3;
+using sofa::type::Vector3;
 
 template <class In, class Out>
 BarycentricMapperRegularGridTopology<In,Out>::BarycentricMapperRegularGridTopology(RegularGridTopology* fromTopology,
-                                                                                   PointSetTopologyContainer* toTopology)
+    core::topology::BaseMeshTopology* toTopology)
     : Inherit1(fromTopology, toTopology)
     , m_fromTopology(fromTopology)
     , m_matrixJ(nullptr), m_updateJ(true)
@@ -80,7 +80,7 @@ void BarycentricMapperRegularGridTopology<In,Out>::init ( const typename Out::Ve
     {
         for ( unsigned int i=0; i<out.size(); i++ )
         {
-            Vector3 coefs;
+            sofa::type::Vec3 coefs;
             Index cube = m_fromTopology->findCube ( Vector3 ( Out::getCPos(out[i]) ), coefs[0], coefs[1], coefs[2] );
             if ( cube==sofa::InvalidID )
                 cube = m_fromTopology->findNearestCube ( Vector3 ( Out::getCPos(out[i]) ), coefs[0], coefs[1], coefs[2] );
@@ -127,10 +127,8 @@ void BarycentricMapperRegularGridTopology<In,Out>::applyJ ( typename Out::VecDer
 {
     out.resize( m_map.size() );
 
-    for( size_t index=0 ; index<this->maskTo->size() ; ++index)
+    for( size_t index=0 ; index< out.size() ; ++index)
     {
-        if( this->maskTo->isActivated() && !this->maskTo->getEntry(index) ) continue;
-
         const topology::RegularGridTopology::Hexa cube = this->m_fromTopology->getHexaCopy ( this->m_map[index].in_index );
 
         const Real fx = m_map[index].baryCoords[0];
@@ -150,12 +148,8 @@ void BarycentricMapperRegularGridTopology<In,Out>::applyJ ( typename Out::VecDer
 template <class In, class Out>
 void BarycentricMapperRegularGridTopology<In,Out>::applyJT ( typename In::VecDeriv& out, const typename Out::VecDeriv& in )
 {
-    ForceMask& mask = *this->maskFrom;
-
-    for( size_t index=0 ; index<this->maskTo->size() ; ++index)
+    for( size_t index=0 ; index<in.size() ; ++index)
     {
-        if( !this->maskTo->getEntry(index) ) continue;
-
         const typename Out::DPos v = Out::getDPos(in[index]);
         const topology::RegularGridTopology::Hexa cube = this->m_fromTopology->getHexaCopy ( this->m_map[index].in_index );
 
@@ -173,22 +167,13 @@ void BarycentricMapperRegularGridTopology<In,Out>::applyJT ( typename In::VecDer
 
         out[cube[7]] += v * ( ( 1-fx ) * ( fy ) * ( fz ) );
         out[cube[6]] += v * ( ( fx ) * ( fy ) * ( fz ) );
-
-        mask.insertEntry(cube[0]);
-        mask.insertEntry(cube[1]);
-        mask.insertEntry(cube[2]);
-        mask.insertEntry(cube[3]);
-        mask.insertEntry(cube[4]);
-        mask.insertEntry(cube[5]);
-        mask.insertEntry(cube[6]);
-        mask.insertEntry(cube[7]);
     }
 
 }
 
 
 template <class In, class Out>
-const sofa::defaulttype::BaseMatrix* BarycentricMapperRegularGridTopology<In,Out>::getJ(int outSize, int inSize)
+const sofa::linearalgebra::BaseMatrix* BarycentricMapperRegularGridTopology<In,Out>::getJ(int outSize, int inSize)
 {
 
     if (m_matrixJ && !m_updateJ)
@@ -264,14 +249,7 @@ void BarycentricMapperRegularGridTopology<In,Out>::draw  (const core::visual::Vi
             }
         }
     }
-    vparams->drawTool()->drawLines ( points, 1, sofa::helper::types::RGBAColor::blue());
-}
-
-template <class In, class Out>
-void BarycentricMapperRegularGridTopology<In,Out>::addMatrixContrib(MatrixType* m,
-                                                                    int row, int col, Real value)
-{
-    Inherit1::addMatrixContrib(m, row, col, value);
+    vparams->drawTool()->drawLines ( points, 1, sofa::type::RGBAColor::blue());
 }
 
 template <class In, class Out>

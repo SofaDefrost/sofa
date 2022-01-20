@@ -23,38 +23,15 @@
 
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <SofaBoundaryCondition/ProjectDirectionConstraint.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/simulation/Simulation.h>
 #include <iostream>
-#include <SofaBaseTopology/TopologySubsetData.inl>
-#include <sofa/helper/vector_algorithm.h>
+#include <sofa/type/vector_algorithm.h>
 
 
 namespace sofa::component::projectiveconstraintset
 {
-
-template< class DataTypes>
-bool ProjectDirectionConstraint<DataTypes>::FCPointHandler::applyTestCreateFunction(Index, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    if (fc)
-    {
-        return false;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-template< class DataTypes>
-void ProjectDirectionConstraint<DataTypes>::FCPointHandler::applyDestroyFunction(Index pointIndex, core::objectmodel::Data<value_type> &)
-{
-    if (fc)
-    {
-        fc->removeConstraint((Index) pointIndex);
-    }
-}
 
 template <class DataTypes>
 ProjectDirectionConstraint<DataTypes>::ProjectDirectionConstraint()
@@ -64,7 +41,6 @@ ProjectDirectionConstraint<DataTypes>::ProjectDirectionConstraint()
     , f_direction( initData(&f_direction,CPos(),"direction","Direction of the line"))
     , l_topology(initLink("topology", "link to the topology container"))
     , data(new ProjectDirectionConstraintInternalData<DataTypes>())    
-    , m_pointHandler(nullptr)
 {
     f_indices.beginEdit()->push_back(0);
     f_indices.endEdit();
@@ -74,9 +50,6 @@ ProjectDirectionConstraint<DataTypes>::ProjectDirectionConstraint()
 template <class DataTypes>
 ProjectDirectionConstraint<DataTypes>::~ProjectDirectionConstraint()
 {
-    if (m_pointHandler)
-        delete m_pointHandler;
-
     delete data;
 }
 
@@ -97,7 +70,7 @@ void ProjectDirectionConstraint<DataTypes>::addConstraint(Index index)
 template <class DataTypes>
 void ProjectDirectionConstraint<DataTypes>::removeConstraint(Index index)
 {
-    sofa::helper::removeValue(*f_indices.beginEdit(),index);
+    sofa::type::removeValue(*f_indices.beginEdit(),index);
     f_indices.endEdit();
 }
 
@@ -115,17 +88,13 @@ void ProjectDirectionConstraint<DataTypes>::init()
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
-   
 
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
         
-        // Initialize functions and parameters
-        m_pointHandler = new FCPointHandler(this, &f_indices);
-        f_indices.createTopologyHandler(_topology, m_pointHandler);
-        f_indices.registerTopologicalData();
+        // Initialize topological changes support
+        f_indices.createTopologyHandler(_topology);
     }
     else
     {
@@ -134,7 +103,7 @@ void ProjectDirectionConstraint<DataTypes>::init()
 
     const Indices & indices = f_indices.getValue();
 
-    Index maxIndex=this->mstate->getSize();
+    const Index maxIndex=this->mstate->getSize();
     for (unsigned int i=0; i<indices.size(); ++i)
     {
         const Index index=indices[i];
@@ -172,7 +141,7 @@ void  ProjectDirectionConstraint<DataTypes>::reinit()
 
     // resize the jacobian
     unsigned numBlocks = this->mstate->getSize();
-    unsigned blockSize = DataTypes::deriv_total_size;
+    const unsigned blockSize = DataTypes::deriv_total_size;
     jacobian.resize( numBlocks*blockSize,numBlocks*blockSize );
 
     // fill the jacobian in ascending order
@@ -183,7 +152,7 @@ void  ProjectDirectionConstraint<DataTypes>::reinit()
         if( it != tmp.end() && i==*it )  // constrained particle: set diagonal to projection block, and  the cursor to the next constraint
         {
             jacobian.insertBackBlock(i,i,bProjection);
-            it++;
+            ++it;
         }
         else           // unconstrained particle: set diagonal to identity block
         {
@@ -195,15 +164,15 @@ void  ProjectDirectionConstraint<DataTypes>::reinit()
 
     const VecCoord& x = this->mstate->read(core::ConstVecCoordId::position())->getValue();
     const Indices &indices = f_indices.getValue();
-    for( Indices::const_iterator it = indices.begin() ; it != indices.end() ; ++it )
+    for (const auto id : indices)
     {
-        m_origin.push_back( DataTypes::getCPos(x[*it]) );
+        m_origin.push_back(DataTypes::getCPos(x[id]));
     }
 
 }
 
 template <class DataTypes>
-void ProjectDirectionConstraint<DataTypes>::projectMatrix( sofa::defaulttype::BaseMatrix* M, unsigned offset )
+void ProjectDirectionConstraint<DataTypes>::projectMatrix( sofa::linearalgebra::BaseMatrix* M, unsigned offset )
 {
     J.copy(jacobian, M->colSize(), offset); // projection matrix for an assembled state
     BaseSparseMatrix* E = dynamic_cast<BaseSparseMatrix*>(M);
@@ -229,9 +198,9 @@ void ProjectDirectionConstraint<DataTypes>::projectJacobianMatrix(const core::Me
 }
 
 template <class DataTypes>
-void ProjectDirectionConstraint<DataTypes>::projectVelocity(const core::MechanicalParams* mparams, DataVecDeriv& vdata)
+void ProjectDirectionConstraint<DataTypes>::projectVelocity(const core::MechanicalParams* mparams, DataVecDeriv& vData)
 {
-    projectResponse(mparams,vdata);
+    projectResponse(mparams,vData);
 }
 
 template <class DataTypes>
@@ -254,15 +223,15 @@ void ProjectDirectionConstraint<DataTypes>::projectPosition(const core::Mechanic
 }
 
 template <class DataTypes>
-void ProjectDirectionConstraint<DataTypes>::applyConstraint(defaulttype::BaseMatrix * /*mat*/, unsigned int /*offset*/)
+void ProjectDirectionConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* /*mparams*/, const sofa::core::behavior::MultiMatrixAccessor* /*matrix*/)
 {
-    msg_error() << "applyConstraint is not implemented ";
+    msg_error() << "applyConstraint is not implemented";
 }
 
 template <class DataTypes>
-void ProjectDirectionConstraint<DataTypes>::applyConstraint(defaulttype::BaseVector * /*vect*/, unsigned int /*offset*/)
+void ProjectDirectionConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* /*mparams*/, linearalgebra::BaseVector* /*vector*/, const sofa::core::behavior::MultiMatrixAccessor* /*matrix*/)
 {
-    msg_error() << "ProjectDirectionConstraint<DataTypes>::applyConstraint(defaulttype::BaseVector *vect, unsigned int offset) is not implemented ";
+    dmsg_error() << "ProjectDirectionConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* mparams, linearalgebra::BaseVector* vector, const sofa::core::behavior::MultiMatrixAccessor* matrix) is not implemented";
 }
 
 
@@ -281,25 +250,25 @@ void ProjectDirectionConstraint<DataTypes>::draw(const core::visual::VisualParam
 
     if( f_drawSize.getValue() == 0) // old classical drawing by points
     {
-        std::vector< sofa::defaulttype::Vector3 > points;
-        sofa::defaulttype::Vector3 point;
+        std::vector< sofa::type::Vector3 > points;
+        sofa::type::Vector3 point;
         for (unsigned int index : indices)
         {
             point = DataTypes::getCPos(x[index]);
             points.push_back(point);
         }
-        vparams->drawTool()->drawPoints(points, 10, sofa::helper::types::RGBAColor(1,0.5,0.5,1));
+        vparams->drawTool()->drawPoints(points, 10, sofa::type::RGBAColor(1,0.5,0.5,1));
     }
     else // new drawing by spheres
     {
-        std::vector< sofa::defaulttype::Vector3 > points;
-        sofa::defaulttype::Vector3 point;
+        std::vector< sofa::type::Vector3 > points;
+        sofa::type::Vector3 point;
         for (unsigned int index : indices)
         {
             point = DataTypes::getCPos(x[index]);
             points.push_back(point);
         }
-        vparams->drawTool()->drawSpheres(points, (float)f_drawSize.getValue(), sofa::helper::types::RGBAColor(1.0f,0.35f,0.35f,1.0f));
+        vparams->drawTool()->drawSpheres(points, (float)f_drawSize.getValue(), sofa::type::RGBAColor(1.0f,0.35f,0.35f,1.0f));
     }
     vparams->drawTool()->restoreLastState();
 

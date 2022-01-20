@@ -24,13 +24,7 @@
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/ObjectFactory.h>
 
-namespace sofa
-{
-
-namespace component
-{
-
-namespace linearsolver
+namespace sofa::component::linearsolver
 {
 
 using namespace sofa::defaulttype;
@@ -118,6 +112,8 @@ void SparseCholeskySolver<TMatrix,TVector>::invert(Matrix& M)
     N = cs_chol (&A, S) ;		/* numeric Cholesky factorization */
 }
 
+using namespace sofa::linearalgebra;
+
 int SparseCholeskySolverClass = core::RegisterObject("Direct linear solver based on Sparse Cholesky factorization, implemented with the CSPARSE library")
         .add< SparseCholeskySolver< CompressedRowSparseMatrix<double>,FullVector<double> > >(true)
         .add< SparseCholeskySolver< CompressedRowSparseMatrix<float>,FullVector<float> > >()
@@ -126,8 +122,4 @@ int SparseCholeskySolverClass = core::RegisterObject("Direct linear solver based
 template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< CompressedRowSparseMatrix<double>,FullVector<double> >;
 template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< CompressedRowSparseMatrix<float>,FullVector<float> >;
 
-} // namespace linearsolver
-
-} // namespace component
-
-} // namespace sofa
+} // namespace sofa::component::linearsolver

@@ -36,7 +36,7 @@ void FixParticlePerformer<DataTypes>::start()
 {
     const BodyPicked &picked=this->interactor->getBodyPicked();
 
-    helper::vector<unsigned int > points;
+    type::vector<unsigned int > points;
     typename DataTypes::Coord fixPoint;
     MouseContainer* mstateCollision=getFixationPoints(picked, points, fixPoint);
 
@@ -80,7 +80,7 @@ void FixParticlePerformer<DataTypes>::start()
 template <class DataTypes>
 void FixParticlePerformer<DataTypes>::execute()
 {
-};
+}
 
 
 
@@ -107,7 +107,7 @@ FixParticlePerformer<DataTypes>::FixParticlePerformer(BaseMouseInteractor *i):TI
 
 
 template <class DataTypes>
-sofa::component::container::MechanicalObject< DataTypes >* FixParticlePerformer<DataTypes>::getFixationPoints(const BodyPicked &b, helper::vector<Index> &points, Coord &fixPoint)
+sofa::component::container::MechanicalObject< DataTypes >* FixParticlePerformer<DataTypes>::getFixationPoints(const BodyPicked &b, type::vector<Index> &points, Coord &fixPoint)
 {
     const auto idx=b.indexCollisionElement;
     MouseContainer* collisionState=0;
@@ -116,8 +116,8 @@ sofa::component::container::MechanicalObject< DataTypes >* FixParticlePerformer<
     {
         collisionState = dynamic_cast<MouseContainer*>(b.body->getContext()->getMechanicalState());
 
-        auto funcGetFixationPoints = s_mapSupportedModels.find(std::type_index(typeid(*b.body)));
-        if (funcGetFixationPoints != s_mapSupportedModels.end())
+        auto funcGetFixationPoints = (*getMapInstance()).find(std::type_index(typeid(*b.body)));
+        if (funcGetFixationPoints != (*getMapInstance()).end())
         {
             funcGetFixationPoints->second(b.body, idx, points, fixPoint);
         }
@@ -137,11 +137,5 @@ sofa::component::container::MechanicalObject< DataTypes >* FixParticlePerformer<
 
     return collisionState;
 }
-
-#ifndef WIN32
-template<typename DataTypes>
-    std::unordered_map<std::type_index, typename FixParticlePerformer<DataTypes>::GetFixationPointsOnModelFunction >
-    FixParticlePerformer<DataTypes>::s_mapSupportedModels;
-#endif // WIN32
 
 } // namespace sofa::component::collision

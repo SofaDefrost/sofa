@@ -39,7 +39,7 @@ using sofa::core::visual::VisualParams;
 #include <SofaGeneralEngine/DifferenceEngine.h>
 using sofa::component::engine::DifferenceEngine ;
 
-using sofa::helper::vector;
+using sofa::type::vector;
 
 namespace sofa
 {
@@ -55,7 +55,7 @@ struct DifferenceEngine_test : public BaseSimulationTest,
     Node::SPtr m_node;
     typename ThisClass::SPtr m_thisObject;
 
-    void SetUp()
+    void SetUp() override
     {
         setSimulation(m_simu = new DAGSimulation());
         m_node = m_simu->createNewGraph("root");
@@ -104,7 +104,7 @@ struct DifferenceEngine_test : public BaseSimulationTest,
 };
 
 using ::testing::Types;
-typedef Types<defaulttype::Vector3> DataTypes;
+typedef Types<type::Vector3> DataTypes;
 
 TYPED_TEST_SUITE(DifferenceEngine_test, DataTypes);
 

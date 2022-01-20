@@ -26,9 +26,8 @@
 #include <sofa/core/behavior/LinearSolver.h>
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/DiagonalMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/DiagonalMatrix.h>
 #include <sofa/helper/map.h>
 
 #include <cmath>
@@ -58,7 +57,7 @@ public:
     typedef TMatrix Matrix;
     typedef TVector Vector;
     typedef sofa::component::linearsolver::MatrixLinearSolver<TMatrix,TVector> Inherit;
-    typedef typename TMatrix::Bloc SubMatrix;
+    typedef typename TMatrix::Block SubMatrix;
 
     Data<bool> f_verbose; ///< Dump system state at each iteration
 protected:

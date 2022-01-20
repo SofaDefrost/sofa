@@ -85,10 +85,10 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
     if (d_componentState.getValue() != sofa::core::objectmodel::ComponentState::Valid)
         return;
 
-    using sofa::defaulttype::Vector3;
-    using sofa::defaulttype::Matrix3;
-    using sofa::defaulttype::Mat3x3d;
-    using sofa::defaulttype::Vec3d;
+    using sofa::type::Vector3;
+    using sofa::type::Matrix3;
+    using sofa::type::Mat3x3d;
+    using sofa::type::Vec3d;
 
     const VecCoord& in = d_inputPositions.getValue();
     const VecCoord& out = d_mappedPointPositions.getValue();
@@ -125,8 +125,8 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
 
     const sofa::core::topology::BaseMeshTopology::SeqTriangles& triangles = l_topology->getTriangles();
     const sofa::core::topology::BaseMeshTopology::SeqQuads& quads = l_topology->getQuads();
-    sofa::helper::vector<Matrix3> bases;
-    sofa::helper::vector<Vector3> centers;
+    sofa::type::vector<Matrix3> bases;
+    sofa::type::vector<Vector3> centers;
 
     if ( tetrahedra.empty() && cubes.empty() )
     {
@@ -137,8 +137,8 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
             const sofa::core::topology::BaseMeshTopology::SeqEdges& edges = l_topology->getEdges();
             if ( edges.empty() ) return;
 
-            sofa::helper::vector< SReal >   lengthEdges;
-            sofa::helper::vector< Vector3 > unitaryVectors;
+            sofa::type::vector< SReal >   lengthEdges;
+            sofa::type::vector< Vector3 > unitaryVectors;
 
             unsigned int e;
             for ( e=0; e<edges.size(); e++ )
@@ -183,7 +183,9 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
                 m[1] = (in)[triangles[t][2]]-(in)[triangles[t][0]];
                 m[2] = cross ( m[0],m[1] );
                 mt.transpose ( m );
-                bases[t].invert ( mt );
+                const bool canInvert = bases[t].invert ( mt );
+                assert(canInvert);
+                SOFA_UNUSED(canInvert);
                 centers[t] = ( (in)[triangles[t][0]]+(in)[triangles[t][1]]+(in)[triangles[t][2]] ) /3;
             }
             for ( unsigned int c = 0; c < quads.size(); c++ )
@@ -193,26 +195,28 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
                 m[1] = (in)[quads[c][3]]-(in)[quads[c][0]];
                 m[2] = cross ( m[0],m[1] );
                 mt.transpose ( m );
-                bases[c0+c].invert ( mt );
+                const bool canInvert = bases[c0+c].invert ( mt );
+                assert(canInvert);
+                SOFA_UNUSED(canInvert);
                 centers[c0+c] = ( (in)[quads[c][0]]+(in)[quads[c][1]]+(in)[quads[c][2]]+(in)[quads[c][3]] ) *0.25;
             }
             for ( unsigned int i=0; i<(out).size(); i++ )
             {
-                Vector3 pos = DataTypes::getCPos((out)[i]);
-                Vector3 coefs;
+                auto pos = DataTypes::getCPos((out)[i]);
+                type::Vec3 coefs;
                 int index = -1;
-                double distance = 1e10;
+                SReal distance = 1e10;
                 for ( unsigned int t = 0; t < triangles.size(); t++ )
                 {
-                    Vec3d v = bases[t] * ( pos - (in)[triangles[t][0]] );
-                    double d = std::max ( std::max ( -v[0],-v[1] ),std::max ( ( v[2]<0?-v[2]:v[2] )-0.01,v[0]+v[1]-1 ) );
+                    const auto v = bases[t] * ( pos - (in)[triangles[t][0]] );
+                    SReal d = std::max ( std::max ( SReal(-v[0]), SReal(-v[1]) ),std::max (SReal(( v[2]<0?-v[2]:v[2] )-0.01), SReal(v[0]+v[1]-1) ) );
                     if ( d>0 ) d = ( pos-centers[t] ).norm2();
                     if ( d<distance ) { coefs = v; distance = d; index = t; }
                 }
                 for ( unsigned int c = 0; c < quads.size(); c++ )
                 {
-                    Vec3d v = bases[c0+c] * ( pos - (in)[quads[c][0]] );
-                    double d = std::max ( std::max ( -v[0],-v[1] ),std::max ( std::max ( v[1]-1,v[0]-1 ),std::max ( v[2]-0.01,-v[2]-0.01 ) ) );
+                    const auto v = bases[c0+c] * ( pos - (in)[quads[c][0]] );
+                    SReal d = std::max ( std::max (SReal(-v[0]), SReal(-v[1]) ),std::max ( std::max (SReal(v[1]-1), SReal(v[0]-1) ),std::max (SReal(v[2]-0.01), SReal(-v[2]-0.01 )) ) );
                     if ( d>0 ) d = ( pos-centers[c0+c] ).norm2();
                     if ( d<distance ) { coefs = v; distance = d; index = c0+c; }
                 }
@@ -243,7 +247,9 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
             m[1] = (in)[tetrahedra[t][2]]-(in)[tetrahedra[t][0]];
             m[2] = (in)[tetrahedra[t][3]]-(in)[tetrahedra[t][0]];
             mt.transpose ( m );
-            bases[t].invert ( mt );
+            const bool canInvert = bases[t].invert ( mt );
+            assert(canInvert);
+            SOFA_UNUSED(canInvert);
             centers[t] = ( (in)[tetrahedra[t][0]]+(in)[tetrahedra[t][1]]+(in)[tetrahedra[t][2]]+(in)[tetrahedra[t][3]] ) *0.25;
         }
         for ( unsigned int c = 0; c < cubes.size(); c++ )
@@ -253,26 +259,28 @@ void MeshBarycentricMapperEngine<DataTypes>::doUpdate()
             m[1] = (in)[cubes[c][3]]-(in)[cubes[c][0]];
             m[2] = (in)[cubes[c][4]]-(in)[cubes[c][0]];
             mt.transpose ( m );
-            bases[c0+c].invert ( mt );
+            const bool canInvert = bases[c0+c].invert ( mt );
+            assert(canInvert);
+            SOFA_UNUSED(canInvert);
             centers[c0+c] = ( (in)[cubes[c][0]]+(in)[cubes[c][1]]+(in)[cubes[c][2]]+(in)[cubes[c][3]]+(in)[cubes[c][4]]+(in)[cubes[c][5]]+(in)[cubes[c][6]]+(in)[cubes[c][7]] ) *0.125;
         }
         for ( unsigned int i=0; i<(out).size(); i++ )
         {
-            Vector3 pos = DataTypes::getCPos((out)[i]);
-            Vector3 coefs;
+            auto pos = DataTypes::getCPos((out)[i]);
+            sofa::type::Vec3 coefs;
             int index = -1;
             double distance = 1e10;
             for ( unsigned int t = 0; t < tetrahedra.size(); t++ )
             {
-                Vector3 v = bases[t] * ( pos - (in)[tetrahedra[t][0]] );
-                double d = std::max ( std::max ( -v[0],-v[1] ),std::max ( -v[2],v[0]+v[1]+v[2]-1 ) );
+                const auto v = bases[t] * ( pos - (in)[tetrahedra[t][0]] );
+                SReal d = std::max ( std::max (SReal (-v[0]), SReal(-v[1]) ),std::max (SReal(-v[2]), SReal(v[0]+v[1]+v[2]-1 )) );
                 if ( d>0 ) d = ( pos-centers[t] ).norm2();
                 if ( d<distance ) { coefs = v; distance = d; index = t; }
             }
             for ( unsigned int c = 0; c < cubes.size(); c++ )
             {
-                Vector3 v = bases[c0+c] * ( pos - (in)[cubes[c][0]] );
-                double d = std::max ( std::max ( -v[0],-v[1] ),std::max ( std::max ( -v[2],v[0]-1 ),std::max ( v[1]-1,v[2]-1 ) ) );
+                const auto v = bases[c0+c] * ( pos - (in)[cubes[c][0]] );
+                SReal d = std::max ( std::max (SReal(-v[0]), SReal(-v[1]) ),std::max ( std::max (SReal(-v[2]), SReal(v[0]-1) ),std::max (SReal(v[1]-1), SReal(v[2]-1 )) ) );
                 if ( d>0 ) d = ( pos-centers[c0+c] ).norm2();
                 if ( d<distance ) { coefs = v; distance = d; index = c0+c; }
             }

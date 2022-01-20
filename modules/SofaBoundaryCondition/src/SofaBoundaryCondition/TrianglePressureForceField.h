@@ -24,9 +24,8 @@
 
 
 #include <sofa/core/behavior/ForceField.h>
-#include <SofaBaseTopology/TopologySparseData.h>
-#include <SofaBaseTopology/TriangleSetGeometryAlgorithms.h>
-#include <sofa/defaulttype/MatSym.h>
+#include <sofa/core/topology/TopologySubsetData.h>
+#include <sofa/type/MatSym.h>
 
 namespace sofa::component::forcefield
 {
@@ -42,8 +41,8 @@ public:
     typedef typename DataTypes::Coord    Coord   ;
     typedef typename DataTypes::Deriv    Deriv   ;
     typedef typename Coord::value_type   Real    ;
-    typedef defaulttype::Mat<3,3,Real> Mat33;
-    typedef defaulttype::MatSym<3,Real> MatSym3;
+    typedef type::Mat<3,3,Real> Mat33;
+    typedef type::MatSym<3,Real> MatSym3;
 
     typedef core::objectmodel::Data<VecCoord> DataVecCoord;
     typedef core::objectmodel::Data<VecDeriv> DataVecDeriv;
@@ -53,7 +52,7 @@ public:
     Data<Deriv> pressure; ///< pressure is a vector with specified direction
   	Data<MatSym3> cauchyStress; ///< the Cauchy stress applied on triangles
 
-    Data<sofa::helper::vector<Index> > triangleList; ///< Indices of triangles separated with commas where a pressure is applied
+    Data<sofa::type::vector<Index> > triangleList; ///< Indices of triangles separated with commas where a pressure is applied
 
     /// the normal used to define the edge subjected to the pressure force.
     Data<Deriv> normal;
@@ -61,7 +60,7 @@ public:
     Data<Real> dmin; ///< coordinates min of the plane for the vertex selection
     Data<Real> dmax;///< coordinates max of the plane for the vertex selection
     Data<bool> p_showForces; ///< draw triangles which have a given pressure
-    Data<bool> p_useConstantForce; ///< applied force is computed as the the pressure vector times the area at rest
+    Data<bool> p_useConstantForce; ///< applied force is computed as the pressure vector times the area at rest
 
     /// Link to be set to the topology container in the component graph.
     SingleLink<TrianglePressureForceField<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
@@ -102,11 +101,9 @@ protected:
         }
     };
 
-    component::topology::TriangleSparseData<sofa::helper::vector<TrianglePressureInformation> > trianglePressureMap; ///< map between edge indices and their pressure
+    core::topology::TriangleSubsetData<sofa::type::vector<TrianglePressureInformation> > trianglePressureMap; ///< map between triangle indices and their pressure
 
     sofa::core::topology::BaseMeshTopology* m_topology;
-	sofa::component::topology::TriangleSetGeometryAlgorithms<DataTypes>* triangleGeo;
-
 
 	TrianglePressureForceField();
 
@@ -118,7 +115,7 @@ public:
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx) override;
 
     /// Constant pressure has null variation
-    void addKToMatrix(sofa::defaulttype::BaseMatrix * /*m*/, SReal /*kFactor*/, unsigned int & /*offset*/) override {}
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * /*m*/, SReal /*kFactor*/, unsigned int & /*offset*/) override {}
 
     /// Constant pressure has null variation
     void addKToMatrix(const core::MechanicalParams* /*mparams*/, const sofa::core::behavior::MultiMatrixAccessor* /*matrix*/ ) override {}

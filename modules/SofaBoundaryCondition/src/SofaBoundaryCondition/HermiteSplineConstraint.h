@@ -24,8 +24,8 @@
 
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/behavior/MechanicalState.h>
-#include <sofa/helper/vector.h>
-#include <SofaBaseTopology/TopologySubsetData.h>
+#include <sofa/type/vector.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 
 namespace sofa::component::projectiveconstraintset
 {
@@ -54,11 +54,11 @@ public:
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
     typedef Data<MatrixDeriv> DataMatrixDeriv;
-    typedef helper::vector<unsigned int> SetIndexArray;
-    typedef sofa::component::topology::PointSubsetData< SetIndexArray > SetIndex;
-    typedef typename defaulttype::Vec<3, Real> Vec3R;
-    typedef typename defaulttype::Vec<2, Real> Vec2R;
-    typedef typename helper::Quater<Real> QuatR;
+    typedef type::vector<unsigned int> SetIndexArray;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
+    typedef typename type::Vec<3, Real> Vec3R;
+    typedef typename type::Vec<2, Real> Vec2R;
+    typedef typename type::Quat<Real> QuatR;
 
 public:
     ///indices of the DOFs constraints
@@ -86,7 +86,7 @@ public:
     SingleLink<HermiteSplineConstraint<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
     
 protected:
-    HermiteSplineConstraint(core::behavior::MechanicalState<DataTypes>* mstate = nullptr);
+    explicit HermiteSplineConstraint(core::behavior::MechanicalState<DataTypes>* mstate = nullptr);
 
     ~HermiteSplineConstraint();
 public:

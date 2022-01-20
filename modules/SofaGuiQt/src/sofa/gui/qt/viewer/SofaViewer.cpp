@@ -97,11 +97,6 @@ void SofaViewer::keyPressEvent(QKeyEvent * e)
         m_bShowAxis = !m_bShowAxis;
         break;
     }
-    case Qt::Key_S:
-    {
-        m_backend->screenshot(m_backend->screenshotName());
-        break;
-    }
     case Qt::Key_V:
         // --- save video
     {
@@ -540,7 +535,7 @@ void SofaViewer::setBackgroundImage(std::string imageFileName)
         helper::io::Image* image =  helper::io::Image::FactoryImage::getInstance()->createObject(extension,backgroundImageFile);
         if( !image )
         {
-            helper::vector<std::string> validExtensions;
+            type::vector<std::string> validExtensions;
             helper::io::Image::FactoryImage::getInstance()->uniqueKeys(std::back_inserter(validExtensions));
             msg_warning("SofaViewer") << "Could not create file '" << imageFileName <<"'" << msgendl
                     << "  Valid extensions: " << validExtensions;

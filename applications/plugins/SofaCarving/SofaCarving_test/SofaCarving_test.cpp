@@ -23,11 +23,11 @@
 #include <SofaCarving/CarvingManager.h>
 #include <SofaSimulationGraph/SimpleApi.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <SofaSimulationGraph/testing/BaseSimulationTest.h>
+#include <sofa/testing/BaseSimulationTest.h>
 #include <SofaBaseUtils/initSofaBaseUtils.h>
 #include <SofaBaseLinearSolver/initSofaBaseLinearSolver.h>
 
-using namespace sofa::helper::testing;
+using namespace sofa::testing;
 using namespace sofa::component::collision;
 using namespace sofa::simpleapi;
 
@@ -64,7 +64,7 @@ bool SofaCarving_test::createScene(const std::string& carvingDistance)
     m_root = createRootNode(m_simu, "root");
    
     // set scene variables
-    m_root->setGravity(sofa::defaulttype::Vector3(0.0, 0.0, -0.9));
+    m_root->setGravity(sofa::type::Vector3(0.0, 0.0, -0.9));
     m_root->setDt(0.01);
     createObject(m_root, "RequiredPlugin", { { "name","SofaGeneralSimpleFem" } });
     createObject(m_root, "RequiredPlugin", { { "name","SofaTopologyMapping" } });
@@ -78,7 +78,7 @@ bool SofaCarving_test::createScene(const std::string& carvingDistance)
     createObject(m_root, "BVHNarrowPhase", { { "name","Narrow Phase Detection" } });
     createObject(m_root, "CollisionResponse", {
         { "name", "Contact Manager" },
-        { "response", "default" }
+        { "response", "PenalityContactForceField" }
     });
     createObject(m_root, "MinProximityIntersection", { { "name","Proximity" },
         { "alarmDistance", "0.5" },
@@ -173,13 +173,13 @@ bool SofaCarving_test::createScene(const std::string& carvingDistance)
         { "output", "@Container" }
         });
 
-    createObject(nodeSurface, "TriangleSet", {
+    createObject(nodeSurface, "TriangleCollisionModel", {
         { "name", "Triangle Model" },
         { "tags", "CarvingSurface" },
         { "group", "0" }
         });
 
-    createObject(nodeSurface, "PointSet", {
+    createObject(nodeSurface, "PointCollisionModel", {
         { "name", "Point Model" },
         { "tags", "CarvingSurface" },
         { "group", "0" }

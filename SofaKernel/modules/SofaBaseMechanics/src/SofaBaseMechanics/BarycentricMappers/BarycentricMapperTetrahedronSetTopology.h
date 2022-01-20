@@ -22,16 +22,12 @@
 #pragma once
 #include <SofaBaseMechanics/BarycentricMappers/BarycentricMapperTopologyContainer.h>
 
-#include <SofaBaseTopology/TetrahedronSetTopologyContainer.h>
-#include <SofaBaseTopology/TetrahedronSetGeometryAlgorithms.h>
-
 namespace sofa::component::mapping
 {
 
-using sofa::defaulttype::Vec3dTypes;
-using sofa::defaulttype::Vec3fTypes;
-using sofa::defaulttype::Mat3x3d;
-using sofa::defaulttype::Vector3;
+using sofa::defaulttype::Vec3Types;
+using sofa::type::Mat3x3d;
+using sofa::type::Vector3;
 typedef typename sofa::core::topology::BaseMeshTopology::Tetrahedron Tetrahedron;
 
 /// Class allowing barycentric mapping computation on a TetrahedronSetTopology
@@ -50,25 +46,22 @@ public:
     Index addPointInTetra(const Index index, const SReal* baryCoords) override ;
 
 protected:
-    BarycentricMapperTetrahedronSetTopology(topology::TetrahedronSetTopologyContainer* fromTopology,
-                                            topology::PointSetTopologyContainer* toTopology);
-    ~BarycentricMapperTetrahedronSetTopology() override {}
+    BarycentricMapperTetrahedronSetTopology(sofa::core::topology::TopologyContainer* fromTopology,
+        core::topology::BaseMeshTopology* toTopology);
+    ~BarycentricMapperTetrahedronSetTopology() override = default;
 
-    virtual helper::vector<Tetrahedron> getElements() override;
-    virtual helper::vector<SReal> getBaryCoef(const Real* f) override;
-    helper::vector<SReal> getBaryCoef(const Real fx, const Real fy, const Real fz);
+    virtual type::vector<Tetrahedron> getElements() override;
+    virtual type::vector<SReal> getBaryCoef(const Real* f) override;
+    type::vector<SReal> getBaryCoef(const Real fx, const Real fy, const Real fz);
     void computeBase(Mat3x3d& base, const typename In::VecCoord& in, const Tetrahedron& element) override;
     void computeCenter(Vector3& center, const typename In::VecCoord& in, const Tetrahedron& element) override;
-    void computeDistance(double& d, const Vector3& v) override;
+    void computeDistance(SReal& d, const Vector3& v) override;
     void addPointInElement(const Index elementIndex, const SReal* baryCoords) override;
 
     //handle topology changes depending on the topology
     void processTopologicalChanges(const typename Out::VecCoord& out, const typename In::VecCoord& in, core::topology::Topology* t);
 
-    void processAddPoint(const sofa::defaulttype::Vec3d & pos, const typename In::VecCoord& in, MappingData & vectorData);
-
-    topology::TetrahedronSetTopologyContainer*      m_fromContainer {nullptr};
-    topology::TetrahedronSetGeometryAlgorithms<In>*	m_fromGeomAlgo  {nullptr};
+    void processAddPoint(const sofa::type::Vec3d & pos, const typename In::VecCoord& in, MappingData & vectorData);
 
     using Inherit1::d_map;
     using Inherit1::m_fromTopology;
@@ -77,7 +70,7 @@ protected:
 };
 
 #if !defined(SOFA_COMPONENT_MAPPING_BARYCENTRICMAPPERTETRAHEDRONSETTOPOLOGY_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperTetrahedronSetTopology< Vec3dTypes, Vec3dTypes >;
+extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperTetrahedronSetTopology< Vec3Types, Vec3Types >;
 #endif
 
 } // namespace sofa::component::mapping

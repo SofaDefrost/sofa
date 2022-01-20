@@ -25,12 +25,12 @@
 
 #include <sofa/core/behavior/ForceField.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/defaulttype/Mat.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/Mat.h>
+#include <sofa/core/topology/TopologyData.h>
 
-#include <sofa/defaulttype/Mat.h>
-#include <sofa/helper/fixed_array.h>
+#include <sofa/type/Mat.h>
+#include <sofa/type/fixed_array.h>
 
 #include <map>
 #include <set>
@@ -62,7 +62,7 @@ public:
     typedef core::objectmodel::Data<VecCoord>    DataVecCoord;
 
     enum { N=DataTypes::spatial_dimensions };
-    typedef defaulttype::Mat<N,N,Real> Mat;
+    typedef type::Mat<N,N,Real> Mat;
 
     using Index = sofa::Index;
 
@@ -80,17 +80,17 @@ protected:
         int     m1, m2;  /// the two extremities of the first spring: masses m1 and m2
         int     m3, m4;  /// the two extremities of the second spring: masses m3 and m4
 
-        double  ks;      /// spring stiffness (initialized to the default value)
-        double  kd;      /// damping factor (initialized to the default value)
+        SReal  ks;      /// spring stiffness (initialized to the default value)
+        SReal  kd;      /// damping factor (initialized to the default value)
 
-        double  restlength1; /// rest length of the first spring
-        double  restlength2; /// rest length of the second spring
+        SReal  restlength1; /// rest length of the first spring
+        SReal  restlength2; /// rest length of the second spring
 
         bool is_activated;
 
         bool is_initialized;
 
-        EdgeInformation(int m1=0, int m2=0, int m3=0, int m4=0, double restlength1=0.0, double restlength2=0.0, bool is_activated=false, bool is_initialized=false)
+        EdgeInformation(int m1=0, int m2=0, int m3=0, int m4=0, SReal restlength1=0.0, SReal restlength2=0.0, bool is_activated=false, bool is_initialized=false)
             : m1(m1), m2(m2), m3(m3), m4(m4), restlength1(restlength1), restlength2(restlength2), is_activated(is_activated), is_initialized(is_initialized)
         {
         }
@@ -119,16 +119,16 @@ public:
 
     SReal getPotentialEnergy(const core::MechanicalParams* /* mparams */, const DataVecCoord& /* d_x */) const override;
 
-    virtual double getKs() const { return f_ks.getValue();}
-    virtual double getKd() const { return f_kd.getValue();}
+    virtual SReal getKs() const { return f_ks.getValue();}
+    virtual SReal getKd() const { return f_kd.getValue();}
 
-    void setKs(const double ks)
+    void setKs(const SReal ks)
     {
-        f_ks.setValue((double)ks);
+        f_ks.setValue((SReal)ks);
     }
-    void setKd(const double kd)
+    void setKd(const SReal kd)
     {
-        f_kd.setValue((double)kd);
+        f_kd.setValue((SReal)kd);
     }
 
     // -- VisualModel interface
@@ -136,66 +136,49 @@ public:
     void initTextures() { }
     void update() { }
 
-    sofa::component::topology::EdgeData<sofa::helper::vector<EdgeInformation> > &getEdgeInfo() {return edgeInfo;}
+    sofa::core::topology::EdgeData<sofa::type::vector<EdgeInformation> > &getEdgeInfo() {return edgeInfo;}
+
+    /** Method to initialize @sa EdgeInformation when a new edge is created.
+    * Will be set as creation callback in the EdgeData @sa edgeInfo
+    */
+    void applyEdgeCreation(Index edgeIndex, EdgeInformation& ei,
+        const core::topology::BaseMeshTopology::Edge&,
+        const sofa::type::vector< Index >&,
+        const sofa::type::vector< SReal >&);
+
+    /** Method to update @sa edgeInfo when a new quad is created.
+    * Will be set as callback in the EdgeData @sa edgeInfo when QUADSADDED event is fired
+    * to create a new spring between new created triangles.
+    */
+    void applyQuadCreation(const sofa::type::vector<Index>& quadAdded,
+        const sofa::type::vector<core::topology::BaseMeshTopology::Quad>&,
+        const sofa::type::vector<sofa::type::vector<Index> >&,
+        const sofa::type::vector<sofa::type::vector<SReal> >&);
+
+    /** Method to update @sa edgeInfo when a quad is removed.
+    * Will be set as callback in the EdgeData @sa edgeInfo when QUADSREMOVED event is fired
+    * to remove spring if needed or update pair of quad.
+    */
+    void applyQuadDestruction(const sofa::type::vector<Index>& quadRemoved);
+
+    /// Method to update @sa edgeInfo when a point is removed. Will be set as callback when POINTSREMOVED event is fired
+    void applyPointDestruction(const sofa::type::vector<Index>& pointIndices);
+
+    /// Method to update @sa edgeInfo when points are renumbered. Will be set as callback when POINTSRENUMBERING event is fired
+    void applyPointRenumbering(const sofa::type::vector<Index>& pointToRenumber);
 
 
-    class EdgeBSHandler : public topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge, helper::vector<EdgeInformation> >
-    {
-    public:
-        typedef typename QuadularBendingSprings<DataTypes>::EdgeInformation EdgeInformation;
-
-        EdgeBSHandler(QuadularBendingSprings<DataTypes>* ff, topology::EdgeData<sofa::helper::vector<EdgeInformation> >* data )
-            :topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge, sofa::helper::vector<EdgeInformation> >(data)
-            ,ff(ff)
-        {
-        }
-
-        void applyCreateFunction(Index edgeIndex, EdgeInformation& ei,
-                const core::topology::BaseMeshTopology::Edge &,
-                const sofa::helper::vector< Index > &,
-                const sofa::helper::vector< double > &);
-
-        void applyQuadCreation(const sofa::helper::vector<Index> & quadAdded,
-                const sofa::helper::vector<core::topology::BaseMeshTopology::Quad> &,
-                const sofa::helper::vector<sofa::helper::vector<Index> > &,
-                const sofa::helper::vector<sofa::helper::vector<double> > &);
-
-        void applyQuadDestruction(const sofa::helper::vector<Index> & quadRemoved);
-
-        using topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge, helper::vector<EdgeInformation> >::ApplyTopologyChange;
-
-        /// Callback to add quads elements.
-        void ApplyTopologyChange(const core::topology::QuadsAdded* /*event*/);
-        /// Callback to remove quads elements.
-        void ApplyTopologyChange(const core::topology::QuadsRemoved* /*event*/);
-
-        void applyPointDestruction(const sofa::helper::vector<Index> &pointIndices);
-
-        void applyPointRenumbering(const sofa::helper::vector<Index> &pointToRenumber);
-
-        /// Callback to remove points elements.
-        void ApplyTopologyChange(const core::topology::PointsRemoved* /*event*/);
-        /// Callback to renumbering on points elements.
-        void ApplyTopologyChange(const core::topology::PointsRenumbering* /*event*/);
-
-    protected:
-        QuadularBendingSprings<DataTypes>* ff;
-    };
-
-    Data<double> f_ks; ///< uniform stiffness for the all springs
-    Data<double> f_kd; ///< uniform damping for the all springs
+    Data<SReal> f_ks; ///< uniform stiffness for the all springs
+    Data<SReal> f_kd; ///< uniform damping for the all springs
 
     /// Link to be set to the topology container in the component graph.
     SingleLink<QuadularBendingSprings<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;
 
 protected:
-    sofa::component::topology::EdgeData<sofa::helper::vector<EdgeInformation> > edgeInfo; ///< Internal edge data
+    sofa::core::topology::EdgeData<sofa::type::vector<EdgeInformation> > edgeInfo; ///< Internal edge data
 
     /// Pointer to the current topology
     sofa::core::topology::BaseMeshTopology* m_topology;
-
-    /// Handler for subset Data
-    EdgeBSHandler* edgeHandler;
 
     bool updateMatrix;
     SReal m_potentialEnergy;

@@ -19,22 +19,14 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_CORE_BEHAVIOR_CONSTRAINTCORRECTION_INL
-#define SOFA_CORE_BEHAVIOR_CONSTRAINTCORRECTION_INL
+#pragma once
 
 #include <sofa/core/behavior/ConstraintCorrection.h>
 #include <sofa/core/behavior/ConstraintSolver.h>
 #include <sofa/core/ConstraintParams.h>
 
-namespace sofa
+namespace sofa::core::behavior
 {
-
-namespace core
-{
-
-namespace behavior
-{
-
 
 template< class DataTypes >
 void ConstraintCorrection< DataTypes >::init()
@@ -45,28 +37,36 @@ void ConstraintCorrection< DataTypes >::init()
 template< class DataTypes >
 void ConstraintCorrection< DataTypes >::cleanup()
 {
-    while(!constraintsolvers.empty())
+    for (auto it = l_constraintsolvers.rbegin(); it != l_constraintsolvers.rend(); ++it)
     {
-        constraintsolvers.back()->removeConstraintCorrection(this);
-        constraintsolvers.pop_back();
+        (*it)->removeConstraintCorrection(this);
     }
+    l_constraintsolvers.clear();
     sofa::core::behavior::BaseConstraintCorrection::cleanup();
 }
 
 template <class DataTypes>
 void ConstraintCorrection<DataTypes>::addConstraintSolver(core::behavior::ConstraintSolver *s)
 {
-    constraintsolvers.push_back(s);
+    if (!l_constraintsolvers.add(s))
+    {
+        dmsg_error_when(!s) << "Trying to add an invalid constraint solver";
+        dmsg_error() << "Cannot add the requested constraint solver";
+    }
 }
 
 template <class DataTypes>
 void ConstraintCorrection<DataTypes>::removeConstraintSolver(core::behavior::ConstraintSolver *s)
 {
-    constraintsolvers.remove(s);
+    if (!l_constraintsolvers.remove(s))
+    {
+        dmsg_error_when(!s) << "Trying to remove an invalid constraint solver";
+        dmsg_error() << "Cannot remove the requested constraint solver";
+    }
 }
 
 template< class DataTypes >
-void ConstraintCorrection< DataTypes >::computeMotionCorrectionFromLambda(const core::ConstraintParams* cparams, core::MultiVecDerivId dx, const defaulttype::BaseVector * lambda)
+void ConstraintCorrection< DataTypes >::computeMotionCorrectionFromLambda(const core::ConstraintParams* cparams, core::MultiVecDerivId dx, const linearalgebra::BaseVector * lambda)
 {
     addConstraintForceInMotionSpace(cparams, cparams->lambda(), cparams->j(), lambda);
 
@@ -126,7 +126,7 @@ void ConstraintCorrection< DataTypes >::applyVelocityCorrection(const core::Cons
 
 
 template< class DataTypes >
-void ConstraintCorrection< DataTypes >::applyPredictiveConstraintForce(const core::ConstraintParams *cparams, core::MultiVecDerivId f, const defaulttype::BaseVector *lambda)
+void ConstraintCorrection< DataTypes >::applyPredictiveConstraintForce(const core::ConstraintParams *cparams, core::MultiVecDerivId f, const linearalgebra::BaseVector *lambda)
 {
     if (mstate)
     {
@@ -135,7 +135,7 @@ void ConstraintCorrection< DataTypes >::applyPredictiveConstraintForce(const cor
 }
 
 template< class DataTypes >
-void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const core::ConstraintParams* cparams, core::MultiVecDerivId f, core::ConstMultiMatrixDerivId j, const defaulttype::BaseVector * lambda)
+void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const core::ConstraintParams* cparams, core::MultiVecDerivId f, core::ConstMultiMatrixDerivId j, const linearalgebra::BaseVector * lambda)
 {
     if (mstate)
     {
@@ -150,7 +150,7 @@ void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const co
 
 
 template< class DataTypes >
-void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const core::ConstraintParams*, Data< VecDeriv > &f, const Data< MatrixDeriv>& j, const defaulttype::BaseVector *lambda)
+void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const core::ConstraintParams*, Data< VecDeriv > &f, const Data< MatrixDeriv>& j, const linearalgebra::BaseVector *lambda)
 {
     VecDeriv& force = *f.beginEdit();
 
@@ -186,10 +186,4 @@ void ConstraintCorrection< DataTypes >::addConstraintForceInMotionSpace(const co
     f.endEdit();
 }
 
-} // namespace behavior
-
-} // namespace core
-
-} // namespace sofa
-
-#endif // SOFA_CORE_BEHAVIOR_CONSTRAINTCORRECTION_INL
+} // namespace sofa::core::behavior

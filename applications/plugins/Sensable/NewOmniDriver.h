@@ -30,8 +30,8 @@
 #include <sofa/helper/LCPcalc.h>
 #include <sofa/defaulttype/SolidTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/helper/Quater.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/Quat.h>
 
 
 #include <sofa/core/behavior/BaseController.h>
@@ -52,7 +52,7 @@
 #include <cstring>
 
 #include <SofaOpenglVisual/OglModel.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/core/topology/TopologyData.h>
 #include <SofaBaseVisual/InteractiveCamera.h>
 
 #include <math.h>

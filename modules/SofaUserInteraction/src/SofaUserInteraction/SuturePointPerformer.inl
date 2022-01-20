@@ -22,7 +22,6 @@
 #include <SofaUserInteraction/SuturePointPerformer.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <SofaBaseMechanics/MechanicalObject.h>
-#include <SofaBaseTopology/TriangleSetTopologyContainer.h>
 #include <SofaMeshCollision/TriangleModel.h>
 #include <sofa/defaulttype/VecTypes.h>
 
@@ -69,7 +68,7 @@ void SuturePointPerformer<DataTypes>::start()
 
         CollisionModel->getContext()->get (SpringObject, sofa::core::objectmodel::BaseContext::SearchRoot);
 
-        sofa::component::topology::TriangleSetTopologyContainer* triangleContainer;
+        sofa::core::topology::BaseMeshTopology* triangleContainer;
         CollisionModel->getContext()->get (triangleContainer);
 
         sofa::component::container::MechanicalObject <defaulttype::Vec3Types>* MechanicalObject;
@@ -84,7 +83,12 @@ void SuturePointPerformer<DataTypes>::start()
         }
         else if (!triangleContainer)
         {
-            msg_error(this->interactor) << "Can't find triangleContainer.";
+            msg_error(this->interactor) << "Can't find a topology.";
+            return;
+        }
+        else if (triangleContainer->getTriangles().empty())
+        {
+            msg_error(this->interactor) << "Can't find a topology with triangles.";
             return;
         }
         else if (!MechanicalObject)
@@ -100,26 +104,26 @@ void SuturePointPerformer<DataTypes>::start()
 
 
         // Get vertices of both triangles
-        sofa::helper::vector<sofa::defaulttype::Vector3 > listCoords;
+        sofa::type::vector<sofa::type::Vector3 > listCoords;
         const core::topology::BaseMeshTopology::Triangle Triangle1 = triangleContainer->getTriangle(firstPicked.indexCollisionElement);
         const core::topology::BaseMeshTopology::Triangle Triangle2 = triangleContainer->getTriangle(picked.indexCollisionElement);
 
         for (unsigned int i=0; i<3; i++)
         {
-            const sofa::defaulttype::Vector3& tmp = (MechanicalObject->read(core::ConstVecCoordId::position())->getValue())[ Triangle1[i] ];
+            const sofa::type::Vector3& tmp = (MechanicalObject->read(core::ConstVecCoordId::position())->getValue())[ Triangle1[i] ];
             listCoords.push_back (tmp);
         }
 
         for (unsigned int i=0; i<3; i++)
         {
-            const sofa::defaulttype::Vector3& tmp = (MechanicalObject->read(core::ConstVecCoordId::position())->getValue())[ Triangle2[i] ];
+            const sofa::type::Vector3& tmp = (MechanicalObject->read(core::ConstVecCoordId::position())->getValue())[ Triangle2[i] ];
             listCoords.push_back (tmp);
         }
 
-        sofa::helper::vector <unsigned int> pointToSuture;
+        sofa::type::vector<unsigned int> pointToSuture;
         pointToSuture.resize(2);
 
-        sofa::helper::vector<sofa::defaulttype::Vector3 > listPoint;
+        sofa::type::vector<sofa::type::Vector3 > listPoint;
         listPoint.push_back(firstPicked.point);
         listPoint.push_back(picked.point);
 
@@ -183,7 +187,7 @@ SuturePointPerformer<DataTypes>::~SuturePointPerformer()
 {
     if (SpringObject) //means we added a spring
     {
-        sofa::helper::vector <Spring> vecSprings = SpringObject->getSprings();
+        sofa::type::vector<Spring> vecSprings = SpringObject->getSprings();
         unsigned int nbr = vecSprings.size();
 
         for (unsigned int i = 0; i<addedSprings.size(); ++i)

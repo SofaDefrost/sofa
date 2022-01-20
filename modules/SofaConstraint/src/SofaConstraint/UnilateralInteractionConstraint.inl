@@ -23,8 +23,8 @@
 #include <SofaConstraint/UnilateralInteractionConstraint.h>
 #include <sofa/core/ConstraintParams.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa::component::constraintset
 {
@@ -146,8 +146,6 @@ void UnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const cor
 
             c.id = contactId++;
 
-            const Deriv u(1,0,0);
-
             MatrixDerivRowIterator c1_it = c1.writeLine(c.id);
             c1_it.addCol(c.m1, -c.norm);
 
@@ -179,7 +177,7 @@ void UnilateralInteractionConstraint<DataTypes>::buildConstraintMatrix(const cor
 
 
 template<class DataTypes>
-void UnilateralInteractionConstraint<DataTypes>::getPositionViolation(defaulttype::BaseVector *v)
+void UnilateralInteractionConstraint<DataTypes>::getPositionViolation(linearalgebra::BaseVector *v)
 {
     const VecCoord &PfreeVec = this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue();
     const VecCoord &QfreeVec = this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue();
@@ -259,7 +257,7 @@ void UnilateralInteractionConstraint<DataTypes>::getPositionViolation(defaulttyp
 
 
 template<class DataTypes>
-void UnilateralInteractionConstraint<DataTypes>::getVelocityViolation(defaulttype::BaseVector *v)
+void UnilateralInteractionConstraint<DataTypes>::getVelocityViolation(linearalgebra::BaseVector *v)
 {
     auto P = this->getMState2()->readPositions();
     auto Q = this->getMState1()->readPositions();
@@ -292,7 +290,7 @@ void UnilateralInteractionConstraint<DataTypes>::getVelocityViolation(defaulttyp
 
 
 template<class DataTypes>
-void UnilateralInteractionConstraint<DataTypes>::getConstraintViolation(const core::ConstraintParams *cparams, defaulttype::BaseVector *v, const DataVecCoord &, const DataVecCoord &
+void UnilateralInteractionConstraint<DataTypes>::getConstraintViolation(const core::ConstraintParams *cparams, linearalgebra::BaseVector *v, const DataVecCoord &, const DataVecCoord &
         , const DataVecDeriv &, const DataVecDeriv &)
 {
     switch (cparams->constOrder())
@@ -399,9 +397,9 @@ void UnilateralInteractionConstraint<DataTypes>::draw(const core::visual::Visual
     vparams->drawTool()->disableLighting();
     vparams->drawTool()->saveLastState();
 
-    std::vector<sofa::defaulttype::Vector3> redVertices;
-    std::vector<sofa::defaulttype::Vector3> otherVertices;
-    std::vector<sofa::helper::types::RGBAColor> otherColors;
+    std::vector<sofa::type::Vector3> redVertices;
+    std::vector<sofa::type::Vector3> otherVertices;
+    std::vector<sofa::type::RGBAColor> otherColors;
 
     for (unsigned int i=0; i<contacts.size(); i++)
     {
@@ -412,14 +410,14 @@ void UnilateralInteractionConstraint<DataTypes>::draw(const core::visual::Visual
 
         otherVertices.push_back(c.P);        
         otherVertices.push_back(c.P + c.norm);
-        otherColors.push_back(sofa::helper::types::RGBAColor::white());
+        otherColors.push_back(sofa::type::RGBAColor::white());
 
         otherVertices.push_back(c.Q);
         otherVertices.push_back(c.Q - c.norm);
-        otherColors.push_back(sofa::helper::types::RGBAColor(0,0.5,0.5,1));
+        otherColors.push_back(sofa::type::RGBAColor(0,0.5,0.5,1));
 
     }
-    vparams->drawTool()->drawLines(redVertices, 5, sofa::helper::types::RGBAColor::red());
+    vparams->drawTool()->drawLines(redVertices, 5, sofa::type::RGBAColor::red());
     vparams->drawTool()->drawLines(otherVertices, 3, otherColors);
 
 

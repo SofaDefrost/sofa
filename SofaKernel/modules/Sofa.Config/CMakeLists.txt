@@ -63,7 +63,13 @@ if(MSVC)
     option(SOFA_VECTORIZE "Enable the use of SSE2 instructions by the compiler (Only available for MSVC)." OFF)
 endif()
 ### Mask
-option(SOFA_USE_MASK "Use mask optimization" OFF)
+### Removed since v21.12
+### Warn the user if he set the option by himself
+if(SOFA_USE_MASK)
+    message(WARNING "SOFA_USE_MASK is set ; use of ForceMask has been removed in v21.12. If you are using this feature, your own code will most likely not compile anymore.
+            For more information: https://github.com/sofa-framework/sofa/pull/2316")
+endif()
+
 ### SOFA_DEV_TOOL
 option(SOFA_WITH_DEVTOOLS "Compile with developement extra features." ON)
 ### Threading
@@ -169,7 +175,10 @@ endif()
 ## Windows-specific
 if(WIN32)    
     list(APPEND SOFACONFIG_COMPILE_OPTIONS "-D_USE_MATH_DEFINES")
-    list(APPEND SOFACONFIG_COMPILE_OPTIONS "/MP;/wd4250;/wd4251;/wd4275;/wd4675;/wd4996;/wd4661")
+    list(APPEND SOFACONFIG_COMPILE_OPTIONS "-D_CRT_SECURE_NO_WARNINGS")
+    list(APPEND SOFACONFIG_COMPILE_OPTIONS "-D_CRT_NONSTDC_NO_DEPRECATE")
+
+    list(APPEND SOFACONFIG_COMPILE_OPTIONS "/MP;/wd4250;/wd4251;/wd4275;/wd4675;/wd4661")
     # 4661: no suitable definition provided for explicit template instantiation request
     # it happens because we put explicit instantiation in a separate translation unit
     # it is by design, so this warning is irrelevant in our project
@@ -184,6 +193,18 @@ if(WIN32)
     if(SOFA_ENABLE_LINK_TIME_OPTIMIZATION)
         list(APPEND SOFACONFIG_COMPILE_OPTIONS_RELEASE "/GL")
         list(APPEND SOFACONFIG_LINK_OPTIONS_RELEASE "/LTCG")
+    endif()
+
+
+    # Experimental: compilation with MSVC/Clang-cl
+    if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+        if( ${CMAKE_CXX_COMPILER_FRONTEND_VARIANT} STREQUAL MSVC) # something weird happens if we put the two test in one if ??
+            message(WARNING "Experimental: you are trying to compile with MSVC and the clang-cl toolchain; this is not officially supported.")
+            # remove lots of warnings (the Wall of "normal" clang seems different of Wall of clang-cl)
+            list(APPEND SOFACONFIG_COMPILE_OPTIONS -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-reserved-id-macro -Wno-language-extension-token -Wno-dllexport-explicit-instantiation-decl -Wno-nonportable-system-include-path -Wno-zero-as-null-pointer-constant -Wno-documentation)
+            # optimization flags (not sure if necessary..)
+            list(APPEND SOFACONFIG_COMPILE_OPTIONS_RELEASE /fp:fast -march=native)
+        endif()
     endif()
 endif()
 

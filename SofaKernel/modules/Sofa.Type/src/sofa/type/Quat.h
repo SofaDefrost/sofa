@@ -33,7 +33,6 @@ namespace sofa::type
 template<class Real>
 class SOFA_TYPE_API Quat
 {
-private:
     Real _q[4];
 
     typedef type::Vec<3, Real> Vec3;
@@ -106,7 +105,7 @@ public:
     /// Convert the quaternion into an orientation matrix
     void toMatrix(Mat3x3 &m) const;
 
-    SOFA_ATTRIBUTE_CLEANING__QUAT_API("Function toMatrix(mat4x4) will be removed. Use toHomogeneousMatrix() instead")
+    SOFA_ATTRIBUTE_DEPRECATED__QUAT_API("Function toMatrix(mat4x4) will be removed. Use toHomogeneousMatrix() instead")
     void toMatrix(Mat4x4 &m) const { toHomogeneousMatrix(m); }
 
     /// Convert the quaternion into an orientation homogeneous matrix
@@ -205,7 +204,7 @@ public:
     /// Sets this quaternion to the rotation required to rotate direction vector vFrom to direction vector vTo. vFrom and vTo are assumed to be normalized.
     void setFromUnitVectors(const Vec3& vFrom, const Vec3& vTo);
 
-    SOFA_ATTRIBUTE_CLEANING__QUAT_API("This function will be removed. use iostream operators instead.")
+    SOFA_ATTRIBUTE_DEPRECATED__QUAT_API("This function will be removed. use iostream operators instead.")
     void print();
 
     auto slerp(const Quat &q1, Real t) const -> Quat;

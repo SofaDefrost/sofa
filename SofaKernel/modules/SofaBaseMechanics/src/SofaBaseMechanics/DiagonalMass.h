@@ -25,17 +25,11 @@
 
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/core/behavior/Mass.h>
-#include <SofaBaseTopology/TopologyData.h>
-#include <sofa/helper/vector.h>
+#include <sofa/core/topology/TopologyData.h>
+#include <sofa/type/vector.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <sofa/defaulttype/RigidTypes.h>
-#include <sofa/defaulttype/Vec.h>
-
-#include <SofaBaseTopology/EdgeSetGeometryAlgorithms.h>
-#include <SofaBaseTopology/TriangleSetGeometryAlgorithms.h>
-#include <SofaBaseTopology/TetrahedronSetGeometryAlgorithms.h>
-#include <SofaBaseTopology/QuadSetGeometryAlgorithms.h>
-#include <SofaBaseTopology/HexahedronSetGeometryAlgorithms.h>
+#include <sofa/type/Vec.h>
 
 #include <sofa/core/objectmodel/DataFileName.h>
 
@@ -47,11 +41,11 @@ class DiagonalMassInternalData
 {
 public :
     typedef typename DataTypes::Real Real;
-    typedef helper::vector<TMassType> MassVector;
-    typedef sofa::component::topology::PointData<MassVector> VecMass;
+    typedef type::vector<TMassType> MassVector;
+    typedef sofa::core::topology::PointData<MassVector> VecMass;
 
     // In case of non 3D template
-    typedef sofa::defaulttype::Vec<3,Real> Vec3;
+    typedef sofa::type::Vec<3,Real> Vec3;
     typedef sofa::defaulttype::StdVectorTypes< Vec3, Vec3, Real > GeometricalTypes ; /// assumes the geometry object type is 3D
 };
 
@@ -82,6 +76,7 @@ public:
     typedef core::topology::BaseMeshTopology::Edge Edge;
     typedef core::topology::BaseMeshTopology::EdgeID EdgeID;
     typedef core::topology::BaseMeshTopology::Quad Quad;
+    typedef core::topology::BaseMeshTopology::QuadID QuadID;
     typedef core::topology::BaseMeshTopology::Triangle Triangle;
     typedef core::topology::BaseMeshTopology::TriangleID TriangleID;
     typedef core::topology::BaseMeshTopology::Tetrahedron Tetrahedron;
@@ -89,83 +84,6 @@ public:
     typedef core::topology::BaseMeshTopology::Hexahedron Hexahedron;
     typedef core::topology::BaseMeshTopology::HexahedronID HexahedronID;
 
-    class DMassPointEngine : public topology::TopologyDataHandler<Point,MassVector>
-    {
-    public:
-        typedef typename DiagonalMass<DataTypes,TMassType>::MassVector MassVector;
-        DMassPointEngine(DiagonalMass<DataTypes,TMassType>* _dm, sofa::component::topology::PointData<MassVector>* _data)
-            : topology::TopologyDataHandler<Point,MassVector>(_data), dm(_dm)
-        {}
-
-        void applyCreateFunction(PointID pointIndex, TMassType& m, const Point&, const sofa::helper::vector< PointID > &,
-                                 const sofa::helper::vector< double > &);
-
-        using topology::TopologyDataHandler<Point,MassVector>::ApplyTopologyChange;
-
-        ///////////////////////// Functions on Points //////////////////////////////////////
-        /// Apply removing points.
-        void applyPointDestruction(const sofa::helper::vector<PointID> & /*indices*/);
-        /// Callback to remove points.
-        virtual void ApplyTopologyChange(const core::topology::PointsRemoved* /*event*/);
-
-        ///////////////////////// Functions on Edges //////////////////////////////////////
-        /// Apply adding edges elements.
-        void applyEdgeCreation(const sofa::helper::vector< EdgeID >& /*indices*/,
-                               const sofa::helper::vector< Edge >& /*elems*/,
-                               const sofa::helper::vector< sofa::helper::vector< EdgeID > >& /*ancestors*/,
-                               const sofa::helper::vector< sofa::helper::vector< double > >& /*coefs*/);
-        /// Apply removing edges elements.
-        void applyEdgeDestruction(const sofa::helper::vector<EdgeID> & /*indices*/);
-
-        /// Callback to add edges elements.
-        virtual void ApplyTopologyChange(const core::topology::EdgesAdded* /*event*/);
-        /// Callback to remove edges elements.
-        virtual void ApplyTopologyChange(const core::topology::EdgesRemoved* /*event*/);
-
-        ///////////////////////// Functions on Triangles //////////////////////////////////////
-        /// Apply adding triangles elements.
-        void applyTriangleCreation(const sofa::helper::vector< TriangleID >& /*indices*/,
-                                   const sofa::helper::vector< Triangle >& /*elems*/,
-                                   const sofa::helper::vector< sofa::helper::vector< TriangleID > >& /*ancestors*/,
-                                   const sofa::helper::vector< sofa::helper::vector< double > >& /*coefs*/);
-        /// Apply removing triangles elements.
-        void applyTriangleDestruction(const sofa::helper::vector<TriangleID> & /*indices*/);
-
-        /// Callback to add triangles elements.
-        virtual void ApplyTopologyChange(const core::topology::TrianglesAdded* /*event*/);
-        /// Callback to remove triangles elements.
-        virtual void ApplyTopologyChange(const core::topology::TrianglesRemoved* /*event*/);
-
-        ///////////////////////// Functions on Tetrahedron //////////////////////////////////////
-        /// Apply adding tetrahedron elements.
-        void applyTetrahedronCreation(const sofa::helper::vector< TetrahedronID >& /*indices*/,
-                                      const sofa::helper::vector< Tetrahedron >& /*elems*/,
-                                      const sofa::helper::vector< sofa::helper::vector< TetrahedronID > >& /*ancestors*/,
-                                      const sofa::helper::vector< sofa::helper::vector< double > >& /*coefs*/);
-        /// Apply removing tetrahedron elements.
-        void applyTetrahedronDestruction(const sofa::helper::vector<TetrahedronID> & /*indices*/);
-
-        /// Callback to add tetrahedron elements.
-        virtual void ApplyTopologyChange(const core::topology::TetrahedraAdded* /*event*/);
-        /// Callback to remove tetrahedron elements.
-        virtual void ApplyTopologyChange(const core::topology::TetrahedraRemoved* /*event*/);
-
-        ///////////////////////// Functions on Hexahedron //////////////////////////////////////
-        /// Apply adding hexahedron elements.
-        void applyHexahedronCreation(const sofa::helper::vector< HexahedronID >& /*indices*/,
-                                     const sofa::helper::vector< Hexahedron >& /*elems*/,
-                                     const sofa::helper::vector< sofa::helper::vector< HexahedronID > >& /*ancestors*/,
-                                     const sofa::helper::vector< sofa::helper::vector< double > >& /*coefs*/);
-        /// Apply removing hexahedron elements.
-        void applyHexahedronDestruction(const sofa::helper::vector<HexahedronID> & /*indices*/);
-        /// Callback to add hexahedron elements.
-        virtual void ApplyTopologyChange(const core::topology::HexahedraAdded* /*event*/);
-        /// Callback to remove hexahedron elements.
-        virtual void ApplyTopologyChange(const core::topology::HexahedraRemoved* /*event*/);
-
-    protected:
-        DiagonalMass<DataTypes,TMassType>* dm;
-    };
     /// the mass density used to compute the mass from a mesh topology and geometry
     Data< Real > d_massDensity;
 
@@ -180,8 +98,6 @@ public:
 
     Data< float > d_showAxisSize; ///< factor length of the axis displayed (only used for rigids)
     core::objectmodel::DataFileName d_fileMass; ///< an Xsp3.0 file to specify the mass parameters
-
-    DMassPointEngine* m_pointEngine;
 
     /// value defining the initialization process of the mass (0 : totalMass, 1 : massDensity, 2 : vertexMass)
     int m_initializationProcess;
@@ -202,21 +118,15 @@ protected:
 
     class Loader;
     /// The type of topology to build the mass from the topology
-    sofa::core::topology::TopologyElementType m_massTopologyType;
+    sofa::geometry::ElementType m_massTopologyType;
 
     /// Pointer to the topology container. Will be set by link @sa l_topology
     sofa::core::topology::BaseMeshTopology* m_topology;
 
-public:
-    sofa::component::topology::EdgeSetGeometryAlgorithms<GeometricalTypes>* edgeGeo;
-    sofa::component::topology::TriangleSetGeometryAlgorithms<GeometricalTypes>* triangleGeo;
-    sofa::component::topology::QuadSetGeometryAlgorithms<GeometricalTypes>* quadGeo;
-    sofa::component::topology::TetrahedronSetGeometryAlgorithms<GeometricalTypes>* tetraGeo;
-    sofa::component::topology::HexahedronSetGeometryAlgorithms<GeometricalTypes>* hexaGeo;
 protected:
     DiagonalMass();
 
-    ~DiagonalMass() override;
+    ~DiagonalMass() override = default;
 public:
 
     bool load(const char *filename);
@@ -229,7 +139,7 @@ public:
 
     void doUpdateInternal() override;
 
-    sofa::core::topology::TopologyElementType getMassTopologyType() const
+    sofa::geometry::ElementType getMassTopologyType() const
     {
         return m_massTopologyType;
     }
@@ -244,6 +154,99 @@ protected:
     void initTopologyHandlers();
     void massInitialization();
 
+    /// Compute the vertexMass using input density and return the corresponding full mass.
+    Real computeVertexMass(Real density);
+
+    /** Method to initialize @sa MassVector when a new Point is created.
+    * Will be set as creation callback in the PointData @sa d_vertexMass
+    */
+    void applyPointCreation(PointID pointIndex, MassType& m, const Point&,
+        const sofa::type::vector< PointID >&,
+        const sofa::type::vector< SReal >&);
+
+    /** Method to update @sa d_vertexMass when a Point is removed.
+    * Will be set as destruction callback in the PointData @sa d_vertexMass
+    */
+    void applyPointDestruction(Index id, MassType& VertexMass);
+
+
+    /** Method to update @sa d_vertexMass when a new Edge is created.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when EDGESADDED event is fired.    
+    */
+    void applyEdgeCreation(const sofa::type::vector< EdgeID >& /*indices*/,
+        const sofa::type::vector< Edge >& /*elems*/,
+        const sofa::type::vector< sofa::type::vector< EdgeID > >& /*ancestors*/,
+        const sofa::type::vector< sofa::type::vector< SReal > >& /*coefs*/);
+
+    /** Method to update @sa d_vertexMass when a Edge is removed.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when EDGESREMOVED event is fired.
+    */
+    void applyEdgeDestruction(const sofa::type::vector<EdgeID>& /*indices*/);
+
+
+    /** Method to update @sa d_vertexMass when a new Triangle is created.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when TRIANGLESADDED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 2, int > = 0 >
+    void applyTriangleCreation(const sofa::type::vector< TriangleID >& /*indices*/,
+        const sofa::type::vector< Triangle >& /*elems*/,
+        const sofa::type::vector< sofa::type::vector< TriangleID > >& /*ancestors*/,
+        const sofa::type::vector< sofa::type::vector< SReal > >& /*coefs*/);
+
+    /** Method to update @sa d_vertexMass when a Triangle is removed.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when TRIANGLESREMOVED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 2, int > = 0 >
+    void applyTriangleDestruction(const sofa::type::vector<TriangleID>& /*indices*/);
+
+
+    /** Method to update @sa d_vertexMass when a new Quad is created.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when QUADSADDED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 2, int > = 0 >
+    void applyQuadCreation(const sofa::type::vector< QuadID >& /*indices*/,
+        const sofa::type::vector< Quad >& /*elems*/,
+        const sofa::type::vector< sofa::type::vector< QuadID > >& /*ancestors*/,
+        const sofa::type::vector< sofa::type::vector< SReal > >& /*coefs*/);
+
+    /** Method to update @sa d_vertexMass when a Quad is removed.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when QUADSREMOVED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 2, int > = 0 >
+    void applyQuadDestruction(const sofa::type::vector<QuadID>& /*indices*/);
+    
+
+    /** Method to update @sa d_vertexMass when a new Tetrahedron is created.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when TETRAHEDRAADDED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 3, int > = 0 >
+    void applyTetrahedronCreation(const sofa::type::vector< TetrahedronID >& /*indices*/,
+        const sofa::type::vector< Tetrahedron >& /*elems*/,
+        const sofa::type::vector< sofa::type::vector< TetrahedronID > >& /*ancestors*/,
+        const sofa::type::vector< sofa::type::vector< SReal > >& /*coefs*/);
+
+    /** Method to update @sa d_vertexMass when a Tetrahedron is removed.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when TETRAHEDRAREMOVED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 3, int > = 0 >
+    void applyTetrahedronDestruction(const sofa::type::vector<TetrahedronID>& /*indices*/);
+
+
+    /** Method to update @sa d_vertexMass when a new Hexahedron is created.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when HEXAHEDRAADDED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 3, int > = 0 >
+    void applyHexahedronCreation(const sofa::type::vector< HexahedronID >& /*indices*/,
+        const sofa::type::vector< Hexahedron >& /*elems*/,
+        const sofa::type::vector< sofa::type::vector< HexahedronID > >& /*ancestors*/,
+        const sofa::type::vector< sofa::type::vector< SReal > >& /*coefs*/);
+    
+    /** Method to update @sa d_vertexMass when a Hexahedron is removed.
+    * Will be set as callback in the PointData @sa d_vertexMass to update the mass vector when HEXAHEDRAREMOVED event is fired.
+    */
+    template <typename T = DataTypes, typename std::enable_if_t<T::spatial_dimensions >= 3, int > = 0 >
+    void applyHexahedronDestruction(const sofa::type::vector<HexahedronID>& /*indices*/);
+
 public:
 
     SReal getTotalMass() const { return d_totalMass.getValue(); }
@@ -253,15 +256,15 @@ public:
     void printMass();
 
     /// Compute the mass from input values
-    void computeMass();
-
+    SOFA_ATTRIBUTE_DISABLED("v21.06", "v21.12", "ComputeMass should not be called from outside. Changing one of the Data: density, totalMass or vertexMass will recompute the mass.")
+    void computeMass() = delete;
 
     /// @name Read and write access functions in mass information
     /// @{
     virtual const Real &getMassDensity();
     virtual const Real &getTotalMass();
 
-    virtual void setVertexMass(sofa::helper::vector< Real > vertexMass);
+    virtual void setVertexMass(sofa::type::vector< Real > vertexMass);
     virtual void setMassDensity(Real massDensityValue);
     virtual void setTotalMass(Real totalMass);
     /// @}
@@ -296,7 +299,7 @@ public:
 
     SReal getPotentialEnergy(const core::MechanicalParams* mparams, const DataVecCoord& x) const override;   ///< Mgx potential in a uniform gravity field, null at origin
 
-    defaulttype::Vector6 getMomentum(const core::MechanicalParams* mparams, const DataVecCoord& x, const DataVecDeriv& v) const override;  ///< (Mv,cross(x,Mv)+Iw) override
+    type::Vector6 getMomentum(const core::MechanicalParams* mparams, const DataVecCoord& x, const DataVecDeriv& v) const override;  ///< (Mv,cross(x,Mv)+Iw) override
 
     void addGravityToV(const core::MechanicalParams* mparams, DataVecDeriv& d_v) override;
 
@@ -305,7 +308,7 @@ public:
 
 
     SReal getElementMass(sofa::Index index) const override;
-    void getElementMass(sofa::Index, defaulttype::BaseMatrix *m) const override;
+    void getElementMass(sofa::Index, linearalgebra::BaseMatrix *m) const override;
 
     bool isDiagonal() const override {return true;}
 
@@ -336,12 +339,12 @@ private:
     void initRigidImpl() ;
 
     template <class T>
-    defaulttype::Vector6 getMomentumRigid3Impl ( const core::MechanicalParams*,
+    type::Vector6 getMomentumRigid3Impl ( const core::MechanicalParams*,
                                                  const DataVecCoord& vx,
                                                  const DataVecDeriv& vv ) const ;
 
     template <class T>
-    defaulttype::Vector6 getMomentumVec3Impl ( const core::MechanicalParams*,
+    type::Vector6 getMomentumVec3Impl ( const core::MechanicalParams*,
                                                const DataVecCoord& vx,
                                                const DataVecDeriv& vv ) const ;
 };
@@ -365,16 +368,16 @@ void DiagonalMass<defaulttype::Rigid2Types, defaulttype::Rigid2Mass>::init();
 template <>
 void DiagonalMass<defaulttype::Rigid2Types, defaulttype::Rigid2Mass>::draw(const core::visual::VisualParams* vparams);
 template <>
-defaulttype::Vector6 DiagonalMass<defaulttype::Vec3Types, double>::getMomentum ( const core::MechanicalParams*, const DataVecCoord& vx, const DataVecDeriv& vv ) const;
+type::Vector6 DiagonalMass<defaulttype::Vec3Types, SReal>::getMomentum ( const core::MechanicalParams*, const DataVecCoord& vx, const DataVecDeriv& vv ) const;
 template <>
-defaulttype::Vector6 DiagonalMass<defaulttype::Rigid3Types,defaulttype::Rigid3Mass>::getMomentum ( const core::MechanicalParams*, const DataVecCoord& vx, const DataVecDeriv& vv ) const;
+type::Vector6 DiagonalMass<defaulttype::Rigid3Types,defaulttype::Rigid3Mass>::getMomentum ( const core::MechanicalParams*, const DataVecCoord& vx, const DataVecDeriv& vv ) const;
 
 
 
 #if  !defined(SOFA_COMPONENT_MASS_DIAGONALMASS_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec3Types,double>;
-extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec2Types,double>;
-extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec1Types,double>;
+extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec3Types,SReal>;
+extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec2Types,SReal>;
+extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Vec1Types,SReal>;
 extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Rigid3Types,defaulttype::Rigid3Mass>;
 extern template class SOFA_SOFABASEMECHANICS_API DiagonalMass<defaulttype::Rigid2Types,defaulttype::Rigid2Mass>;
 

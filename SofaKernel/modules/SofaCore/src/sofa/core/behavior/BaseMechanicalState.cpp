@@ -23,13 +23,7 @@
 #include <sofa/core/objectmodel/BaseNode.h>
 
 
-namespace sofa
-{
-
-namespace core
-{
-
-namespace behavior
+namespace sofa::core::behavior
 {
 
 BaseMechanicalState::BaseMechanicalState()
@@ -50,7 +44,7 @@ void BaseMechanicalState::vMultiOp(const ExecParams* params, const VMultiOp& ops
     for(VMultiOp::const_iterator it = ops.begin(), itend = ops.end(); it != itend; ++it)
     {
         VecId r = it->first.getId(this);
-        const helper::vector< std::pair< ConstMultiVecId, SReal > >& operands = it->second;
+        const type::vector< std::pair< ConstMultiVecId, SReal > >& operands = it->second;
         size_t nop = operands.size();
         if (nop==0)
         {
@@ -77,7 +71,9 @@ void BaseMechanicalState::vMultiOp(const ExecParams* params, const VMultiOp& ops
                 i = 1;
             }
             for (; i<nop; ++i)
-                vOp( params, r, r, operands[i].first.getId(this), operands[i].second);
+            {
+                vOp(params, r, r, operands[i].first.getId(this), operands[i].second);
+            }
         }
     }
 }
@@ -109,8 +105,4 @@ bool BaseMechanicalState::removeInNode( objectmodel::BaseNode* node )
 }
 
 
-} // namespace behavior
-
-} // namespace core
-
-} // namespace sofa
+} // namespace sofa::core::behavior

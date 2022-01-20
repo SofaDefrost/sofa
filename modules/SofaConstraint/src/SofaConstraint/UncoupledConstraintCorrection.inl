@@ -25,9 +25,9 @@
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/topology/TopologyChange.h>
-#include <sofa/defaulttype/BaseMatrix.h>
-#include <SofaBaseTopology/PointSetTopologyContainer.h>
-#include <SofaBaseTopology/TopologyData.inl>
+#include <sofa/linearalgebra/BaseMatrix.h>
+#include <sofa/core/topology/TopologyData.inl>
+#include <sofa/core/ConstraintParams.h>
 
 namespace sofa::component::constraintset
 {
@@ -39,7 +39,7 @@ namespace
 template<Size N, typename Real, class VecReal>
 inline double UncoupledConstraintCorrection_computeCompliance(
     Index index,
-    const sofa::defaulttype::Vec<N, Real>& n1, const sofa::defaulttype::Vec<N, Real>& n2,
+    const sofa::type::Vec<N, Real>& n1, const sofa::type::Vec<N, Real>& n2,
     const Real comp0, const VecReal& comp)
 {
     return (n1 * n2) * ((index < comp.size()) ? comp[index] : comp0);
@@ -67,9 +67,9 @@ inline double UncoupledConstraintCorrection_computeCompliance(
 
 /// Compute displacement from constraint force for Vec types
 template<Size N, typename Real, class VecReal>
-inline sofa::defaulttype::Vec<N, Real> UncoupledConstraintCorrection_computeDx(
+inline sofa::type::Vec<N, Real> UncoupledConstraintCorrection_computeDx(
     Index index,
-    const sofa::defaulttype::Vec<N, Real>& f,
+    const sofa::type::Vec<N, Real>& f,
     const Real comp0, const VecReal& comp)
 {
     return (f) * ((index < comp.size()) ? comp[index] : comp0);
@@ -164,7 +164,6 @@ void UncoupledConstraintCorrection<DataTypes>::init()
             if (_topology != nullptr)
             {
                 compliance.createTopologyHandler(_topology);
-                compliance.registerTopologicalData();
             }
         }
     }
@@ -188,7 +187,7 @@ void UncoupledConstraintCorrection<DataTypes>::reinit()
 }
 
 template<class DataTypes>
-void UncoupledConstraintCorrection<DataTypes>::getComplianceWithConstraintMerge(defaulttype::BaseMatrix* Wmerged, std::vector<int> &constraint_merge)
+void UncoupledConstraintCorrection<DataTypes>::getComplianceWithConstraintMerge(linearalgebra::BaseMatrix* Wmerged, std::vector<int> &constraint_merge)
 {
     helper::WriteAccessor<Data<MatrixDeriv> > constraintsData = *this->mstate->write(core::MatrixDerivId::constraintJacobian());
     MatrixDeriv& constraints = constraintsData.wref();
@@ -211,10 +210,10 @@ void UncoupledConstraintCorrection<DataTypes>::getComplianceWithConstraintMerge(
 
     // look for the number of group;
     unsigned int numGroup = 0;
-    for (unsigned int cm = 0; cm < constraint_merge.size(); cm++)
+    for (int cm : constraint_merge)
     {
-        if (constraint_merge[cm] > (int) numGroup)
-            numGroup = (unsigned int) constraint_merge[cm];
+        if (cm > (int) numGroup)
+            numGroup = (unsigned int) cm;
     }
     numGroup += 1;
 
@@ -258,7 +257,7 @@ void UncoupledConstraintCorrection<DataTypes>::getComplianceWithConstraintMerge(
 
 
 template<class DataTypes>
-void UncoupledConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(const sofa::core::ConstraintParams * cparams, sofa::defaulttype::BaseMatrix *W)
+void UncoupledConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(const sofa::core::ConstraintParams * cparams, sofa::linearalgebra::BaseMatrix *W)
 {
     const MatrixDeriv& constraints = cparams->readJ(this->mstate)->getValue() ;
     VecReal comp = compliance.getValue();
@@ -374,7 +373,7 @@ void UncoupledConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(co
 }
 
 template<class DataTypes>
-void UncoupledConstraintCorrection<DataTypes>::getComplianceMatrix(defaulttype::BaseMatrix *m) const
+void UncoupledConstraintCorrection<DataTypes>::getComplianceMatrix(linearalgebra::BaseMatrix *m) const
 {
     const VecReal& comp = compliance.getValue();
     const Real comp0 = defaultCompliance.getValue();
@@ -410,6 +409,8 @@ void UncoupledConstraintCorrection<DataTypes>::computeDx(const Data< VecDeriv > 
 template<class DataTypes>
 void UncoupledConstraintCorrection<DataTypes>::computeMotionCorrection(const core::ConstraintParams* cparams, core::MultiVecDerivId dx, core::MultiVecDerivId f)
 {
+    SOFA_UNUSED(cparams);
+
     auto writeDx = sofa::helper::getWriteAccessor( *dx[this->getMState()].write() );
     const Data<VecDeriv>& f_d = *f[this->getMState()].read();
     computeDx(f_d, writeDx.wref());
@@ -499,7 +500,7 @@ void UncoupledConstraintCorrection<DataTypes>::applyVelocityCorrection(const cor
 
 
 template<class DataTypes>
-void UncoupledConstraintCorrection<DataTypes>::applyContactForce(const defaulttype::BaseVector *f)
+void UncoupledConstraintCorrection<DataTypes>::applyContactForce(const linearalgebra::BaseVector *f)
 {
     helper::WriteAccessor<Data<VecDeriv> > forceData = *this->mstate->write(core::VecDerivId::externalForce());
     VecDeriv& force = forceData.wref();
@@ -694,7 +695,7 @@ void UncoupledConstraintCorrection<DataTypes>::setConstraintDForce(double * df, 
 
 
 template<class DataTypes>
-void UncoupledConstraintCorrection<DataTypes>::getBlockDiagonalCompliance(defaulttype::BaseMatrix* W, int begin, int end)
+void UncoupledConstraintCorrection<DataTypes>::getBlockDiagonalCompliance(linearalgebra::BaseMatrix* W, int begin, int end)
 {
     const MatrixDeriv& constraints = this->mstate->read(core::ConstMatrixDerivId::constraintJacobian())->getValue();
     const VecReal& comp = compliance.getValue();

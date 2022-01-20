@@ -4,11 +4,13 @@
 #include <SofaBaseTopology/MeshTopology.h>
 #include <SofaMiscCollision/MeshIntTool.h>
 
+#include <sofa/simulation/Node.h>
+
 namespace sofa{
 
 namespace PrimitiveCreationTest{
 
-using sofa::defaulttype::Vec3;
+using sofa::type::Vec3;
 
 /**
   *\brief Makes up an OBBCollisionModel<sofa::defaulttype::Rigid3Types> containing just one OBB. angles and order are the rotations used to make up this OBB.

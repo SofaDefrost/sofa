@@ -21,46 +21,17 @@
 ******************************************************************************/
 #pragma once
 
+#include <SofaBoundaryCondition/FixedConstraint.h>
 #include <sofa/core/behavior/MultiMatrixAccessor.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <SofaBoundaryCondition/FixedConstraint.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <sofa/defaulttype/RigidTypes.h>
-#include <iostream>
-#include <SofaBaseTopology/TopologySubsetData.inl>
-#include <sofa/helper/vector_algorithm.h>
+#include <sofa/type/vector_algorithm.h>
 
-#include <sofa/core/objectmodel/BaseObject.h>
 using sofa::core::objectmodel::ComponentState;
 
 
 namespace sofa::component::projectiveconstraintset
 {
-
-// Define TestNewPointFunction
-template< class DataTypes>
-bool FixedConstraint<DataTypes>::FCPointHandler::applyTestCreateFunction(Index, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    if (fc)
-    {
-        return false;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-// Define RemovalFunction
-template< class DataTypes>
-void FixedConstraint<DataTypes>::FCPointHandler::applyDestroyFunction(Index pointIndex, value_type &)
-{
-    if (fc)
-    {
-        fc->removeConstraint((Index) pointIndex);
-    }
-}
 
 template <class DataTypes>
 FixedConstraint<DataTypes>::FixedConstraint()
@@ -72,7 +43,6 @@ FixedConstraint<DataTypes>::FixedConstraint()
     , d_projectVelocity( initData(&d_projectVelocity,false,"activate_projectVelocity","activate project velocity to set velocity") )
     , l_topology(initLink("topology", "link to the topology container"))
     , data(new FixedConstraintInternalData<DataTypes>())
-    , m_pointHandler(nullptr)
 {
     // default to indice 0
     d_indices.beginEdit()->push_back(0);
@@ -90,9 +60,6 @@ FixedConstraint<DataTypes>::FixedConstraint()
 template <class DataTypes>
 FixedConstraint<DataTypes>::~FixedConstraint()
 {
-    if (m_pointHandler)
-        delete m_pointHandler;
-
     delete data;
 }
 
@@ -113,7 +80,7 @@ void FixedConstraint<DataTypes>::addConstraint(Index index)
 template <class DataTypes>
 void FixedConstraint<DataTypes>::removeConstraint(Index index)
 {
-    sofa::helper::removeValue(*d_indices.beginEdit(),index);
+    sofa::type::removeValue(*d_indices.beginEdit(),index);
     d_indices.endEdit();
 }
 
@@ -138,16 +105,12 @@ void FixedConstraint<DataTypes>::init()
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
-
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
 
-        // Initialize topological functions
-        m_pointHandler = new FCPointHandler(this, &d_indices);
-        d_indices.createTopologyHandler(_topology, m_pointHandler);
-        d_indices.registerTopologicalData();
+        // Initialize topological changes support
+        d_indices.createTopologyHandler(_topology);
     }
     else
     {
@@ -186,7 +149,7 @@ void  FixedConstraint<DataTypes>::checkIndices()
     if (!invalidIndices.empty())
     {
         std::sort( invalidIndices.begin(), invalidIndices.end(), std::greater<Index>() );
-        int max = invalidIndices.size()-1;
+        const int max = invalidIndices.size()-1;
         for (int i=max; i>= 0; i--)
         {
             removeConstraint(invalidIndices[i]);
@@ -195,13 +158,13 @@ void  FixedConstraint<DataTypes>::checkIndices()
 }
 
 template <class DataTypes>
-void FixedConstraint<DataTypes>::projectMatrix( sofa::defaulttype::BaseMatrix* M, unsigned offset )
+void FixedConstraint<DataTypes>::projectMatrix( sofa::linearalgebra::BaseMatrix* M, unsigned offset )
 {
     static const unsigned blockSize = DataTypes::deriv_total_size;
 
     if( d_fixAll.getValue() )
     {
-        unsigned size = this->mstate->getSize();
+        const unsigned size = this->mstate->getSize();
         for( unsigned i=0; i<size; i++ )
         {
             M->clearRowsCols( offset + i * blockSize, offset + (i+1) * (blockSize) );
@@ -210,9 +173,9 @@ void FixedConstraint<DataTypes>::projectMatrix( sofa::defaulttype::BaseMatrix* M
     else
     {
         // clears the rows and columns associated with fixed particles
-        for(SetIndexArray::const_iterator it= d_indices.getValue().begin(), iend=d_indices.getValue().end(); it!=iend; it++ )
+        for (const auto id : d_indices.getValue())
         {
-            M->clearRowsCols( offset + (*it) * blockSize, offset + (*it+1) * (blockSize) );
+            M->clearRowsCols( offset + id * blockSize, offset + (id+1) * blockSize );
         }
     }
 }
@@ -318,14 +281,13 @@ template <class DataTypes>
 void FixedConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* mparams, const sofa::core::behavior::MultiMatrixAccessor* matrix)
 {
     SOFA_UNUSED(mparams);
-    core::behavior::MultiMatrixAccessor::MatrixRef r = matrix->getMatrix(this->mstate.get());
-    if(r)
+    if(core::behavior::MultiMatrixAccessor::MatrixRef r = matrix->getMatrix(this->mstate.get()))
     {
         const unsigned int N = Deriv::size();
 
         if( d_fixAll.getValue() )
         {
-            unsigned size = this->mstate->getSize();
+            const unsigned size = this->mstate->getSize();
             for(unsigned int i=0; i<size; i++)
             {
                 // Reset Fixed Row and Col
@@ -354,13 +316,13 @@ void FixedConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* m
 }
 
 template <class DataTypes>
-void FixedConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* mparams, defaulttype::BaseVector* vect, const sofa::core::behavior::MultiMatrixAccessor* matrix)
+void FixedConstraint<DataTypes>::applyConstraint(const core::MechanicalParams* mparams, linearalgebra::BaseVector* vect, const sofa::core::behavior::MultiMatrixAccessor* matrix)
 {
     SOFA_UNUSED(mparams);
-    int o = matrix->getGlobalOffset(this->mstate.get());
+    const int o = matrix->getGlobalOffset(this->mstate.get());
     if (o >= 0)
     {
-        unsigned int offset = (unsigned int)o;
+        const unsigned int offset = (unsigned int)o;
         const unsigned int N = Deriv::size();
 
         if( d_fixAll.getValue() )
@@ -398,8 +360,8 @@ void FixedConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
 
     if( d_drawSize.getValue() == 0) // old classical drawing by points
     {
-        std::vector< sofa::defaulttype::Vector3 > points;
-        sofa::defaulttype::Vector3 point;
+        std::vector< sofa::type::Vector3 > points;
+        sofa::type::Vector3 point;
 
         if( d_fixAll.getValue() )
             for (unsigned i=0; i<x.size(); i++ )
@@ -415,14 +377,14 @@ void FixedConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
                 points.push_back(point);
             }
         }
-        vparams->drawTool()->drawPoints(points, 10, sofa::helper::types::RGBAColor(1,0.5,0.5,1));
+        vparams->drawTool()->drawPoints(points, 10, sofa::type::RGBAColor(1,0.5,0.5,1));
     }
     else // new drawing by spheres
     {
         vparams->drawTool()->setLightingEnabled(true);
 
-        std::vector< sofa::defaulttype::Vector3 > points;
-        sofa::defaulttype::Vector3 point;
+        std::vector< sofa::type::Vector3 > points;
+        sofa::type::Vector3 point;
         if( d_fixAll.getValue()==true )
             for (unsigned i=0; i<x.size(); i++ )
             {
@@ -437,7 +399,7 @@ void FixedConstraint<DataTypes>::draw(const core::visual::VisualParams* vparams)
                 points.push_back(point);
             }
         }
-        vparams->drawTool()->drawSpheres(points, (float)d_drawSize.getValue(), sofa::helper::types::RGBAColor(1.0f,0.35f,0.35f,1.0f));
+        vparams->drawTool()->drawSpheres(points, (float)d_drawSize.getValue(), sofa::type::RGBAColor(1.0f,0.35f,0.35f,1.0f));
     }
 
     vparams->drawTool()->restoreLastState();

@@ -24,33 +24,14 @@
 #include <SofaBoundaryCondition/LinearVelocityConstraint.h>
 #include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <sofa/helper/types/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 #include <sofa/defaulttype/RigidTypes.h>
 #include <iostream>
-#include <SofaBaseTopology/TopologySubsetData.inl>
-#include <sofa/helper/vector_algorithm.h>
+#include <sofa/type/vector_algorithm.h>
 
 
 namespace sofa::component::projectiveconstraintset
 {
-
-
-// Define TestNewPointFunction
-template< class TDataTypes>
-bool LinearVelocityConstraint<TDataTypes>::FCPointHandler::applyTestCreateFunction(Index, const sofa::helper::vector<Index> &, const sofa::helper::vector<double> &)
-{
-    return lc != 0;
-}
-
-// Define RemovalFunction
-template< class TDataTypes>
-void LinearVelocityConstraint<TDataTypes>::FCPointHandler::applyDestroyFunction(Index pointIndex, value_type &)
-{
-    if (lc)
-    {
-        lc->removeIndex((Index) pointIndex);
-    }
-}
 
 template <class TDataTypes>
 LinearVelocityConstraint<TDataTypes>::LinearVelocityConstraint()
@@ -60,7 +41,7 @@ LinearVelocityConstraint<TDataTypes>::LinearVelocityConstraint()
     , d_keyVelocities(  initData(&d_keyVelocities,"velocities","velocities corresponding to the key times") )
     , d_coordinates( initData(&d_coordinates, "coordinates", "coordinates on which to apply velocities") )
     , l_topology(initLink("topology", "link to the topology container"))
-    , m_pointHandler(nullptr)
+    , finished(false)
 {
     d_indices.beginEdit()->push_back(0);
     d_indices.endEdit();
@@ -75,8 +56,7 @@ LinearVelocityConstraint<TDataTypes>::LinearVelocityConstraint()
 template <class TDataTypes>
 LinearVelocityConstraint<TDataTypes>::~LinearVelocityConstraint()
 {
-    if (m_pointHandler)
-        delete m_pointHandler;
+
 }
 
 template <class TDataTypes>
@@ -96,7 +76,7 @@ void LinearVelocityConstraint<TDataTypes>::addIndex(Index index)
 template <class TDataTypes>
 void LinearVelocityConstraint<TDataTypes>::removeIndex(Index index)
 {
-    sofa::helper::removeValue(*d_indices.beginEdit(),index);
+    sofa::type::removeValue(*d_indices.beginEdit(),index);
     d_indices.endEdit();
 }
 
@@ -132,19 +112,13 @@ void LinearVelocityConstraint<TDataTypes>::init()
         l_topology.set(this->getContext()->getMeshTopologyLink());
     }
 
-    sofa::core::topology::BaseMeshTopology* _topology = l_topology.get();
-
-    if (_topology)
+    if (sofa::core::topology::BaseMeshTopology* _topology = l_topology.get())
     {
         msg_info() << "Topology path used: '" << l_topology.getLinkedPath() << "'";
 
-        // Initialize functions and parameters
-        m_pointHandler = new FCPointHandler(this, &d_indices);
-        d_indices.createTopologyHandler(_topology, m_pointHandler);
-        d_indices.registerTopologicalData();
-
+        // Initialize topological changes support
+        d_indices.createTopologyHandler(_topology);
         d_coordinates.createTopologyHandler(_topology);
-        d_coordinates.registerTopologicalData();
     }
     else
     {
@@ -307,7 +281,7 @@ void LinearVelocityConstraint<DataTypes>::findKeyTimes()
         nextT = *d_keyTimes.getValue().begin();
         prevT = nextT;
 
-        typename helper::vector<Real>::const_iterator it_t = d_keyTimes.getValue().begin();
+        typename type::vector<Real>::const_iterator it_t = d_keyTimes.getValue().begin();
         typename VecDeriv::const_iterator it_v = d_keyVelocities.getValue().begin();
 
         //WARNING : we consider that the key-events are in chronological order
@@ -325,8 +299,8 @@ void LinearVelocityConstraint<DataTypes>::findKeyTimes()
                 nextV = *it_v;
                 finished = true;
             }
-            it_t++;
-            it_v++;
+            ++it_t;
+            ++it_v;
         }
     }
 }// LinearVelocityConstraint::findKeyTimes
@@ -346,8 +320,8 @@ void LinearVelocityConstraint<TDataTypes>::draw(const core::visual::VisualParams
 
     vparams->drawTool()->disableLighting();
 
-    std::vector<sofa::defaulttype::Vector3> vertices;
-    sofa::helper::types::RGBAColor color(1, 0.5, 0.5, 1);
+    std::vector<sofa::type::Vector3> vertices;
+    const sofa::type::RGBAColor color(1, 0.5, 0.5, 1);
     const VecDeriv& keyVelocities = d_keyVelocities.getValue();
     const SetIndexArray & indices = d_indices.getValue();
     for (unsigned int i=0 ; i<keyVelocities.size()-1 ; i++)
@@ -357,8 +331,8 @@ void LinearVelocityConstraint<TDataTypes>::draw(const core::visual::VisualParams
             const typename DataTypes::CPos& cpos0 = DataTypes::getCPos(x0[*it]+keyVelocities[i]);
             const typename DataTypes::CPos& cpos1 = DataTypes::getCPos(x0[*it]+keyVelocities[i+1]);
 
-            vertices.push_back(sofa::defaulttype::Vector3(cpos0));
-            vertices.push_back(sofa::defaulttype::Vector3(cpos1));
+            vertices.push_back(sofa::type::Vector3(cpos0));
+            vertices.push_back(sofa::type::Vector3(cpos1));
         }
     }
 

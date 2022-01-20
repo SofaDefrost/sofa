@@ -52,7 +52,7 @@
 #include <sofa/gui/GUIManager.h>
 #include <sofa/gui/Main.h>
 
-#include <sofa/helper/ArgumentParser.h>
+#include <sofa/gui/ArgumentParser.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/helper/system/glut.h>
 
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
     // contact manager
     DefaultContactManager::SPtr contactManager = New<DefaultContactManager>();
     contactManager->setName("Contact Manager");
-    contactManager->setDefaultResponseType("default");
+    contactManager->setDefaultResponseType("PenalityContactForceField");
     groot->addObject(contactManager);
 
     // collision group

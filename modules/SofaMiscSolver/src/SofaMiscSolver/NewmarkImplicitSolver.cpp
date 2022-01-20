@@ -100,7 +100,7 @@ void NewmarkImplicitSolver::solve(const core::ExecParams* params, SReal dt, sofa
 
     // 2. Compute right hand term of equation on a_{t+h}
 
-    mop.computeForce(b,true,false);
+    mop.computeForce(b);
     //b = f;
     // b = M a
     if (rM != 0.0 || rK != 0.0 || beta != 0.5)
@@ -123,9 +123,9 @@ void NewmarkImplicitSolver::solve(const core::ExecParams* params, SReal dt, sofa
 
     core::behavior::MultiMatrix<simulation::common::MechanicalOperations> matrix(&mop);
 
-    matrix = MechanicalMatrix::K * (-h*h*beta - h*rK*gamma) + MechanicalMatrix::B*(-h)*gamma + MechanicalMatrix::M * (1 + h*gamma*rM);
+    matrix.setSystemMBKMatrix(MechanicalMatrix::K * (-h*h*beta - h*rK*gamma) + MechanicalMatrix::B*(-h)*gamma + MechanicalMatrix::M * (1 + h*gamma*rM));
 
-    msg_info()<<"matrix = "<< MechanicalMatrix::K *(-h*h*beta + -h*rK*gamma) + MechanicalMatrix::M * (1 + h*gamma*rM) << " = " << matrix<<sendl;
+    msg_info()<<"matrix = "<< MechanicalMatrix::K *(-h*h*beta + -h*rK*gamma) + MechanicalMatrix::M * (1 + h*gamma*rM) << " = " << matrix;
     matrix.solve(aResult, b);
     msg_info() << "a1 = " << aResult;
 
@@ -176,7 +176,7 @@ void NewmarkImplicitSolver::solve(const core::ExecParams* params, SReal dt, sofa
     a.eq(aResult);
 }
 
-int NewmarkImplicitSolverClass = core::RegisterObject("Implicit time integratorusing Newmark scheme")
+int NewmarkImplicitSolverClass = core::RegisterObject("Implicit time integrator using Newmark scheme")
         .add< NewmarkImplicitSolver >();
 
 } // namespace sofa::component::odesolver

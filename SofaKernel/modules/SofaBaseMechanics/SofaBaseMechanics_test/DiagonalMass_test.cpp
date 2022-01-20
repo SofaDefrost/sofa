@@ -84,8 +84,9 @@ public:
     typedef TMassType MassType;
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::VecCoord VecCoord;
+
     typedef typename DataTypes::Real Real;
-    typedef typename helper::vector<MassType> VecMass;
+    typedef typename type::vector<MassType> VecMass;
     typedef DiagonalMass<TDataTypes, TMassType> TheDiagonalMass ;
 
     simulation::Simulation* simulation = nullptr;
@@ -698,7 +699,7 @@ public:
         EXPECT_NEAR(vMasses[1], refValue * 2, 1e-4);
         EXPECT_NEAR(mass->getTotalMass(), 8, 1e-4);
         
-        sofa::helper::vector<sofa::Index> hexaIds = { 0 };        
+        sofa::type::vector<sofa::Index> hexaIds = { 0 };        
         // remove hexahedron id: 0
         modifier->removeHexahedra(hexaIds);
         EXPECT_EQ(vMasses.size(), 26);
@@ -771,7 +772,7 @@ public:
         EXPECT_NEAR(vMasses[0], refValue2, 1e-4);
         EXPECT_NEAR(mass->getTotalMass(), 8.0, 1e-4);
 
-        sofa::helper::vector<sofa::Index> tetraIds = { 0 };
+        sofa::type::vector<sofa::Index> tetraIds = { 0 };
         // remove tetrahedron id: 0
         modifier->removeTetrahedra(tetraIds); 
         EXPECT_EQ(vMasses.size(), 8);
@@ -829,30 +830,57 @@ public:
         ASSERT_NE(modifier, nullptr);
 
         const VecMass& vMasses = mass->d_vertexMass.getValue();
-        static const Real refValue = Real(1.0 / 4.0);  // 0.125
+        static const Real refValue = Real(1.0 / 4.0);  // 0.25
         static const Real initMass = mass->getTotalMass();
 
-        // check value at init
-        EXPECT_EQ(vMasses.size(), 9);
+        // check value at init. Grid of 4 quads, should be first and third line: 0.25, 0.5, 0.25, second line: 0.5, 1.0, 0.5
+        // 1/4 ---- 1/2 ---- 1/4
+        //  |   m:1  |   m:1  |
+        //  |  id:2  |  id:3  |
+        // 1/2 ----  1  ---- 1/2
+        //  |   m:1  |   m:1  |
+        //  |  id:0  |  id:1  |
+        // 1/4 ---- 1/2 ---- 1/4
+        EXPECT_EQ(vMasses.size(), 9);  
         EXPECT_NEAR(vMasses[0], refValue, 1e-4);
         EXPECT_NEAR(vMasses[1], refValue * 2, 1e-4);
+        EXPECT_NEAR(vMasses[4], refValue * 4, 1e-4);
         EXPECT_NEAR(initMass, 4, 1e-4);
-
-        sofa::helper::vector<sofa::Index> ids = { 0 };
+        Real lastV = vMasses[8];
+       
+        
         // remove quad id: 0
+        // 1/4 ---- 1/2 ---- 1/4
+        //  |   m:1  |   m:1  |
+        //  |  id:2  |  id:0  |
+        // 1/4 ---- 3/4 ---- 1/2
+        //           |   m:1  |
+        //           |  id:1  |
+        //          1/4 ---- 1/4
+        sofa::type::vector<sofa::Index> ids = { 0 };
         modifier->removeQuads(ids, true, true);
         EXPECT_EQ(vMasses.size(), 8);
-        EXPECT_NEAR(vMasses[0], refValue, 1e-4); // check update of Mass when removing tetra
-        EXPECT_NEAR(vMasses[1], refValue * 2, 1e-4);
-        EXPECT_NEAR(mass->getTotalMass(), initMass - refValue, 1e-4);
-        const Real lastV = vMasses[7];
+        EXPECT_NEAR(vMasses[0], lastV, 1e-4); // check update of Mass when removing quad, vMasses[0] is now mapped to point position 8.
+        EXPECT_NEAR(vMasses[1], refValue, 1e-4); // one neighboord quad removed. 
+        EXPECT_NEAR(vMasses[4], refValue * 3, 1e-4); // one neighboord quad removed. 
+
+        EXPECT_NEAR(mass->getTotalMass(), initMass - 1, 1e-4);
+        lastV = vMasses[7];
 
         // remove quad id: 0
+        // 1/4 ---- 1/4
+        //  |   m:1  |
+        //  |  id:0  |
+        // 1/4 ---- 2/4 ---- 1/4
+        //           |   m:1  |
+        //           |  id:1  |
+        //          1/4 ---- 1/4
         modifier->removeQuads(ids, true, true);
         EXPECT_EQ(vMasses.size(), 7);
-        EXPECT_NEAR(vMasses[0], lastV, 1e-4); // check swap value
-        EXPECT_NEAR(vMasses[1], refValue * 2, 1e-4);
-        EXPECT_NEAR(mass->getTotalMass(), initMass - 2*refValue, 1e-4);
+        EXPECT_NEAR(vMasses[0], lastV - refValue, 1e-4); // check swap value
+        EXPECT_NEAR(vMasses[1], refValue, 1e-4);
+        EXPECT_NEAR(vMasses[4], refValue * 2, 1e-4); // one neighboord quad removed. 
+        EXPECT_NEAR(mass->getTotalMass(), initMass - 2, 1e-4);
 
         ids.push_back(1);
         // remove quad id: 0, 1
@@ -902,7 +930,7 @@ public:
         EXPECT_NEAR(vMasses[1], refValue2, 1e-4);
         EXPECT_NEAR(initMass, 4, 1e-4);
 
-        sofa::helper::vector<sofa::Index> ids = { 0 };
+        sofa::type::vector<sofa::Index> ids = { 0 };
         // remove Triangle id: 0
         modifier->removeTriangles(ids, true, true);
         EXPECT_EQ(vMasses.size(), 9);
@@ -973,7 +1001,7 @@ public:
         EXPECT_NEAR(vMasses[1], refValue, 1e-4);
         EXPECT_NEAR(initMass, 2, 1e-4);
 
-        sofa::helper::vector<sofa::Index> ids = { 0 };
+        sofa::type::vector<sofa::Index> ids = { 0 };
         // remove Edge id: 0
         modifier->removeEdges(ids, true);
         EXPECT_EQ(vMasses.size(), 3);

@@ -36,7 +36,7 @@ using sofa::simulation::graph::DAGSimulation;
 #include <SofaGeneralEngine/DilateEngine.h>
 using sofa::component::engine::DilateEngine ;
 
-using sofa::helper::vector;
+using sofa::type::vector;
 
 
 namespace sofa
@@ -53,7 +53,7 @@ struct DilateEngine_test : public BaseSimulationTest,
     Node::SPtr m_node;
     typename ThisClass::SPtr m_thisObject;
 
-    void SetUp()
+    void SetUp() override
     {
         setSimulation(m_simu = new DAGSimulation());
         m_node = m_simu->createNewGraph("root");

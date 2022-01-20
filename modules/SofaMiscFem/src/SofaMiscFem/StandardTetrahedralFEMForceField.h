@@ -27,13 +27,14 @@
 #include <SofaMiscFem/HyperelasticMaterial.h>
 #include <sofa/core/behavior/ForceField.h>
 #include <SofaBaseMechanics/MechanicalObject.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/defaulttype/Mat.h>
-#include <sofa/defaulttype/MatSym.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/Mat.h>
+#include <sofa/type/MatSym.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/core/topology/TopologyData.h>
 #include <string>
 #include <map>
+#include <sofa/type/trait/Rebind.h>
 
 
 namespace sofa::component::forcefield
@@ -59,16 +60,16 @@ class StandardTetrahedralFEMForceField: public core::behavior::ForceField<DataTy
     typedef typename DataTypes::Coord Coord;
     typedef typename DataTypes::Deriv Deriv;
     typedef typename Coord::value_type Real;
-    typedef defaulttype::Mat<3,3,Real> Matrix3;
-    typedef defaulttype::Mat<6,6,Real> Matrix6;
-    typedef defaulttype::Mat<6,3,Real> Matrix63;
-    typedef defaulttype::MatSym<3,Real> MatrixSym;
+    typedef type::Mat<3,3,Real> Matrix3;
+    typedef type::Mat<6,6,Real> Matrix6;
+    typedef type::Mat<6,3,Real> Matrix63;
+    typedef type::MatSym<3,Real> MatrixSym;
 
     typedef core::objectmodel::Data<VecDeriv>    DataVecDeriv; 
     typedef core::objectmodel::Data<VecCoord>    DataVecCoord; 
 
-    typedef helper::vector<Real> SetParameterArray;
-    typedef helper::vector<Coord> SetAnisotropyDirectionArray;
+    typedef type::vector<Real> SetParameterArray;
+    typedef type::vector<Coord> SetAnisotropyDirectionArray;
 
     typedef core::topology::BaseMeshTopology::Index Index;
     typedef core::topology::BaseMeshTopology::Tetra Element;
@@ -108,9 +109,9 @@ public :
 	  Real strainEnergy;
 
       //Tetrahedron Points Indicies for CUDA
-      float tetraIndices[4];
+      float tetraIndices[4]{};
       //Tetrahedron Edges for CUDA
-      float tetraEdges[6];
+      float tetraEdges[6]{};
 
       /// Output stream
       inline friend std::ostream& operator<< ( std::ostream& os, const TetrahedronRestInformation& /*eri*/ ) {  return os;  }
@@ -120,7 +121,7 @@ public :
       TetrahedronRestInformation() : restVolume(0), volScale(0), fiberDirection(), strainEnergy(0) {}
 
     };
-    typedef typename VecCoord::template rebind<TetrahedronRestInformation>::other tetrahedronRestInfoVector;
+	using tetrahedronRestInfoVector  = type::rebind_to<VecCoord, TetrahedronRestInformation>;
     
 	
    /// data structure stored for each edge
@@ -138,7 +139,7 @@ public :
 
      EdgeInformation(): DfDx() { vertices[0]=0.f; vertices[1]=0.f; }
    };
-   typedef typename VecCoord::template rebind<EdgeInformation>::other edgeInformationVector;
+   using edgeInformationVector  = type::rebind_to<VecCoord, EdgeInformation>;
 
  protected :
    core::topology::BaseMeshTopology* m_topology;
@@ -159,10 +160,10 @@ public:
 	void setMaterialName(const std::string& name) {
 		f_materialName.setValue(name);
 	}
-    void setparameter(const helper::vector<Real>& param) {
+    void setparameter(const type::vector<Real>& param) {
 		f_parameterSet.setValue(param);
 	}
-    void setdirection(const helper::vector<Coord>& direction) {
+    void setdirection(const type::vector<Coord>& direction) {
 		f_anisotropySet.setValue(direction);
 	}
 
@@ -178,7 +179,7 @@ public:
     //Used for CUDA implementation
     void initNeighbourhoodPoints();
     void initNeighbourhoodEdges();
-    void addKToMatrix(sofa::defaulttype::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
+    void addKToMatrix(sofa::linearalgebra::BaseMatrix * matrix, SReal kFact, unsigned int &offset) override;
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& d_f, const DataVecCoord& d_x, const DataVecDeriv& d_v) override;
     void addDForce(const core::MechanicalParams* mparams, DataVecDeriv& d_df, const DataVecDeriv& d_dx) override;
     SReal getPotentialEnergy(const core::MechanicalParams* /*mparams*/, const DataVecCoord&  /* x */) const override
@@ -189,47 +190,29 @@ public:
 
     void draw(const core::visual::VisualParams* vparams) override;
 
-  //  defaulttype::Mat<3,3,double> getPhi( int );
+  //  type::Mat<3,3,double> getPhi( int );
 
-    class GHTetrahedronHandler : public topology::TopologyDataHandler<core::topology::BaseMeshTopology::Tetrahedron, tetrahedronRestInfoVector >
-        {
-        public:
-          typedef typename StandardTetrahedralFEMForceField<DataTypes>::TetrahedronRestInformation TetrahedronRestInformation;
-
-          GHTetrahedronHandler(StandardTetrahedralFEMForceField<DataTypes>* ff,
-                               topology::TetrahedronData<tetrahedronRestInfoVector>* data )
-            :topology::TopologyDataHandler<core::topology::BaseMeshTopology::Tetrahedron, tetrahedronRestInfoVector >(data)
-            ,ff(ff)
-          {
-          }
-
-          void applyCreateFunction(Index, TetrahedronRestInformation &t,
-                                   const core::topology::BaseMeshTopology::Tetrahedron&,
-                                   const sofa::helper::vector<Index> &,
-                                   const sofa::helper::vector<double> &);
-
-         protected:
-          StandardTetrahedralFEMForceField<DataTypes>* ff;
-
-        };
+    /** Method to initialize @sa TetrahedronRestInformation when a new Tetrahedron is created.
+    * Will be set as creation callback in the TetrahedronData @sa tetrahedronInfo
+    */
+    void createTetrahedronRestInformation(Index, TetrahedronRestInformation& t,
+        const core::topology::BaseMeshTopology::Tetrahedron&,
+        const sofa::type::vector<Index>&,
+        const sofa::type::vector<SReal>&);
 	
   protected:
     /// the array that describes the complete material energy and its derivatives
 
 	fem::HyperelasticMaterial<DataTypes> *myMaterial;
 
-        topology::TetrahedronData<tetrahedronRestInfoVector> tetrahedronInfo; ///< Internal tetrahedron data
-        //EdgeData<sofa::helper::vector< EdgeInformation> > edgeInfo; ///< Internal edge data
-        topology::EdgeData<edgeInformationVector> edgeInfo; ///< Internal edge data
+    core::topology::TetrahedronData<tetrahedronRestInfoVector> tetrahedronInfo; ///< Internal tetrahedron data
+    core::topology::EdgeData<edgeInformationVector> edgeInfo; ///< Internal edge data
 
 
         void testDerivatives();
         void saveMesh( const char *filename );
 	
 	VecCoord myposition;
-
-        GHTetrahedronHandler* tetrahedronHandler;
-    
 };
 
 

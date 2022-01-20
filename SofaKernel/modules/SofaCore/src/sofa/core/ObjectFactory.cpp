@@ -26,9 +26,7 @@
 #include <sofa/helper/ComponentChange.h>
 #include <sofa/helper/StringUtils.h>
 
-namespace sofa
-{
-namespace core
+namespace sofa::core
 {
 
 ObjectFactory::~ObjectFactory()
@@ -274,12 +272,37 @@ objectmodel::BaseObject::SPtr ObjectFactory::createObject(objectmodel::BaseConte
     /// The object has been created, but not with the template given by the user
     if (!usertemplatename.empty() && object->getTemplateName() != userresolved)
     {
-        std::string w = "Template " + usertemplatename + std::string(" incorrect, used ") + object->getTemplateName();
-        msg_warning(object.get()) << w;
+        std::vector<std::string> templateList;
+        if (entry)
+            for (const auto& cr : entry->creatorMap)
+                templateList.push_back(cr.first);
+        std::stringstream ss;
+        bool isUserTemplateNameInTemplateList = false;
+        for(unsigned int i = 0; i < templateList.size(); ++i)
+        {
+            ss << templateList[i];
+            isUserTemplateNameInTemplateList |= (templateList[i] == usertemplatename || templateList[i] == userresolved);
+            if (i != templateList.size() - 1)
+                ss << ", ";
+        }
+        if (isUserTemplateNameInTemplateList)
+        {
+            msg_warning(object.get()) << "Requested template '" << usertemplatename << "' "
+                                      << "is not compatible with the current context. "
+                                      << "Falling back to the first compatible template: '"
+                                      << object->getTemplateName() << "'.";
+        }
+        else
+        {
+            msg_warning(object.get()) << "Requested template '" << usertemplatename << "' "
+                                      << "cannot be found in the list of available templates [" << ss.str() << "]. "
+                                      << "Falling back to default template: '"
+                                      << object->getTemplateName() << "'.";
+        }
     }
     else if (creators.size() > 1)
-    {	// There was multiple possibilities, we used the first one (not necessarily the default, as it can be incompatible)
-        std::string w = "Template " + templatename + std::string(" incorrect, used ") + object->getTemplateName() + std::string(" in the list:");
+    {	// There were multiple possibilities, we used the first one (not necessarily the default, as it can be incompatible)
+        std::string w = "Template '" + templatename + std::string("' incorrect, used ") + object->getTemplateName() + std::string(" in the list:");
         for(unsigned int i = 0; i < creators.size(); ++i)
             w += std::string("\n\t* ") + creators[i].first;
         msg_warning(object.get()) << w;
@@ -358,15 +381,22 @@ void ObjectFactory::getEntriesFromTarget(std::vector<ClassEntry::SPtr>& result, 
         it != itEnd; ++it)
     {
         ClassEntry::SPtr entry = it->second;
-        bool inTarget = false;
-        for (CreatorMap::iterator itc = entry->creatorMap.begin(), itcend = entry->creatorMap.end(); itc != itcend; ++itc)
+        if(entry->className == it->first)
         {
-            Creator::SPtr c = itc->second;
-            if (target == c->getTarget())
-                inTarget = true;
+
+            bool inTarget = false;
+            for (CreatorMap::iterator itc = entry->creatorMap.begin(), itcend = entry->creatorMap.end(); itc != itcend; ++itc)
+            {
+                Creator::SPtr c = itc->second;
+                if (target == c->getTarget())
+                {
+                    inTarget = true;
+                    break;
+                }
+            }
+            if (inTarget)
+                result.push_back(entry);
         }
-        if (inTarget)
-            result.push_back(entry);
     }
 }
 
@@ -597,6 +627,4 @@ RegisterObject::operator int()
     }
 }
 
-} // namespace core
-
-} // namespace sofa
+} // namespace sofa::core

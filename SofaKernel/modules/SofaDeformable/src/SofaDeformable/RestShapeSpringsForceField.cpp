@@ -25,10 +25,12 @@
 
 #include <sofa/helper/visual/DrawTool.h>
 #include <sofa/core/ObjectFactory.h>
+#include <sofa/core/behavior/MultiMatrixAccessor.h>
 
 namespace sofa::component::forcefield
 {
 
+using namespace sofa::type;
 using namespace sofa::defaulttype;
 
 
@@ -123,7 +125,7 @@ void RestShapeSpringsForceField<Rigid3Types>::addKToMatrix(const core::Mechanica
     const VecReal& k_a = d_angularStiffness.getValue();
     const sofa::Size N = 6;
     sofa::core::behavior::MultiMatrixAccessor::MatrixRef mref = matrix->getMatrix(this->mstate);
-    sofa::defaulttype::BaseMatrix* mat = mref.matrix;
+    sofa::linearalgebra::BaseMatrix* mat = mref.matrix;
     unsigned int offset = mref.offset;
     Real kFact = (Real)sofa::core::mechanicalparams::kFactorIncludingRayleighDamping(mparams, this->rayleighStiffness.getValue());
 
@@ -159,7 +161,7 @@ void RestShapeSpringsForceField<Rigid3Types>::draw(const core::visual::VisualPar
     sofa::helper::ReadAccessor< DataVecCoord > p0 = *getExtPosition();
     sofa::helper::ReadAccessor< DataVecCoord > p = this->mstate->read(core::VecCoordId::position());
 
-    sofa::helper::vector< Vector3 > vertices;
+    sofa::type::vector< Vector3 > vertices;
 
     for (sofa::Index i=0; i<m_indices.size(); i++)
     {

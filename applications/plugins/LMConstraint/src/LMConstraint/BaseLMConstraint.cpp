@@ -58,7 +58,7 @@ BaseLMConstraint::BaseLMConstraint()
 unsigned int BaseLMConstraint::getNumConstraint(ConstraintParams::ConstOrder Order)
 {
     size_t result=0;
-    const helper::vector< ConstraintGroup* > &vec = constraintOrder[Order];
+    const type::vector< ConstraintGroup* > &vec = constraintOrder[Order];
     for (size_t i=0; i<vec.size(); ++i) result+=vec[i]->getNumConstraint();
     return static_cast<unsigned int>(result);
 }
@@ -70,14 +70,14 @@ ConstraintGroup* BaseLMConstraint::addGroupConstraint(ConstraintParams::ConstOrd
     return c;
 }
 
-void BaseLMConstraint::getConstraintViolation(const core::ConstraintParams* cparams, defaulttype::BaseVector *v)
+void BaseLMConstraint::getConstraintViolation(const core::ConstraintParams* cparams, linearalgebra::BaseVector *v)
 {
     getConstraintViolation(v,cparams->constOrder());
 }
 
-void BaseLMConstraint::getConstraintViolation(defaulttype::BaseVector * v, const sofa::core::ConstraintParams::ConstOrder Order)
+void BaseLMConstraint::getConstraintViolation(linearalgebra::BaseVector * v, const sofa::core::ConstraintParams::ConstOrder Order)
 {
-    const helper::vector< ConstraintGroup* > &constraints = constraintOrder[Order];
+    const type::vector< ConstraintGroup* > &constraints = constraintOrder[Order];
     for (size_t idxGroupConstraint=0; idxGroupConstraint<constraints.size(); ++idxGroupConstraint)
     {
         ConstraintGroup *group=constraints[idxGroupConstraint];
@@ -93,10 +93,10 @@ void BaseLMConstraint::getConstraintViolation(defaulttype::BaseVector * v, const
 
 void BaseLMConstraint::resetConstraint()
 {
-    std::map< ConstraintParams::ConstOrder, helper::vector< ConstraintGroup*> >::iterator it;
+    std::map< ConstraintParams::ConstOrder, type::vector< ConstraintGroup*> >::iterator it;
     for (it=constraintOrder.begin(); it!=constraintOrder.end(); ++it)
     {
-        helper::vector< ConstraintGroup* > &v=it->second;
+        type::vector< ConstraintGroup* > &v=it->second;
         for (size_t i=0; i<v.size(); ++i)
         {
             delete v[i];

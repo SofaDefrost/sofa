@@ -22,15 +22,15 @@
 #pragma once
 #include <SofaBoundaryCondition/config.h>
 
-#include <SofaBaseTopology/TopologySubsetData.h>
+#include <sofa/core/topology/TopologySubsetIndices.h>
 #include <sofa/core/behavior/ProjectiveConstraintSet.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/core/objectmodel/Event.h>
-#include <sofa/defaulttype/BaseMatrix.h>
+#include <sofa/linearalgebra/BaseMatrix.h>
 #include <sofa/defaulttype/RigidTypes.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 
 #include <type_traits>
 #include <set>
@@ -61,8 +61,8 @@ public:
     typedef typename DataTypes::Real Real;
     typedef Data<VecCoord> DataVecCoord;
     typedef Data<VecDeriv> DataVecDeriv;
-    typedef helper::vector<Index> SetIndexArray;
-    typedef sofa::component::topology::PointSubsetData< SetIndexArray > SetIndex;
+    typedef type::vector<Index> SetIndexArray;
+    typedef sofa::core::topology::TopologySubsetIndices SetIndex;
 
     static const unsigned int CoordSize = Coord::total_size;
 
@@ -123,7 +123,7 @@ public:
     /// Apply the computed movements to the border mesh points between beginConstraintTime and endConstraintTime
     void projectPosition(const core::MechanicalParams* mparams, DataVecCoord& xData) override;
     // Implement projectMatrix for assembled solver of compliant
-    void projectMatrix( sofa::defaulttype::BaseMatrix* /*M*/, unsigned /*offset*/ ) override;
+    void projectMatrix( sofa::linearalgebra::BaseMatrix* /*M*/, unsigned /*offset*/ ) override;
 
     void projectJacobianMatrix(const core::MechanicalParams* /*mparams*/, DataMatrixDeriv& /* cData */) override
     {
@@ -136,32 +136,12 @@ public:
     /// Draw the constrained points (= border mesh points)
      void draw(const core::visual::VisualParams* vparams) override;
 
-    class FCPointHandler : public sofa::component::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, SetIndexArray >
-    {
-    public:
-        typedef typename PatchTestMovementConstraint<DataTypes>::SetIndexArray SetIndexArray;
-
-        FCPointHandler(PatchTestMovementConstraint<DataTypes>* _fc, sofa::component::topology::PointSubsetData<SetIndexArray>* _data)
-            : sofa::component::topology::TopologyDataHandler<core::topology::BaseMeshTopology::Point, SetIndexArray >(_data), fc(_fc) {}
-
-        void applyDestroyFunction(Index /*index*/, value_type& /*T*/);
-
-        bool applyTestCreateFunction(Index /*index*/,
-                const sofa::helper::vector< Index > & /*ancestors*/,
-                const sofa::helper::vector< double > & /*coefs*/);
-    protected:
-        PatchTestMovementConstraint<DataTypes> *fc;
-    };
-
 protected:
     
     template <class DataDeriv>
     void projectResponseT(const core::MechanicalParams* mparams, DataDeriv& dx);
 
 private:
-
-    /// Handler for subset Data
-    FCPointHandler* m_pointHandler;
 
     /// Find the corners of the grid mesh
     void findCornerPoints();

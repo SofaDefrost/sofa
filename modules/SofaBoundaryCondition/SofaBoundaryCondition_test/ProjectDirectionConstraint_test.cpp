@@ -69,7 +69,7 @@ struct ProjectDirectionConstraint_test : public BaseSimulationTest, NumericTest<
     typename MechanicalObject::SPtr dofs;
 
      /// Create the context for the tests.
-    void SetUp()
+    void SetUp() override
     {
         //Init
         sofa::simulation::setSimulation(simulation = new sofa::simulation::graph::DAGSimulation());
@@ -138,7 +138,7 @@ struct ProjectDirectionConstraint_test : public BaseSimulationTest, NumericTest<
 
        projection->projectPosition(core::mechanicalparams::defaultInstance(), *dofs->write(core::VecCoordId::position()) );
 
-       helper::vector<CPos> m_origin;
+       type::vector<CPos> m_origin;
 
        // particle original position
        const VecCoord& xOrigin = projection->getMState()->read(core::ConstVecCoordId::position())->getValue();
@@ -218,7 +218,7 @@ struct ProjectDirectionConstraint_test : public BaseSimulationTest, NumericTest<
        return succeed;
     }
 
-    void TearDown()
+    void TearDown() override
     {
         if (root!=nullptr)
             sofa::simulation::getSimulation()->unload(root);

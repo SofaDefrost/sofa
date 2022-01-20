@@ -24,7 +24,7 @@
 
 
 #include <sofa/core/behavior/ForceField.h>
-#include <SofaBaseTopology/TopologySparseData.h>
+#include <sofa/core/topology/TopologySubsetData.h>
 #include <fstream>
 
 namespace sofa::component::forcefield
@@ -81,10 +81,10 @@ protected:
     std::ofstream file;
 
 public:
-    sofa::component::topology::TriangleSparseData<sofa::helper::vector <TrianglePressureInformation> > trianglePressureMap; ///< map between edge indices and their pressure    
+    sofa::core::topology::TriangleSubsetData<sofa::type::vector <TrianglePressureInformation> > trianglePressureMap; ///< map between triangle indices and their pressure    
 
     Data<Real> moment;   ///< total moment/torque applied
-    Data<sofa::helper::vector<Index> > triangleList; ///< Indices of triangles separated with commas where a pressure is applied
+    Data<sofa::type::vector<Index> > triangleList; ///< Indices of triangles separated with commas where a pressure is applied
     Data<Deriv> axis;    ///< axis of rotation and normal used to define the edge subjected to the pressure force
     Data<Coord> center;  ///< center of rotation
     Data<Real> penalty;  ///< strength of penalty force
@@ -114,7 +114,7 @@ public:
 
     // returns the rotation of the driven part of the object relative to the original state (in radians)
     // this value is updated in addForce()
-    SReal getRotationAngle() { return rotationAngle; }
+    SReal getRotationAngle() const { return rotationAngle; }
 
 protected :
     OscillatingTorsionPressureForceField();

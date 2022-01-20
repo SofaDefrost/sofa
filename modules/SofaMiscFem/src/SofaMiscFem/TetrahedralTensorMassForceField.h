@@ -26,11 +26,12 @@
 
 
 #include <sofa/core/behavior/ForceField.h>
-#include <sofa/helper/fixed_array.h>
-#include <sofa/helper/vector.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/defaulttype/Mat.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/type/fixed_array.h>
+#include <sofa/type/vector.h>
+#include <sofa/type/Vec.h>
+#include <sofa/type/Mat.h>
+#include <sofa/core/topology/TopologyData.h>
+#include <sofa/type/trait/Rebind.h>
 
 
 namespace sofa::component::forcefield
@@ -49,7 +50,7 @@ public:
     typedef typename DataTypes::Coord    Coord   ;
     typedef typename DataTypes::Deriv    Deriv   ;
     typedef typename Coord::value_type   Real    ;
-    typedef typename VecCoord::template rebind<VecCoord>::other VecType;
+    using VecType = sofa::type::rebind_to<VecCoord, VecCoord>;
 
 
     typedef core::objectmodel::Data<VecDeriv>    DataVecDeriv;
@@ -57,7 +58,7 @@ public:
 
     using Index = sofa::Index;
 
-    class Mat3 : public helper::fixed_array<Deriv,3>
+    class Mat3 : public type::fixed_array<Deriv,3>
     {
     public:
         Deriv operator*(const Deriv& v) const
@@ -95,7 +96,7 @@ protected:
             return in;
         }
     };
-    typedef typename VecCoord::template rebind<EdgeRestInformation>::other edgeRestInfoVector;
+    using edgeRestInfoVector = type::rebind_to<VecCoord, EdgeRestInformation>;
 
     VecCoord  _initialPoints;///< the intial positions of the points
 
@@ -132,57 +133,45 @@ public:
     virtual Real getMu() const { return mu;}
 
     SReal getPotentialEnergy(const core::MechanicalParams* mparams) const override;
-    void setYoungModulus(const double modulus)
+    void setYoungModulus(const Real modulus)
     {
-        f_youngModulus.setValue((Real)modulus);
+        f_youngModulus.setValue(modulus);
     }
-    void setPoissonRatio(const double ratio)
+    void setPoissonRatio(const Real ratio)
     {
-        f_poissonRatio.setValue((Real)ratio);
+        f_poissonRatio.setValue(ratio);
     }
     void draw(const core::visual::VisualParams* vparams) override;
     /// compute lambda and mu based on the Young modulus and Poisson ratio
     void updateLameCoefficients();
 
+    /** Method to initialize @sa EdgeRestInformation when a new edge is created.
+    * Will be set as creation callback in the EdgeData @sa edgeInfo
+    */
+    void createEdgeRestInformation(Index edgeIndex, EdgeRestInformation& ei,
+        const core::topology::BaseMeshTopology::Edge&,
+        const sofa::type::vector< Index >&,
+        const sofa::type::vector< SReal >&);
 
-    class TetrahedralTMEdgeHandler : public topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge,edgeRestInfoVector >
-    {
-    public:
-        typedef typename TetrahedralTensorMassForceField<DataTypes>::EdgeRestInformation EdgeRestInformation;
-        TetrahedralTMEdgeHandler(TetrahedralTensorMassForceField<DataTypes>* _ff, topology::EdgeData<edgeRestInfoVector >* _data) : topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge, edgeRestInfoVector >(_data), ff(_ff) {}
+    /** Method to update @sa edgeInfo when a new Tetrahedron is created.
+    * Will be set as callback in the EdgeData @sa edgeInfo when TETRAHEDRAADDED event is fired
+    * to create a new spring in created Tetrahedron.
+    */
+    void applyTetrahedronCreation(const sofa::type::vector<Index>& tetrahedronAdded,
+        const sofa::type::vector<core::topology::BaseMeshTopology::Tetrahedron>&,
+        const sofa::type::vector<sofa::type::vector<Index> >&,
+        const sofa::type::vector<sofa::type::vector<SReal> >&);
 
-        void applyCreateFunction(Index edgeIndex, EdgeRestInformation& ei,
-                const core::topology::BaseMeshTopology::Edge &,
-                const sofa::helper::vector< Index > &,
-                const sofa::helper::vector< double > &);
+    /** Method to update @sa d_edgeSprings when a triangle is removed.
+    * Will be set as callback in the EdgeData @sa edgeInfo when TETRAHEDRAREMOVED event is fired
+    * to remove spring if needed or update adjacent Tetrahedron.
+    */
+    void applyTetrahedronDestruction(const sofa::type::vector<Index>& tetrahedronRemoved);
 
-        void applyTetrahedronCreation(const sofa::helper::vector<Index> &edgeAdded,
-                const sofa::helper::vector<core::topology::BaseMeshTopology::Tetrahedron> &,
-                const sofa::helper::vector<sofa::helper::vector<Index> > &,
-                const sofa::helper::vector<sofa::helper::vector<double> > &);
-
-        void applyTetrahedronDestruction(const sofa::helper::vector<Index> &edgeRemoved);
-
-        using topology::TopologyDataHandler<core::topology::BaseMeshTopology::Edge,edgeRestInfoVector >::ApplyTopologyChange;
-        /// Callback to add tetrahedron elements.
-        void ApplyTopologyChange(const core::topology::TetrahedraAdded* /*event*/);
-        /// Callback to remove tetrahedron elements.
-        void ApplyTopologyChange(const core::topology::TetrahedraRemoved* /*event*/);
-
-    protected:
-        TetrahedralTensorMassForceField<DataTypes>* ff;
-    };
+    core::topology::EdgeData < edgeRestInfoVector >& getEdgeInfo() { return edgeInfo; }
 
 protected:
-
-//    EdgeData < typename VecType < EdgeRestInformation > > edgeInfo; ///< Internal edge data
-    topology::EdgeData < edgeRestInfoVector > edgeInfo; ///< Internal edge data
-
-//    EdgeData < typename VecType < EdgeRestInformation > > &getEdgeInfo() {return edgeInfo;}
-    topology::EdgeData < edgeRestInfoVector > &getEdgeInfo() {return edgeInfo;}
-
-
-    TetrahedralTMEdgeHandler* edgeHandler;
+    core::topology::EdgeData < edgeRestInfoVector > edgeInfo; ///< Internal edge data
 
     sofa::core::topology::BaseMeshTopology* m_topology;
 

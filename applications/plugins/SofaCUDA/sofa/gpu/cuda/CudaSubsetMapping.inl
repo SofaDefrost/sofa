@@ -24,6 +24,7 @@
 
 #include "CudaSubsetMapping.h"
 #include <SofaBaseMechanics/SubsetMapping.inl>
+#include <sofa/core/topology/TopologySubsetData.inl>
 #include <sofa/core/MechanicalParams.h>
 
 namespace sofa

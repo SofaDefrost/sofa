@@ -167,7 +167,7 @@ void PersistentUnilateralInteractionConstraint<DataTypes>::addContact(double mu,
 
 
 template<class DataTypes>
-void PersistentUnilateralInteractionConstraint<DataTypes>::getPositionViolation(defaulttype::BaseVector *v)
+void PersistentUnilateralInteractionConstraint<DataTypes>::getPositionViolation(linearalgebra::BaseVector *v)
 {
     const VecCoord &PfreeVec = this->getMState2()->read(core::ConstVecCoordId::freePosition())->getValue();
     const VecCoord &QfreeVec = this->getMState1()->read(core::ConstVecCoordId::freePosition())->getValue();
@@ -206,8 +206,8 @@ void PersistentUnilateralInteractionConstraint<DataTypes>::getPositionViolation(
 
             if (dt > 0.0 && dt < 1.0)
             {
-                const sofa::defaulttype::Vector3 Qt = c.Q * (1-dt) + Qfree * dt;
-                const sofa::defaulttype::Vector3 Pt = c.P * (1-dt) + Pfree * dt;
+                const sofa::type::Vector3 Qt = c.Q * (1-dt) + Qfree * dt;
+                const sofa::type::Vector3 Pt = c.P * (1-dt) + Pfree * dt;
 
                 dfree_t	= dot(Pfree-Pt, c.t) - dot(Qfree-Qt, c.t);
                 dfree_s	= dot(Pfree-Pt, c.s) - dot(Qfree-Qt, c.s);
@@ -248,7 +248,7 @@ void PersistentUnilateralInteractionConstraint<DataTypes>::getPositionViolation(
 
 
 template<class DataTypes>
-void PersistentUnilateralInteractionConstraint<DataTypes>::getVelocityViolation(defaulttype::BaseVector *v)
+void PersistentUnilateralInteractionConstraint<DataTypes>::getVelocityViolation(linearalgebra::BaseVector *v)
 {
     const VecDeriv &PvfreeVec = this->getMState2()->read(core::ConstVecDerivId::freeVelocity())->getValue();
     const VecDeriv &QvfreeVec = this->getMState1()->read(core::ConstVecDerivId::freeVelocity())->getValue();
@@ -302,8 +302,8 @@ void PersistentUnilateralInteractionConstraint<DataTypes>::getConstraintResoluti
 template<class DataTypes>
 bool PersistentUnilateralInteractionConstraint<DataTypes>::isSticked(int _contactId) const
 {
-    typename sofa::helper::vector< Contact >::const_iterator it = this->contacts.begin();
-    typename sofa::helper::vector< Contact >::const_iterator itEnd = this->contacts.end();
+    typename sofa::type::vector< Contact >::const_iterator it = this->contacts.begin();
+    typename sofa::type::vector< Contact >::const_iterator itEnd = this->contacts.end();
 
     while (it != itEnd)
     {
@@ -328,8 +328,8 @@ bool PersistentUnilateralInteractionConstraint<DataTypes>::isSticked(int _contac
 template<class DataTypes>
 bool PersistentUnilateralInteractionConstraint<DataTypes>::isSliding(int _contactId) const
 {
-    typename sofa::helper::vector< Contact >::const_iterator it = this->contacts.begin();
-    typename sofa::helper::vector< Contact >::const_iterator itEnd = this->contacts.end();
+    typename sofa::type::vector< Contact >::const_iterator it = this->contacts.begin();
+    typename sofa::type::vector< Contact >::const_iterator itEnd = this->contacts.end();
 
     while (it != itEnd)
     {
@@ -386,8 +386,8 @@ void PersistentUnilateralInteractionConstraint<DataTypes>::setContactForce(int i
 template<class DataTypes>
 typename PersistentUnilateralInteractionConstraint<DataTypes>::Deriv PersistentUnilateralInteractionConstraint<DataTypes>::getContactForce(int _contactId) const
 {
-    typename sofa::helper::vector< Contact >::const_iterator it = this->contacts.begin();
-    typename sofa::helper::vector< Contact >::const_iterator itEnd = this->contacts.end();
+    typename sofa::type::vector< Contact >::const_iterator it = this->contacts.begin();
+    typename sofa::type::vector< Contact >::const_iterator itEnd = this->contacts.end();
 
     while (it != itEnd)
     {

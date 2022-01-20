@@ -65,7 +65,7 @@ struct MonitorTest : public Monitor<Rigid3Types>
 
     void testModif(MechanicalObject<Rigid3Types>* mo)
     {
-        helper::vector<unsigned int> idx = d_indices.getValue();
+        type::vector<unsigned int> idx = d_indices.getValue();
         const Rigid3Types::VecCoord& i1 = *m_X;
         const Rigid3Types::VecCoord& i2 = mo->x.getValue();
         const Rigid3Types::VecDeriv& f1 = *m_F;
@@ -162,7 +162,7 @@ struct Monitor_test : public BaseSimulationTest
         std::remove(std::string(monitor->d_fileName.getFullPath() + "_f.txt").c_str());
         std::remove(std::string(monitor->d_fileName.getFullPath() + "_v.txt").c_str());
     }
-    void SetUp()
+    void SetUp() override
     {
         sofa::component::initSofaBase();
         sofa::component::initSofaImplicitOdeSolver();
@@ -200,7 +200,7 @@ struct Monitor_test : public BaseSimulationTest
         EXPECT_FALSE(mo == 0);
     }
 
-    void TearDown()
+    void TearDown() override
     {
     }
 };

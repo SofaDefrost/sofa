@@ -21,8 +21,6 @@ list(APPEND HEADER_FILES
     MultiMapping_test.h
     Multi2Mapping_test.h
     PrimitiveCreation.h
-    TestMessageHandler.h
-    #LogMessage.h
     )
 list(APPEND SOURCE_FILES
     Elasticity_test.cpp
@@ -31,16 +29,6 @@ list(APPEND SOURCE_FILES
     AffinePatch_test.cpp
     )
 
-if(SOFA_WITH_DEPRECATED_COMPONENTS)
-    list(APPEND HEADER_FILES
-        Elasticity_test_deprecated.h
-        Elasticity_test_deprecated.inl
-        )
-    list(APPEND SOURCE_FILES
-        Elasticity_test_deprecated.cpp
-        )
-endif()
-
 sofa_find_package(SofaFramework REQUIRED)
 sofa_find_package(SofaMiscForceField REQUIRED)
 sofa_find_package(SofaMiscMapping REQUIRED)
@@ -48,6 +36,7 @@ sofa_find_package(SofaMiscFem REQUIRED)
 sofa_find_package(SofaMiscCollision REQUIRED)
 sofa_find_package(SofaComponentAll REQUIRED)
 sofa_find_package(SceneCreator REQUIRED)
+sofa_find_package(Sofa.Testing REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES} ${PYTHON_FILES})
 target_link_libraries(${PROJECT_NAME} SceneCreator SofaComponentAll SofaMiscForceField SofaMiscMapping SofaMiscFem SofaMiscCollision Sofa.Testing)

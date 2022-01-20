@@ -24,9 +24,7 @@
 #include <SofaMiscFem/config.h>
 
 #include <SofaMiscFem/BaseMaterial.h>
-#include <newmat/newmat.h>
-#include <newmat/newmatap.h>
-#include <sofa/defaulttype/Vec.h>
+#include <sofa/type/Vec.h>
 
 namespace sofa::component::fem::material
 {
@@ -41,9 +39,9 @@ class PlasticMaterial : public component::fem::BaseMaterial
 public:
     SOFA_CLASS(PlasticMaterial, component::fem::BaseMaterial);
 
-    typedef sofa::defaulttype::Vector3 Vector3;
-    typedef sofa::helper::vector<double> VecDouble;
-    typedef sofa::helper::vector<Vector3> VecStress;
+    typedef sofa::type::Vector3 Vector3;
+    typedef sofa::type::vector<double> VecDouble;
+    typedef sofa::type::vector<Vector3> VecStress;
 
 	// Material properties
     Data<SReal> _poissonRatio; ///< Poisson ratio in Hooke's law

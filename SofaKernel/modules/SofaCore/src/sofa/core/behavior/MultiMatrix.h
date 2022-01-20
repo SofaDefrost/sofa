@@ -36,22 +36,20 @@ class MultiMatrix
 public:
     typedef sofa::core::VecId VecId;
 
+    /// Copy-constructor is forbidden
+    MultiMatrix(const MultiMatrix<Parent>&) = delete;
+
 protected:
     /// Solver who is using this matrix
-    Parent* parent;
-
-    /// Copy-constructor is forbidden
-    MultiMatrix(const MultiMatrix<Parent>&);
+    Parent* parent { nullptr };
 
 public:
 
-    MultiMatrix(Parent* parent) : parent(parent)
+    explicit MultiMatrix(Parent* parent) : parent(parent)
     {
     }
 
-    ~MultiMatrix()
-    {
-    }
+    ~MultiMatrix() = default;
 
     /// m = 0
     void clear()
@@ -65,11 +63,8 @@ public:
         parent->m_resetSystem();
     }
 
-    SOFA_ATTRIBUTE_DEPRECATED("v21.06 (PR#2167)", "v21.12", "Use setSystemMBKMatrix instead.")
-    void operator=(const MechanicalMatrix& m)
-    {
-        setSystemMBKMatrix(m);
-    }
+    SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#2167)", "v21.12", "Use setSystemMBKMatrix instead.")
+    void operator=(const MechanicalMatrix& m) = delete;
 
     void setSystemMBKMatrix(const MechanicalMatrix& m)
     {

@@ -23,7 +23,7 @@
 #define SOFA_CORE_OBJECTMODEL_LINK_H
 
 #include <sofa/core/objectmodel/BaseLink.h>
-#include <sofa/helper/stable_vector.h>
+#include <sofa/type/stable_vector.h>
 #include <sofa/core/PathResolver.h>
 #include <sofa/core/sptr.h>
 #include <sofa/core/fwd.h>
@@ -194,6 +194,11 @@ public:
         isEmpty = false;
         elems[0] = v;
     }
+    void addBegin(TDestPtr v)
+    {
+        isEmpty = false;
+        elems[0] = v;
+    }
     const TPtr& operator[](std::size_t i) const
     {
         return elems[i];
@@ -258,7 +263,7 @@ public:
     /// We use stable_vector to allow insertion/removal of elements
     /// while iterators are used (required to add/remove objects
     /// while visitors are in progress).
-    typedef sofa::helper::stable_vector<TValueType> T;
+    typedef sofa::type::stable_vector<TValueType> T;
     static void clear(T& c)
     {
         c.clear();
@@ -268,6 +273,11 @@ public:
         std::size_t index = c.size();
         c.push_back(TValueType(v));
         return index;
+    }
+    static std::size_t addBegin(T& c, TDestPtr v)
+    {
+        c.insert(c.begin(), TValueType(v));
+        return 0;
     }
     static std::size_t find(const T& c, TDestPtr v)
     {
@@ -373,6 +383,16 @@ public:
         TraitsContainer::clear(m_value);
     }
 
+    bool addBegin(DestPtr v)
+    {
+        if (!v)
+            return false;
+        std::size_t index = TraitsContainer::addBegin(m_value,v);
+        updateCounter();
+        added(v, index);
+        return true;
+    }
+
     bool add(DestPtr v)
     {
         if (!v)
@@ -468,11 +488,8 @@ public:
         m_owner->addLink(this);
     }
 
-    [[deprecated("2021-01-01: CheckPath as been deprecated for complete removal in PR. You can update your code by using PathResolver::CheckPath(Base*, BaseClass*, string).")]]
-    static bool CheckPath(const std::string& path, Base* context)
-    {
-        return PathResolver::CheckPath(context, sofa::core::objectmodel::base::GetClass<DestType>(), path);
-    }
+    SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1717)", "v21.12", "Use PathResolver::CheckPaths(Base*, BaseClass*, string) instead.")
+    static bool CheckPath(const std::string& path, Base* context) = delete;
 
 protected:
     OwnerType* m_owner {nullptr};
@@ -611,11 +628,8 @@ public:
         return get(index);
     }
 
-    [[deprecated("2021-01-01: CheckPaths as been deprecated for complete removal in PR. You can update your code by using PathResolver::CheckPaths(Base*, BaseClass*, string).")]]
-    static bool CheckPaths(const std::string& pathes, Base* context)
-    {
-        return PathResolver::CheckPaths(context, DestType::GetClass(), pathes);
-    }
+    SOFA_ATTRIBUTE_DISABLED("v21.06 (PR#1717)", "v21.12", "Use PathResolver::CheckPaths(Base*, BaseClass*, string) instead.")
+    static bool CheckPaths(const std::string& pathes, Base* context) = delete;
 
 protected:
     ValidatorFn m_validator;

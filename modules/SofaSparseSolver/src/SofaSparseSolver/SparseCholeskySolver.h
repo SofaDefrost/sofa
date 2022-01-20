@@ -26,9 +26,8 @@
 #include <sofa/core/behavior/LinearSolver.h>
 #include <SofaBaseLinearSolver/MatrixLinearSolver.h>
 #include <sofa/simulation/MechanicalVisitor.h>
-#include <SofaBaseLinearSolver/FullMatrix.h>
-#include <SofaBaseLinearSolver/SparseMatrix.h>
-#include <SofaBaseLinearSolver/CompressedRowSparseMatrix.h>
+#include <sofa/linearalgebra/SparseMatrix.h>
+#include <sofa/linearalgebra/CompressedRowSparseMatrix.h>
 #include <sofa/helper/map.h>
 #include <cmath>
 #include <csparse.h>
@@ -66,15 +65,15 @@ public :
     csn *N;
     int * A_i;
     int * A_p;
-    helper::vector<double> A_x,z_tmp,r_tmp,tmp;
+    type::vector<double> A_x,z_tmp,r_tmp,tmp;
 
     void solveT(double * z, double * r);
     void solveT(float * z, float * r);
 };
 
 #if  !defined(SOFA_COMPONENT_LINEARSOLVER_SPARSECHOLESKYSOLVER_CPP)
-extern template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< CompressedRowSparseMatrix<double>,FullVector<double> >;
-extern template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< CompressedRowSparseMatrix<float>,FullVector<float> >;
+extern template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< sofa::linearalgebra::CompressedRowSparseMatrix<double>, sofa::linearalgebra::FullVector<double> >;
+extern template class SOFA_SOFASPARSESOLVER_API SparseCholeskySolver< sofa::linearalgebra::CompressedRowSparseMatrix<float>, sofa::linearalgebra::FullVector<float> >;
 #endif
 
 } // namespace linearsolver

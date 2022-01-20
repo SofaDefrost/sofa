@@ -66,7 +66,7 @@ public:
         m_constraint = c;
     }
 
-    void setInitForce(defaulttype::Vec3d f)
+    void setInitForce(type::Vec3d f)
     {
         _f[0] = f.x();
         _f[1] = f.y();
@@ -136,12 +136,12 @@ protected:
     /// Computes constraint violation in position and stores it into resolution global vector
     ///
     /// @param v Global resolution vector
-    virtual void getPositionViolation(defaulttype::BaseVector *v);
+    virtual void getPositionViolation(linearalgebra::BaseVector *v);
 
     ///Computes constraint violation in velocity and stores it into resolution global vector
     ///
     /// @param v Global resolution vector
-    virtual void getVelocityViolation(defaulttype::BaseVector *v);
+    virtual void getVelocityViolation(linearalgebra::BaseVector *v);
 
 public:
 

@@ -28,9 +28,8 @@ namespace sofa::component::mapping
 /// Groupe the using as early as possible to make very obvious what are the
 /// external dependencies of the following code.
 using core::visual::VisualParams;
-using sofa::defaulttype::BaseMatrix;
-using sofa::defaulttype::Vec3dTypes;
-using sofa::defaulttype::Vec3fTypes;
+using sofa::linearalgebra::BaseMatrix;
+using sofa::defaulttype::Vec3Types;
 
 /// Class allowing barycentric mapping computation on a MeshTopology
 template<class In, class Out>
@@ -55,8 +54,6 @@ public:
     typedef typename Inherit1::MatrixType MatrixType;
     typedef typename MatrixType::Index MatrixTypeIndex;
 
-    typedef typename Inherit1::ForceMask ForceMask;
-
     using Index = sofa::Index;
 
 public:
@@ -80,7 +77,7 @@ public:
     void applyJT( typename In::MatrixDeriv& out, const typename Out::MatrixDeriv& in ) override;
     const BaseMatrix* getJ(int outSize, int inSize) override;
 
-    sofa::helper::vector< MappingData3D > const* getMap3d() const { return &m_map3d; }
+    sofa::type::vector< MappingData3D > const* getMap3d() const { return &m_map3d; }
 
     template<class I, class O>
     friend std::istream& operator >> ( std::istream& in, BarycentricMapperMeshTopology<I, O> &b );
@@ -91,13 +88,11 @@ public:
 
 protected:
     BarycentricMapperMeshTopology(core::topology::BaseMeshTopology* fromTopology,
-                                  topology::PointSetTopologyContainer* toTopology) ;
+        core::topology::BaseMeshTopology* toTopology) ;
 
-    void addMatrixContrib(MatrixType* m, int row, int col, Real value);
-
-    sofa::helper::vector< MappingData1D >  m_map1d;
-    sofa::helper::vector< MappingData2D >  m_map2d;
-    sofa::helper::vector< MappingData3D >  m_map3d;
+    sofa::type::vector< MappingData1D >  m_map1d;
+    sofa::type::vector< MappingData2D >  m_map2d;
+    sofa::type::vector< MappingData3D >  m_map3d;
 
     MatrixType* m_matrixJ {nullptr};
     bool        m_updateJ {false};
@@ -108,7 +103,7 @@ private:
 };
 
 #if !defined(SOFA_COMPONENT_MAPPING_BARYCENTRICMAPPERMESHTOPOLOGY_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperMeshTopology< Vec3dTypes, Vec3dTypes >;
+extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperMeshTopology< Vec3Types, Vec3Types >;
 
 
 #endif

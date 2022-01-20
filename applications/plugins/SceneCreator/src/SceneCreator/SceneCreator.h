@@ -39,8 +39,8 @@ using sofa::core::objectmodel::BaseObject ;
 
 typedef SReal Scalar;
 typedef sofa::defaulttype::Vec3Types::Deriv Deriv3;
-using sofa::defaulttype::Vec3;
-using sofa::defaulttype::Vec1;
+using sofa::type::Vec3;
+using sofa::type::Vec1;
 
 typedef enum
 {
@@ -49,7 +49,7 @@ typedef enum
     MT_Identity
 } MappingType;
 
-SOFA_SCENECREATOR_API simulation::Node::SPtr createRootWithCollisionPipeline(const std::string &responseType=std::string("default"));
+SOFA_SCENECREATOR_API simulation::Node::SPtr createRootWithCollisionPipeline(const std::string &responseType=std::string("PenalityContactForceField"));
 
 SOFA_SCENECREATOR_API simulation::Node::SPtr createEulerSolverNode(simulation::Node::SPtr parent,
                                                                    const std::string& name,

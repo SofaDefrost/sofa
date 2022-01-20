@@ -5,7 +5,7 @@ unset(GKLIB_PATH CACHE)
 get_filename_component(GKLIB_PATH "GKlib" ABSOLUTE)
 include(GKlib/GKlibSystem.cmake)
 
-file(GLOB metis_sources libmetis/*.c)
+file(GLOB metis_sources libmetis/*.c libmetis/*.h include/*.h)
 
 # The code must be relocatable if we want to link a shared library against it.
 if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xGNU" OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xClang")
@@ -17,6 +17,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CUR
 target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libmetis>")
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} m)
+endif()
+
+if(WIN32)
+    # remove warnings about deprecation (CRT,etc)
+    target_compile_options(${PROJECT_NAME} PRIVATE "/wd4996")
 endif()
 
 sofa_create_package_with_targets(

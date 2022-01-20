@@ -40,7 +40,7 @@ using sofa::core::visual::VisualParams;
 #include <SofaGeneralEngine/ClusteringEngine.h>
 using sofa::component::engine::ClusteringEngine ;
 
-using sofa::helper::vector;
+using sofa::type::vector;
 
 namespace sofa
 {
@@ -58,7 +58,7 @@ struct ClusteringEngine_test : public BaseSimulationTest,
     typename MechanicalObject<DataTypes>::SPtr m_mecaobject;
 
 
-    void SetUp()
+    void SetUp() override
     {
         setSimulation(m_simu = new DAGSimulation());
         m_node = m_simu->createNewGraph("root");

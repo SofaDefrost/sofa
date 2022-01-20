@@ -25,7 +25,7 @@
 #include <sofa/core/behavior/PairInteractionForceField.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <sofa/helper/vector.h>
+#include <sofa/type/vector.h>
 #include <sofa/helper/accessor.h>
 
 #include <sofa/core/objectmodel/DataFileName.h>
@@ -102,7 +102,7 @@ public:
     Data<SReal> kd; ///< uniform damping for the all springs
     Data<float> showArrowSize; ///< size of the axis
     Data<int> drawMode;             ///Draw Mode: 0=Line - 1=Cylinder - 2=Arrow
-    Data<sofa::helper::vector<Spring> > springs; ///< pairs of indices, stiffness, damping, rest length
+    Data<sofa::type::vector<Spring> > springs; ///< pairs of indices, stiffness, damping, rest length
 
 protected:
     core::objectmodel::DataFileName fileSprings;
@@ -126,7 +126,7 @@ public:
     core::behavior::MechanicalState<DataTypes>* getObject1() { return this->mstate1; }
     core::behavior::MechanicalState<DataTypes>* getObject2() { return this->mstate2; }
 
-    const sofa::helper::vector< Spring >& getSprings() const {return springs.getValue();}
+    const sofa::type::vector< Spring >& getSprings() const {return springs.getValue();}
 
     void reinit() override;
     void init() override;
@@ -139,7 +139,7 @@ public:
     SReal getPotentialEnergy(const core::MechanicalParams* /* PARAMS FIRST */, const DataVecCoord& data_x1, const DataVecCoord& data_x2) const override;
 
     using Inherit::addKToMatrix;
-    virtual void addKToMatrix(sofa::defaulttype::BaseMatrix * /*mat*/, SReal /*kFact*/, unsigned int &/*offset*/);
+    virtual void addKToMatrix(sofa::linearalgebra::BaseMatrix * /*mat*/, SReal /*kFact*/, unsigned int &/*offset*/);
 
     SReal getStiffness() const { return ks.getValue(); }
     SReal getDamping() const { return kd.getValue(); }
@@ -151,12 +151,13 @@ public:
     void setDrawMode(int m) {drawMode.setValue(m);}
 
     void draw(const core::visual::VisualParams* vparams) override;
+    void computeBBox(const core::ExecParams* params, bool onlyVisible=false) override;
 
     // -- Modifiers
 
     void clear(sofa::Size reserve=0)
     {
-        sofa::helper::vector<Spring>& springs = *this->springs.beginEdit();
+        sofa::type::vector<Spring>& springs = *this->springs.beginEdit();
         springs.clear();
         if (reserve) springs.reserve(reserve);
         this->springs.endEdit();
@@ -167,7 +168,7 @@ public:
         if (idSpring >= (this->springs.getValue()).size())
             return;
 
-        sofa::helper::vector<Spring>& springs = *this->springs.beginEdit();
+        sofa::type::vector<Spring>& springs = *this->springs.beginEdit();
         springs.erase(springs.begin() +idSpring );
         this->springs.endEdit();
     }
@@ -183,8 +184,6 @@ public:
         springs.beginEdit()->push_back(spring);
         springs.endEdit();
     }
-
-    void updateForceMask() override;
 
     void handleTopologyChange(core::topology::Topology *topo) override;
 

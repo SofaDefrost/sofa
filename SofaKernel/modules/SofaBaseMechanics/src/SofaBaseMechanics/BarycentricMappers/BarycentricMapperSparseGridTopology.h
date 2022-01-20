@@ -27,10 +27,9 @@
 namespace sofa::component::mapping
 {
 
-using sofa::defaulttype::BaseMatrix;
+using sofa::linearalgebra::BaseMatrix;
 using core::visual::VisualParams;
-using sofa::defaulttype::Vec3dTypes;
-using sofa::defaulttype::Vec3fTypes;
+using sofa::defaulttype::Vec3Types;
 
 /// Class allowing barycentric mapping computation on a SparseGridTopology
 template<class In, class Out>
@@ -47,7 +46,6 @@ public:
     typedef typename Inherit1::MBloc MBloc;
     typedef typename Inherit1::MatrixType MatrixType;
     typedef typename MatrixType::Index MatrixTypeIndex;
-    typedef typename Inherit1::ForceMask ForceMask;
     enum { NIn = Inherit1::NIn };
     enum { NOut = Inherit1::NOut };
 
@@ -77,18 +75,16 @@ public:
 
 protected:
     BarycentricMapperSparseGridTopology(topology::SparseGridTopology* fromTopology,
-                                        topology::PointSetTopologyContainer* _toTopology);
+        core::topology::BaseMeshTopology* _toTopology);
 
-    void addMatrixContrib(MatrixType* m, int row, int col, Real value);
-
-    sofa::helper::vector<CubeData> m_map;
+    sofa::type::vector<CubeData> m_map;
     topology::SparseGridTopology* m_fromTopology {nullptr};
     MatrixType* m_matrixJ {nullptr};
     bool m_updateJ {false};
 };
 
 #if !defined(SOFA_COMPONENT_MAPPING_BARYCENTRICMAPPERSPARSEGRIDTOPOLOGY_CPP)
-extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperSparseGridTopology< Vec3dTypes, Vec3dTypes >;
+extern template class SOFA_SOFABASEMECHANICS_API BarycentricMapperSparseGridTopology< Vec3Types, Vec3Types >;
 
 
 #endif

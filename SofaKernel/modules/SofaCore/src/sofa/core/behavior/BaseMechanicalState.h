@@ -19,24 +19,16 @@
 *                                                                             *
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
-#ifndef SOFA_CORE_BEHAVIOR_BASEMECHANICALSTATE_H
-#define SOFA_CORE_BEHAVIOR_BASEMECHANICALSTATE_H
+#pragma once
 
 #include <sofa/core/fwd.h>
 #include <sofa/core/BaseState.h>
 #include <sofa/core/MultiVecId.h>
-#include <sofa/defaulttype/Vec.h>
-#include <sofa/defaulttype/Quat.h>
-#include <sofa/helper/StateMask.h>
-#include <sofa/defaulttype/fwd.h> /// For BaseMatrix
+#include <sofa/type/Vec.h>
+#include <sofa/type/Quat.h>
+#include <sofa/linearalgebra/fwd.h> /// For BaseMatrix
 
-namespace sofa
-{
-
-namespace core
-{
-
-namespace behavior
+namespace sofa::core::behavior
 {
 
 /**
@@ -133,14 +125,18 @@ public:
     /// \li v = a
     /// \li v = a + b
     /// \li v = b * f
-    virtual void vOp(const ExecParams* params, VecId v, ConstVecId a = ConstVecId::null(), ConstVecId b = ConstVecId::null(), SReal f = 1.0 ) = 0;
+    virtual void vOp(const ExecParams* params, VecId v,
+                     ConstVecId a = ConstVecId::null(),
+                     ConstVecId b = ConstVecId::null(),
+                     SReal f = 1.0 ) = 0;
+
     /// Data structure describing a set of linear operation on vectors
     /// \see vMultiOp
-    class VMultiOpEntry : public std::pair< MultiVecId, helper::vector< std::pair< ConstMultiVecId, SReal > > >
+    class VMultiOpEntry : public std::pair< MultiVecId, type::vector< std::pair< ConstMultiVecId, SReal > > >
     {
     public:
         typedef std::pair< ConstMultiVecId, SReal > Fact;
-        typedef helper::vector< Fact > VecFact;
+        typedef type::vector< Fact > VecFact;
         typedef std::pair< MultiVecId, VecFact > Inherit;
         VMultiOpEntry() : Inherit(MultiVecId::null(), VecFact()) {}
         VMultiOpEntry(MultiVecId v) : Inherit(v, VecFact()) {}
@@ -152,7 +148,7 @@ public:
         { this->second.push_back(Fact(a, af));  this->second.push_back(Fact(b, bf)); }
     };
 
-    typedef helper::vector< VMultiOpEntry > VMultiOp;
+    typedef type::vector< VMultiOpEntry > VMultiOp;
 
     /// \brief Perform a sequence of linear vector accumulation operation $r_i = sum_j (v_j*f_{ij})$
     ///
@@ -218,22 +214,22 @@ public:
     virtual void resetConstraint(const ConstraintParams* params) = 0;
 
     /// build the jacobian of the constraint in a baseMatrix
-    virtual void getConstraintJacobian(const ConstraintParams* params, sofa::defaulttype::BaseMatrix* J,unsigned int & off) = 0;
+    virtual void getConstraintJacobian(const ConstraintParams* params, sofa::linearalgebra::BaseMatrix* J,unsigned int & off) = 0;
 
     /// fill the jacobian matrix (of the constraints) with identity blocks on the provided list of nodes(dofs)
-    virtual void buildIdentityBlocksInJacobian(const sofa::helper::vector<unsigned int>& list_n, core::MatrixDerivId &mID) = 0;
+    virtual void buildIdentityBlocksInJacobian(const sofa::type::vector<unsigned int>& list_n, core::MatrixDerivId &mID) = 0;
 
     class ConstraintBlock
     {
     public:
-        ConstraintBlock( unsigned int c, defaulttype::BaseMatrix *m):column(c),matrix(m) {}
+        ConstraintBlock( unsigned int c, linearalgebra::BaseMatrix *m):column(c),matrix(m) {}
 
         unsigned int getColumn() const {return column;}
-        const defaulttype::BaseMatrix &getMatrix() const {return *matrix;}
-        defaulttype::BaseMatrix *getMatrix() {return matrix;}
+        const linearalgebra::BaseMatrix &getMatrix() const {return *matrix;}
+        linearalgebra::BaseMatrix *getMatrix() {return matrix;}
     protected:
         unsigned int column;
-        defaulttype::BaseMatrix *matrix;
+        linearalgebra::BaseMatrix *matrix;
     };
 
     /// Express the matrix L in term of block of matrices, using the indices of the lines in the MatrixDeriv container
@@ -281,12 +277,12 @@ public:
     virtual void applyRotation (const SReal /*rx*/, const SReal /*ry*/, const SReal /*rz*/) {}
 
     /// Rotate the current state
-    virtual void applyRotation(const defaulttype::Quat q)=0;
+    virtual void applyRotation(const type::Quat<SReal> q)=0;
 
     /// Scale the current state
     virtual void applyScale(const SReal /*sx*/,const SReal /*sy*/,const SReal /*sz*/)=0;
 
-    virtual defaulttype::Vector3 getScale() const { return defaulttype::Vector3(1.0,1.0,1.0); }
+    virtual type::Vector3 getScale() const { return type::Vector3(1.0,1.0,1.0); }
 
     virtual bool addBBox(SReal* /*minBBox*/, SReal* /*maxBBox*/)
     {
@@ -307,16 +303,6 @@ public:
 
     /// @}
 
-    /// @name Mask-based optimized computations (by only updating a subset of the DOFs)
-    /// @{
-
-    typedef helper::StateMask ForceMask; // note this should be space-optimized (a bool = a bit) in the STL
-
-    /// Mask to filter the particles. Used inside MechanicalMappings inside applyJ and applyJT methods.
-    ForceMask forceMask;
-
-    /// @}
-
     /// @name Interface with BaseMatrix / BaseVector
     /// @{
 
@@ -332,11 +318,11 @@ public:
 
     /// \brief Copy data to a global BaseVector from the state stored in a local vector.
     /// @param offset the offset in the BaseVector where the scalar values will be used. It will be updated to the first scalar value after the ones used by this operation when this method returns
-    virtual void copyToBaseVector(defaulttype::BaseVector* dest, ConstVecId src, unsigned int &offset) = 0;
+    virtual void copyToBaseVector(linearalgebra::BaseVector* dest, ConstVecId src, unsigned int &offset) = 0;
 
     /// \brief Copy data to a local vector from the state stored in a global BaseVector.
     /// @param offset the offset in the BaseVector where the scalar values will be used. It will be updated to the first scalar value after the ones used by this operation when this method returns
-    virtual void copyFromBaseVector(VecId dest, const defaulttype::BaseVector* src, unsigned int &offset) = 0;
+    virtual void copyFromBaseVector(VecId dest, const linearalgebra::BaseVector* src, unsigned int &offset) = 0;
 
     /// \brief Copy data to an external, user-allocated buffer.
     ///
@@ -355,20 +341,20 @@ public:
     
     /// \brief Add data to a global BaseVector from the state stored in a local vector.
     /// @param offset the offset in the BaseVector where the scalar values will be used. It will be updated to the first scalar value after the ones used by this operation when this method returns
-    virtual void addToBaseVector(defaulttype::BaseVector* dest, ConstVecId src, unsigned int &offset) = 0;
+    virtual void addToBaseVector(linearalgebra::BaseVector* dest, ConstVecId src, unsigned int &offset) = 0;
 
     /// \brief
     ///
     /// Perform dest[i][j] += src[offset + i][j] 0<= i < src_entries 0<= j < 3 (for 3D objects) 0 <= j < 2 (for 2D objects)
     /// @param offset the offset in the BaseVector where the scalar values will be used. It will be updated to the first scalar value after the ones used by this operation when this method returns
-    virtual void addFromBaseVectorSameSize(VecId dest, const defaulttype::BaseVector* src, unsigned int &offset) = 0;
+    virtual void addFromBaseVectorSameSize(VecId dest, const linearalgebra::BaseVector* src, unsigned int &offset) = 0;
 
 
     /// \brief
     ///
     /// Perform dest[ offset + i ][j] += src[i][j]  0<= i < src_entries  0<= j < 3 (for 3D objects) 0 <= j < 2 (for 2D objects)
     /// @param offset the offset in the MechanicalObject local vector specified by VecId dest. It will be updated to the first scalar value after the ones used by this operation when this method returns.
-    virtual void addFromBaseVectorDifferentSize(VecId dest, const defaulttype::BaseVector* src, unsigned int &offset ) = 0;
+    virtual void addFromBaseVectorDifferentSize(VecId dest, const linearalgebra::BaseVector* src, unsigned int &offset ) = 0;
     /// @}
 
     /// @name Data output
@@ -390,10 +376,4 @@ public:
 
 };
 
-} // namespace behavior
-
-} // namespace core
-
-} // namespace sofa
-
-#endif
+} // namespace sofa::core::behavior

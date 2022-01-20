@@ -21,17 +21,13 @@
 ******************************************************************************/
 #pragma once
 #include <SofaGeneralSimpleFem/config.h>
-
-
-
 #include <sofa/core/behavior/ForceField.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <sofa/defaulttype/Mat.h>
-#include <SofaBaseTopology/TopologyData.h>
+#include <sofa/type/Mat.h>
+#include <sofa/core/topology/TopologyData.h>
 
-#include <map>
-#include <sofa/helper/map.h>
+#include <sofa/type/trait/Rebind.h>
 
 namespace sofa::component::forcefield
 {
@@ -86,12 +82,13 @@ public:
     typedef sofa::core::topology::BaseMeshTopology::SeqTriangles VecElement;
     typedef sofa::core::topology::BaseMeshTopology::TrianglesAroundVertex TrianglesAroundVertex;
 
-    typedef sofa::helper::Quater<Real> Quat;
+    typedef sofa::type::Quat<Real> Quat;
 
 protected:
-    typedef defaulttype::Mat<2, 3, Real > Transformation;				    ///< matrix for rigid transformations like rotations
+    typedef type::Mat<2, 3, Real > Transformation;				    ///< matrix for rigid transformations like rotations
+    typedef type::Mat<3, 3, Real> MaterialStiffness;
     enum { DerivSize = DataTypes::deriv_total_size };
-    typedef defaulttype::Mat<DerivSize, DerivSize, Real> MatBloc;
+    typedef type::Mat<DerivSize, DerivSize, Real> MatBloc;
 
     typedef TriangularFEMForceFieldOptimInternalData<DataTypes> InternalData;
     InternalData data;
@@ -102,6 +99,9 @@ protected:
 
     virtual ~TriangularFEMForceFieldOptim();
 public:
+    Real getPoisson() { return d_poisson.getValue(); }
+    Real getYoung() { return d_young.getValue(); }
+
     void init() override;
     void reinit() override;
     void addForce(const core::MechanicalParams* mparams, DataVecDeriv& f, const DataVecCoord& x, const DataVecDeriv& v) override;
@@ -123,7 +123,7 @@ public:
         Real bx, cx, cy, ss_factor;
         Transformation init_frame; // Mat<2,3,Real>
 
-        TriangleInfo() { }
+        TriangleInfo() :bx(0), cx(0), cy(0), ss_factor(0) { }
 
         /// Output stream
         inline friend std::ostream& operator<< ( std::ostream& os, const TriangleInfo& ti )
@@ -178,71 +178,30 @@ public:
             return in;
         }
     };
-    /// Class to store FEM information on each edge, for topology modification handling
-    class EdgeInfo
-    {
-    public:
-        bool fracturable;
-
-        EdgeInfo()
-            : fracturable(false) { }
-
-        /// Output stream
-        inline friend std::ostream& operator<< ( std::ostream& os, const EdgeInfo& /*ei*/ )
-        {
-            return os;
-        }
-
-        /// Input stream
-        inline friend std::istream& operator>> ( std::istream& in, EdgeInfo& /*ei*/ )
-        {
-            return in;
-        }
-    };
-
-    /// Class to store FEM information on each vertex, for topology modification handling
-    class VertexInfo
-    {
-    public:
-        VertexInfo()
-        /*:sumEigenValues(0.0)*/ {}
-
-        /// Output stream
-        inline friend std::ostream& operator<< ( std::ostream& os, const VertexInfo& /*vi*/)
-        {
-            return os;
-        }
-        /// Input stream
-        inline friend std::istream& operator>> ( std::istream& in, VertexInfo& /*vi*/)
-        {
-            return in;
-        }
-    };
 
     /// Topology Data
-    typedef typename VecCoord::template rebind<TriangleInfo>::other VecTriangleInfo;
-    typedef typename VecCoord::template rebind<TriangleState>::other VecTriangleState;
-    typedef typename VecCoord::template rebind<VertexInfo>::other VecVertexInfo;
-    typedef typename VecCoord::template rebind<EdgeInfo>::other VecEdgeInfo;
-    topology::TriangleData<VecTriangleInfo> d_triangleInfo; ///< Internal triangle data (persistent)
-    topology::TriangleData<VecTriangleState> d_triangleState; ///< Internal triangle data (time-dependent)
-    topology::PointData<VecVertexInfo> d_vertexInfo; ///< Internal point data
-    topology::EdgeData<VecEdgeInfo> d_edgeInfo; ///< Internal edge data
+    using VecTriangleInfo  = sofa::type::rebind_to<VecCoord, TriangleInfo>;
+    using VecTriangleState = sofa::type::rebind_to<VecCoord, TriangleState>;
 
+    core::topology::TriangleData<VecTriangleInfo> d_triangleInfo; ///< Internal triangle data (persistent)
+    core::topology::TriangleData<VecTriangleState> d_triangleState; ///< Internal triangle data (time-dependent)
 
-    class TFEMFFOTriangleInfoHandler : public topology::TopologyDataHandler<Triangle,VecTriangleInfo >
-    {
-    public:
-        TFEMFFOTriangleInfoHandler(TriangularFEMForceFieldOptim<DataTypes>* _ff, topology::TriangleData<VecTriangleInfo >* _data) : topology::TopologyDataHandler<Triangle, VecTriangleInfo >(_data), ff(_ff) {}
+    /** Method to create @sa TriangleInfo when a new triangle is created.
+    * Will be set as creation callback in the TriangleData @sa d_triangleInfo
+    */
+    void createTriangleInfo(Index triangleIndex, TriangleInfo&, 
+        const Triangle& t,
+        const sofa::type::vector< Index >&,
+        const sofa::type::vector< SReal >&);
 
-        void applyCreateFunction(Index triangleIndex, TriangleInfo& ,
-                const Triangle & t,
-                const sofa::helper::vector< Index > &,
-                const sofa::helper::vector< double > &);
+    /** Method to create @sa TriangleState when a new triangle is created.
+    * Will be set as creation callback in the TriangleData @sa d_triangleState
+    */
+    void createTriangleState(Index triangleIndex, TriangleState&, 
+        const Triangle& t,
+        const sofa::type::vector< Index > &,
+        const sofa::type::vector< SReal > &);
 
-    protected:
-        TriangularFEMForceFieldOptim<DataTypes>* ff;
-    };
     void initTriangleInfo(Index triangleIndex, TriangleInfo& ti, const Triangle t, const VecCoord& x0);
     void initTriangleState(Index triangleIndex, TriangleState& ti, const Triangle t, const VecCoord& x);
 
@@ -256,25 +215,18 @@ public:
         computeTriangleRotation(result,x0[t[0]], x0[t[1]], x0[t[2]]);
     }
 
-    class TFEMFFOTriangleStateHandler : public topology::TopologyDataHandler<Triangle,VecTriangleState >
-    {
-    public:
-        TFEMFFOTriangleStateHandler(TriangularFEMForceFieldOptim<DataTypes>* _ff, topology::TriangleData<VecTriangleState >* _data) : topology::TopologyDataHandler<Triangle, VecTriangleState >(_data), ff(_ff) {}
-
-        void applyCreateFunction(Index triangleIndex, TriangleState& ,
-                const Triangle & t,
-                const sofa::helper::vector< Index > &,
-                const sofa::helper::vector< double > &);
-
-    protected:
-        TriangularFEMForceFieldOptim<DataTypes>* ff;
-    };
-
     template<class MatrixWriter>
     void addKToMatrixT(const core::MechanicalParams* mparams, MatrixWriter m);
 
     void getTriangleVonMisesStress(Index i, Real& stressValue);
     void getTrianglePrincipalStress(Index i, Real& stressValue, Deriv& stressDirection, Real& stressValue2, Deriv& stressDirection2);
+
+    /// Public methods to access FEM information per element. Those method should not be used internally as they add check on element id.
+    type::fixed_array <Coord, 3> getRotatedInitialElement(Index elemId);
+    Transformation getRotationMatrix(Index elemId);
+    MaterialStiffness getMaterialStiffness(Index elemId);
+    type::Vec3 getStrainDisplacementFactors(Index elemId);
+    Real getTriangleFactor(Index elemId);
 
 public:
 
@@ -288,10 +240,6 @@ public:
     Data<bool> d_showStressValue;
     Data<bool> d_showStressVector; ///< Flag activating rendering of stress directions within each triangle
     Data<Real> d_showStressMaxValue; ///< Max value for rendering of stress values
-
-
-    TFEMFFOTriangleInfoHandler* triangleInfoHandler;
-    TFEMFFOTriangleStateHandler* triangleStateHandler;
 
     /// Link to be set to the topology container in the component graph. 
     SingleLink<TriangularFEMForceFieldOptim<DataTypes>, sofa::core::topology::BaseMeshTopology, BaseLink::FLAG_STOREPATH | BaseLink::FLAG_STRONGLINK> l_topology;

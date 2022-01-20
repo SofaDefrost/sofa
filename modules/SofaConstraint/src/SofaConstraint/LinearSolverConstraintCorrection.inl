@@ -26,6 +26,7 @@
 #include <sofa/simulation/Node.h>
 #include <sofa/simulation/MechanicalVisitor.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/core/ConstraintParams.h>
 
 #include <sstream>
 #include <list>
@@ -67,7 +68,7 @@ void LinearSolverConstraintCorrection<DataTypes>::init()
 
     odesolver = c->get<sofa::core::behavior::OdeSolver>() ;
 
-    const helper::vector<std::string>& solverNames = solverName.getValue();
+    const type::vector<std::string>& solverNames = solverName.getValue();
 
     linearsolvers.clear();
 
@@ -111,7 +112,7 @@ void LinearSolverConstraintCorrection<DataTypes>::init()
 }
 
 template<class TDataTypes>
-void LinearSolverConstraintCorrection<TDataTypes>::computeJ(sofa::defaulttype::BaseMatrix* W, const MatrixDeriv& c)
+void LinearSolverConstraintCorrection<TDataTypes>::computeJ(sofa::linearalgebra::BaseMatrix* W, const MatrixDeriv& c)
 {
     if(d_componentState.getValue() != ComponentState::Valid)
         return ;
@@ -145,7 +146,7 @@ void LinearSolverConstraintCorrection<TDataTypes>::computeJ(sofa::defaulttype::B
 }
 
 template<class DataTypes>
-void LinearSolverConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(const sofa::core::ConstraintParams *cparams, sofa::defaulttype::BaseMatrix* W)
+void LinearSolverConstraintCorrection<DataTypes>::addComplianceInConstraintSpace(const sofa::core::ConstraintParams *cparams, sofa::linearalgebra::BaseMatrix* W)
 {
     if(d_componentState.getValue() != ComponentState::Valid)
         return ;
@@ -191,7 +192,7 @@ void LinearSolverConstraintCorrection<DataTypes>::rebuildSystem(double massFacto
 }
 
 template<class DataTypes>
-void LinearSolverConstraintCorrection<DataTypes>::getComplianceMatrix(defaulttype::BaseMatrix* Minv) const
+void LinearSolverConstraintCorrection<DataTypes>::getComplianceMatrix(linearalgebra::BaseMatrix* Minv) const
 {
     if(d_componentState.getValue() != ComponentState::Valid)
         return ;
@@ -201,8 +202,8 @@ void LinearSolverConstraintCorrection<DataTypes>::getComplianceMatrix(defaulttyp
     const unsigned int numDOFs = mstate->getSize();
     const unsigned int N = Deriv::size();
     const unsigned int numDOFReals = numDOFs*N;
-    static linearsolver::SparseMatrix<SReal> J; //local J
-    if (J.rowSize() != (defaulttype::BaseMatrix::Index)numDOFReals)
+    static linearalgebra::SparseMatrix<SReal> J; //local J
+    if (J.rowSize() != (linearalgebra::BaseMatrix::Index)numDOFReals)
     {
         J.resize(numDOFReals,numDOFReals);
         for (unsigned int i=0; i<numDOFReals; ++i)
@@ -305,7 +306,7 @@ void LinearSolverConstraintCorrection< DataTypes >::applyVelocityCorrection(cons
 
 
 template<class DataTypes>
-void LinearSolverConstraintCorrection<DataTypes>::applyContactForce(const defaulttype::BaseVector *f)
+void LinearSolverConstraintCorrection<DataTypes>::applyContactForce(const linearalgebra::BaseVector *f)
 {
     core::VecDerivId forceID(core::VecDerivId::V_FIRST_DYNAMIC_INDEX);
     core::VecDerivId dxID = core::VecDerivId::dx();
@@ -487,25 +488,27 @@ void LinearSolverConstraintCorrection<DataTypes>::resetForUnbuiltResolution(doub
         std::vector< std::vector<unsigned int> > ordering_per_dof;
         ordering_per_dof.resize(mstate->getSize());   // for each dof, provide the list of constraint for which this dof is the smallest involved
 
-        MatrixDerivRowConstIterator rowItEnd = constraints.end();
-        unsigned int c = 0;
-
-        // we process each constraint of the Mechanical State to know the smallest dofs
-        // the constraints that are concerns the object are removed
-        for (MatrixDerivRowConstIterator rowIt = constraints.begin(); rowIt != rowItEnd; ++rowIt)
+        rowItEnd = constraints.end();
         {
-            ordering_per_dof[VecMinDof[c]].push_back(rowIt.index());
-            c++;
-            renumbering.remove( rowIt.index() );
+            unsigned int constraintId = 0;
+
+            // we process each constraint of the Mechanical State to know the smallest dofs
+            // the constraints that are concerns the object are removed
+            for (MatrixDerivRowConstIterator rowIt = constraints.begin(); rowIt != rowItEnd; ++rowIt)
+            {
+                ordering_per_dof[VecMinDof[constraintId]].push_back(rowIt.index());
+                constraintId++;
+                renumbering.remove( rowIt.index() );
+            }
         }
 
 
         // fill the end renumbering list with the new order
         for (size_t dof = 0; dof < mstate->getSize(); dof++)
         {
-            for (size_t c = 0; c < ordering_per_dof[dof].size(); c++)
+            for (size_t constraintId = 0; constraintId < ordering_per_dof[dof].size(); constraintId++)
             {
-                renumbering.push_back(ordering_per_dof[dof][c]); // push_back the list of constraint by starting from the smallest dof
+                renumbering.push_back(ordering_per_dof[dof][constraintId]); // push_back the list of constraint by starting from the smallest dof
             }
         }
     }
@@ -642,7 +645,7 @@ void LinearSolverConstraintCorrection<DataTypes>::setConstraintDForce(double *df
 }
 
 template<class DataTypes>
-void LinearSolverConstraintCorrection<DataTypes>::getBlockDiagonalCompliance(defaulttype::BaseMatrix* W, int begin, int end)
+void LinearSolverConstraintCorrection<DataTypes>::getBlockDiagonalCompliance(linearalgebra::BaseMatrix* W, int begin, int end)
 {
     if(d_componentState.getValue() != ComponentState::Valid)
         return ;
