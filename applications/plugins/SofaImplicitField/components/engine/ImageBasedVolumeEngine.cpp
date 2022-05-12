@@ -5,7 +5,7 @@
 
 namespace sofa::component::engine
 {
-using sofa::defaulttype::Ray;
+using sofa::type::Ray;
 using sofa::helper::getReadAccessor;
 using sofa::helper::getWriteAccessor;
 using sofaimplicitfield::DisplacementField;
@@ -69,7 +69,7 @@ void ImageBasedVolumeEngine::reinit()
     update();
 }
 
-ImageBasedVolumeEngine::Hit ImageBasedVolumeEngine::sphereTracing(const sofa::defaulttype::Ray& r, const double eps, const double max_depth)
+ImageBasedVolumeEngine::Hit ImageBasedVolumeEngine::sphereTracing(const sofa::type::Ray& r, const double eps, const double max_depth)
 {
     double travelled = 0.0;
     Vec3 pos = r.origin();
@@ -114,9 +114,9 @@ void ImageBasedVolumeEngine::doUpdate()
 
     // Initialize accessors.
     // Inputs.
-    sofa::defaulttype::BoundingBox bbox_one(l_field_one->l_dofs->f_bbox.getValue());
+    sofa::type::BoundingBox bbox_one(l_field_one->l_dofs->f_bbox.getValue());
     auto dof_one = getReadAccessor(*l_field_one->l_dofs->read(sofa::core::VecCoordId::position()));
-    sofa::defaulttype::BoundingBox bbox_two(l_field_two->l_dofs->f_bbox.getValue());
+    sofa::type::BoundingBox bbox_two(l_field_two->l_dofs->f_bbox.getValue());
     auto dof_two = getReadAccessor(*l_field_two->l_dofs->read(sofa::core::VecCoordId::position()));
     auto res = getReadAccessor(d_resolution);
     double eps = getReadAccessor(d_epsilon);
@@ -136,7 +136,7 @@ void ImageBasedVolumeEngine::doUpdate()
 
     // Initialize containers.
     Vec3 bbox_bottom, bbox_size, temp;
-    sofa::defaulttype::Vec4d barycentric_coordinates;
+    sofa::type::Vec4d barycentric_coordinates;
     sofa::core::topology::BaseMeshTopology::Tetrahedron tetra;
 
     // Broad phase 
@@ -155,7 +155,7 @@ void ImageBasedVolumeEngine::doUpdate()
     // Narrow phase 
     
     // Iterate over the faces of the AABB, pairing the oposite faces together.
-    std::vector<sofa::defaulttype::Vec2i> planes {{1,2}, {0,1}, {0,2}};
+    std::vector<sofa::type::Vec2i> planes {{1,2}, {0,1}, {0,2}};
     for (unsigned int plane_it=0; plane_it<3; plane_it++)
     {
         // Compute area of each pixel.

@@ -20,8 +20,8 @@ using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofaimplicitfield::DisplacementField;
 using sofa::core::DataEngine;
-using sofa::defaulttype::Vec3;
-using sofa::defaulttype::Vec2i;
+using sofa::type::Vec3;
+using sofa::type::Vec2i;
 
 // Make Template with <FieldIn, FieldOut> with Variations:
 //      <DisplacementField, DisplacementField>

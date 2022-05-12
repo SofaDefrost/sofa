@@ -3,12 +3,23 @@
 
 layout( location = 0 ) out vec4 fragColor;
 
-layout (std140, location = 1) uniform TetrahedronDetails
+layout (std430, binding = 3) buffer A
 {
-    mat4 T;
-    mat4 Tinv;
-    mat4 U;
-} tetras[];
+    vec3 values[];
+} TetraInitPos;
+
+layout (std430, binding = 4) buffer B
+{
+    vec3 values[];
+} TetraCurrPos;
+
+
+layout (std430, binding = 5) buffer D
+{
+    mat3x3 matrices[];
+} TetraBases;
+
+uniform vec2 mousePosition ;
 
 uniform float zNear ; 
 uniform float zFar ; 
@@ -51,20 +62,57 @@ vec4 map(in vec3 pos)
 vec4 castRay( in vec3 ro, in vec3 rd )
 {
    float depth = depthSample(gl_FragCoord.z);
-   vec4 c;    
+   vec4 lambda;
+   int tetraId = int(floor(gl_PrimitiveID/4));
    vec3 m = vec3(-1.0, -1.0, -1.0);
-   for( int i = 0; i < MAX_MARCHING_STEPS; i++ )
+   mat3 T = TetraBases.matrices[tetraId];
+   mat3 Tinv = inverse(T);
+   vec3 p_4 = TetraCurrPos.values[gl_PrimitiveID*4+3].xyz;
+   mat4 u;
+   u[0] = vec4(TetraInitPos.values[gl_PrimitiveID*4+0],0);
+   u[1] = vec4(TetraInitPos.values[gl_PrimitiveID*4+1],0);
+   u[2] = vec4(TetraInitPos.values[gl_PrimitiveID*4+2],0);
+   u[3] = vec4(TetraInitPos.values[gl_PrimitiveID*4+3],0);
+
+   u[0] = vec4(TetraCurrPos.values[gl_PrimitiveID*4+0],0);
+   u[1] = vec4(TetraCurrPos.values[gl_PrimitiveID*4+1],0);
+   u[2] = vec4(TetraCurrPos.values[gl_PrimitiveID*4+2],0);
+   u[3] = vec4(TetraCurrPos.values[gl_PrimitiveID*4+3],0);
+
+   u = transpose(u);
+
+   printf("CASTING RAY: %d %d (base length: %d)\n", gl_PrimitiveID, tetraId, TetraBases.matrices.length());
+   printf("   rayCast::length %d %d %d\n", TetraCurrPos.values.length(), TetraInitPos.values.length(), TetraBases.matrices.length());
+   printf("   rayCast::T %.1^3f\n"
+          "              %.1^3f\n"
+          "              %.1^3f\n", T[0], T[1], T[2]);
+
+   printf("   rayCast::Tinv %.1^3f\n"
+          "                 %.1^3f\n"
+          "                 %.1^3f\n", Tinv[0], Tinv[1], Tinv[2]);
+
+
+
+   for( int i = 0; i < 1; i++ )
    {
-       vec4 p_i = vec4(ro+rd*depth, 1);
-       
+       vec3 p_i = vec3(ro+rd*depth);
+
        /// Compute the first three values
-       //c = tetras[0].Tinv * (p_i); 
-       
+       lambda = vec4(Tinv * (p_i-p_4), 0);
+
        /// Compute the first three values
-       //c.w = 1.0 - c.x - c.y - c.z;
-       
-       //vec4 u_i = tetras[0].U * c;
-       vec4 res = map( p_i.xyz );
+       lambda.w = 1.0 - lambda.x - lambda.y - lambda.z;
+
+       vec4 u_i = u * lambda;
+
+       printf("   rayCast::p_i %d -> %.1^3f\n", i,(p_i));
+       printf("   rayCast::u_i %d -> %.1^3f\n", i,(u_i));
+       printf("   rayCast::lambda %d -> %.1^4f\n", i, lambda);
+
+
+       /// DEBUG....
+       //drawCh(65.0, 1.0, 1.0);
+       vec4 res = map( u_i.xyz );
        if(res.x < EPSILON && res.x > -EPSILON) 
        {
            return vec4( depth, m );
@@ -73,6 +121,8 @@ vec4 castRay( in vec3 ro, in vec3 rd )
        // break;     
        depth += res.x*0.1;
        m = res.yzw;
+       //m = vec3(TetraInitPos.values[2].xy, 0.5);
+       //m = vec3(1.0,0.5,0.5); //u_i.xyz;
    }
    
    return vec4( MAX_DIST+1.0, m );    
@@ -121,7 +171,7 @@ vec3 estimateNormal(vec3 p) {
 
 vec4 render( in vec3 ro, in vec3 rd )
 {
-    
+   printf(" render:: %.1^3f %.1^3f \n",ro, rd);
    vec4 res = castRay(ro,rd);
    
    if (res.x > MAX_DIST) 
@@ -147,7 +197,8 @@ vec4 render( in vec3 ro, in vec3 rd )
    lin += 0.50*dom*vec3(0.40,0.60,1.00);
    col = col*lin;
 
-   return vec4( clamp(col,0.0,1.0), res.x );
+   return vec4( res.yzw, res.x );
+   //return vec4( clamp(col,0.0,1.0), res.x );
 }
 
 
@@ -186,8 +237,26 @@ vec3 cameraPos(mat4 a_modelView)
   return top / -denom;
 }
 
+vec4 getColorFromId(int id)
+{
+    return vec4((id&0x11)/4.0,((id>>1)&0x11)/4.0,((id>>3)&0x11)/4.0,1);
+}
+
+
 void main()
-{		
+{
+   vec2 screenSize=vec2(779.0,600.0);
+   vec2 mousePos = vec2(mousePosition.x+0.5, screenSize.y-mousePosition.y+0.5);
+   if( length(mousePos.xy-gl_FragCoord.xy) < 0.0001 )
+   {
+       enablePrintf();
+       printfLocation = 0;
+       printf("main::%d mouse(%f %f) %d\n", int(__LINE__), mousePos.x, mousePos.y, gl_PrimitiveID);
+   }else{
+       disablePrintf();
+   }
+
+
    /// Generate the ray 
    vec2 rayPos = gl_FragCoord.st / vec2(779,600) - vec2(0.5,0.5);
    vec4 rayNormalized = vec4(rayPos, -1.0, 1.0) ;
@@ -199,13 +268,30 @@ void main()
    vec4 res = render( rayOrigin2, rayWorld );
    //gl_FragDepth = depthSample(res.w);
    //gl_FragDepth = 1.0-res.w;
-   if (res.w > MAX_DIST) 
-    discard;
-        
-   fragColor = vec4(1.0, rayPos.x, rayPos.y, 1.0);
-   fragColor = vec4(res.xyz , 1.0 );   
-   
-   //fragColor = vec4(1.0,1.0,0.0,0.0);
-   //fragColor = vec4(1.0,0.0,1.0, 1.0 );   
+
+   // int idx = int(round(26.0*gl_FragCoord.x/700.0));
+   // fragColor = vec4(TetraInitPos.values[idx], 1.0);
+
+   if( length(mousePos.xy-gl_FragCoord.st) < 10.0)
+   {
+        fragColor = vec4(1.0,0.0,0.0,0.5);
+        return;
+   }
+
+   if (res.w > MAX_DIST)
+   {
+       discard;
+   }
+
+   fragColor *= vec4(1.0, rayPos.x, rayPos.y, 1.0);
+   //fragColor = getColorFromId(gl_PrimitiveID) * vec4(res.xyz , 1.0 );
+   fragColor *= vec4(res.xyz,1.0);
+
+
+
+
+   //fragColor = vec4(TetraInitPos.values[0],1.0);
+   //fragColor = vec4(TetraCurrPos.values[gl_SampleID],1.0);
+   //fragColor = vec4(1.0,0.0,1.0, 1.0 );
    //fragColor = vec4(rayOrigin,1);
 }

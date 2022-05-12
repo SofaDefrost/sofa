@@ -48,10 +48,10 @@ int ScalarFieldIntersectionLine::computeIntersection(ScalarFieldCollisionElement
 //        return 0;
 
 //    /// retrieving the 2 points of the Line line.
-//    sofa::defaulttype::Vec3 p1 = line.p1();
-//    sofa::defaulttype::Vec3 p2 = line.p2();
-//    ///sofa::defaulttype::Vec3 p_previous = line.p(i);
-//    ///sofa::defaulttype::Vec3 p_next = line.p(i+1);
+//    sofa::type::Vec3 p1 = line.p1();
+//    sofa::type::Vec3 p2 = line.p2();
+//    ///sofa::type::Vec3 p_previous = line.p(i);
+//    ///sofa::type::Vec3 p_next = line.p(i+1);
 
 
 //    /// Evaluate the field at points p1 & p2.
@@ -71,7 +71,7 @@ int ScalarFieldIntersectionLine::computeIntersection(ScalarFieldCollisionElement
 //    /// direction to push out the penetrating point.
 //    /// Case where we have p1 colliding
 //    else if (d1 < margin ){
-//        sofa::defaulttype::Vec3 grad1 = field->getGradient(p1);
+//        sofa::type::Vec3 grad1 = field->getGradient(p1);
 
 //        /// Generates the contact response and add it to the output set of contacts.
 //        contacts->resize(contacts->size()+1);
@@ -88,7 +88,7 @@ int ScalarFieldIntersectionLine::computeIntersection(ScalarFieldCollisionElement
 //    }
 //    ///Case where we have p2 colliding
 //    else if(d2 < margin){
-//    sofa::defaulttype::Vec3 grad2 = field->getGradient(p2);
+//    sofa::type::Vec3 grad2 = field->getGradient(p2);
 
 //    /// Generates the contact response and add it to the output set of contacts.
 //    contacts->resize(contacts->size()+1);
@@ -110,8 +110,8 @@ int ScalarFieldIntersectionLine::computeIntersection(ScalarFieldCollisionElement
 
         for(int i=2;i<10;i++){
           double alpha = i/9.0 ;
-          sofa::defaulttype::Vec3 p0 = line.p1();
-          sofa::defaulttype::Vec3 p1 = line.p2();
+          sofa::type::Vec3 p0 = line.p1();
+          sofa::type::Vec3 p1 = line.p2();
           Vec3d p_i = Interpolation_point(p0,p1,alpha);
           SReal d_i = field->getValue(p_i);
           const double di = line.getProximity() + intersection->getContactDistance();
@@ -119,7 +119,7 @@ int ScalarFieldIntersectionLine::computeIntersection(ScalarFieldCollisionElement
           if (di >= margin_i)
               return 0;
           else if (di < margin_i ){
-              sofa::defaulttype::Vec3 grad_i = field->getGradient(p_i);
+              sofa::type::Vec3 grad_i = field->getGradient(p_i);
 
               /// Generates the contact response and add it to the output set of contacts.
               contacts->resize(contacts->size()+1);

@@ -42,11 +42,11 @@ namespace _surfacemeshgenerationfromscalarfield_
 {
 typedef sofa::core::topology::BaseMeshTopology::SeqTriangles SeqTriangles;
 typedef sofa::core::topology::BaseMeshTopology::Triangle Triangle;
-typedef sofa::helper::vector<sofa::defaulttype::Vec3d> VecCoord;
+typedef sofa::helper::vector<sofa::type::Vec3d> VecCoord;
 
 using sofa::core::visual::VisualParams ;
 using sofa::core::objectmodel::BaseObject ;
-using sofa::defaulttype::Vec3d ;
+using sofa::type::Vec3d ;
 
 class SurfaceMeshGenerationFromScalarField : public BaseObject
 {

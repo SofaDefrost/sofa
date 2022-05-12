@@ -25,56 +25,32 @@
 #include <sofa/type/RGBAColor.h>
 #include <sofa/gl/GLSLShader.h>
 
+#include <SofaImplicitField/components/geometry/DisplacementField.h>
+#include <sofa/core/objectmodel/MouseEvent.h>
+
+
 namespace sofaimplicitfield
 {
 
 using sofa::helper::getReadAccessor;
 using sofa::type::RGBAColor;
 using sofa::type::Mat3x3d;
+using sofa::type::Mat3x3f;
+using sofa::type::Mat4x4d;
 
 /// Register in the Factory
 int ImplicitFieldTransformClass = sofa::core::RegisterObject("registering of ImplicitFieldTransform class").add<DisplacementField>();
 
-<<<<<<< HEAD
-class DisplacementField::InternalData
-{
-public:
-    GLuint vertexBufferObject;
-    GLuint displacementBufferObject;
-    GLuint barycentriCoordinatesBufferObject;
 
-    std::vector<sofa::type::Vec3f> vertices;
-    std::vector<sofa::type::Vec3f> displacements;
-    std::vector<unsigned int> indices;
-    bool isInited = false;
-    GLuint mvpMatrixID ;
-
-    void init()
-    {
-        std::cout << "DisplacementField init internal data" << std::endl;
-        isInited = true;
-
-        /// Create a vertex buffer object so we can draw it
-        glGenBuffers(1, &vertexBufferObject);
-
-        /// Create a vertex buffer object so we can draw it
-        glGenBuffers(1, &displacementBufferObject);
-
-        /// Create a vertex buffer object so we can draw it
-        glGenBuffers(1, &barycentriCoordinatesBufferObject);
-    }
-};
 
 DisplacementField::DisplacementField() :
-=======
-DisplacementField::DisplacementField():
->>>>>>> defrost/stage-nicola-zotto
     l_field(initLink("field", "The scalar field to displace")),
     l_topology(initLink("topology", "The mesh topology to use as interpolation field")),
     l_dofs(initLink("dofs", "The nodal values to interpolate.")),
     l_shader(initLink("shader", "The shader to use for the rendering."))
 {
     data.reset(new InternalData());
+    f_listening.setValue(true);
 }
 
 /* overwritten */
@@ -99,10 +75,10 @@ double DisplacementField::getValue(Vec3d& pos, int& domain)
             // Get target tetrahedron.
             auto tetra = l_topology->getTetrahedron(domain);
             // Compute the underformed coordinate of 'pos':
-            Vec3d pos_undeformed = barycentric_coefs[0] * dof_rest[tetra[0]] + 
-                barycentric_coefs[1] * dof_rest[tetra[1]] + 
-                barycentric_coefs[2] * dof_rest[tetra[2]] + 
-                barycentric_coefs[3] * dof_rest[tetra[3]];
+            Vec3d pos_undeformed = barycentric_coefs[0] * dof_rest[tetra[0]] +
+                    barycentric_coefs[1] * dof_rest[tetra[1]] +
+                    barycentric_coefs[2] * dof_rest[tetra[2]] +
+                    barycentric_coefs[3] * dof_rest[tetra[3]];
             return l_field->getValue(pos_undeformed, domain);
         }
         // msg_warning() << "The point " << pos << " was not found in the passed domain: << domain << "!";
@@ -119,10 +95,10 @@ double DisplacementField::getValue(Vec3d& pos, int& domain)
             // Get target tetrahedron.
             auto tetra = l_topology->getTetrahedron(t);
             // Compute the underformed coordinate of 'pos':
-            Vec3d pos_undeformed = barycentric_coefs[0] * dof_rest[tetra[0]] + 
-                barycentric_coefs[1] * dof_rest[tetra[1]] + 
-                barycentric_coefs[2] * dof_rest[tetra[2]] + 
-                barycentric_coefs[3] * dof_rest[tetra[3]];
+            Vec3d pos_undeformed = barycentric_coefs[0] * dof_rest[tetra[0]] +
+                    barycentric_coefs[1] * dof_rest[tetra[1]] +
+                    barycentric_coefs[2] * dof_rest[tetra[2]] +
+                    barycentric_coefs[3] * dof_rest[tetra[3]];
             return l_field->getValue(pos_undeformed, domain);
         }
     }
@@ -135,6 +111,7 @@ double DisplacementField::getValue(Vec3d& pos, int& domain)
 
 Vec3d DisplacementField::getGradient(Vec3d& pos, int& domain)
 {
+
     // Initialise containers.
     bool found;
     Vec3d gradient {0.0, 0.0, 0.0};
@@ -228,29 +205,20 @@ int DisplacementField::getDomain(Vec3d& pos, int domain)
     return -1;
 }
 
-<<<<<<< HEAD
-    // Here are the tetrahedron's descriptions
-    // l_topology->
-
-    // Here are the moving position.
-    // l_dofs->
-=======
 /* public */
-
-Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof)
+Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::type::vector<Vec3d>>& dof)
 {
     // Get target tetrahedron.
     auto tetra = l_topology->getTetrahedron(domain);
     return getBarycentricCoordinates(p, dof[tetra[0]], dof[tetra[1]], dof[tetra[2]], dof[tetra[3]]);
 }
 
-bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof, Vec4d& barycentric_coefs)
+bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int &domain, sofa::helper::ReadAccessor<sofa::type::vector<Vec3d>>& dof, Vec4d& barycentric_coefs)
 {
     // Get target tetrahedron.
     auto tetra = l_topology->getTetrahedron(domain);
     return checkPointInTetrahedronAndGetBarycentricCoordinates(p, dof[tetra[0]], dof[tetra[1]], dof[tetra[2]], dof[tetra[3]], barycentric_coefs);
 }
->>>>>>> defrost/stage-nicola-zotto
 
 /* protected */
 
@@ -269,21 +237,20 @@ bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(cons
 double DisplacementField::determinant4x4ForVec3And1(const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3)
 {
     double det = v1[2]*v2[1]*v3[0] - v0[2]*v2[1]*v3[0] -
-        v1[1]*v2[2]*v3[0] + v0[1]*v2[2]*v3[0] +
-        v0[2]*v1[1]*v3[0] - v0[1]*v1[2]*v3[0] -
-        v1[2]*v2[0]*v3[1] + v0[2]*v2[0]*v3[1] +
-        v1[0]*v2[2]*v3[1] - v0[0]*v2[2]*v3[1] -
-        v0[2]*v1[0]*v3[1] + v0[0]*v1[2]*v3[1] +
-        v1[1]*v2[0]*v3[2] - v0[1]*v2[0]*v3[2] -
-        v1[0]*v2[1]*v3[2] + v0[0]*v2[1]*v3[2] +
-        v0[1]*v1[0]*v3[2] - v0[0]*v1[1]*v3[2] -
-        v0[2]*v1[1]*v2[0] + v0[1]*v1[2]*v2[0] +
-        v0[2]*v1[0]*v2[1] - v0[0]*v1[2]*v2[1] -
-        v0[1]*v1[0]*v2[2] + v0[0]*v1[1]*v2[2];
+            v1[1]*v2[2]*v3[0] + v0[1]*v2[2]*v3[0] +
+            v0[2]*v1[1]*v3[0] - v0[1]*v1[2]*v3[0] -
+            v1[2]*v2[0]*v3[1] + v0[2]*v2[0]*v3[1] +
+            v1[0]*v2[2]*v3[1] - v0[0]*v2[2]*v3[1] -
+            v0[2]*v1[0]*v3[1] + v0[0]*v1[2]*v3[1] +
+            v1[1]*v2[0]*v3[2] - v0[1]*v2[0]*v3[2] -
+            v1[0]*v2[1]*v3[2] + v0[0]*v2[1]*v3[2] +
+            v0[1]*v1[0]*v3[2] - v0[0]*v1[1]*v3[2] -
+            v0[2]*v1[1]*v2[0] + v0[1]*v1[2]*v2[0] +
+            v0[2]*v1[0]*v2[1] - v0[0]*v1[2]*v2[1] -
+            v0[1]*v1[0]*v2[2] + v0[0]*v1[1]*v2[2];
     return det;
 }
 
-<<<<<<< HEAD
 /// Debug rendering of the Displacement Field.
 void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
 {
@@ -291,22 +258,9 @@ void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
     auto x_0 = getReadAccessor(*l_dofs->read(sofa::core::VecCoordId::restPosition()));
     auto dt = v->drawTool();
 
-    for(auto tetra : l_topology->getTetrahedra())
-    {
-        Vec3d r0 = x[tetra[0]];
-        Vec3d r1 = x[tetra[1]];
-        Vec3d r2 = x[tetra[2]];
-        Vec3d r3 = x[tetra[3]];
+    std::vector<sofa::type::Mat3x3f> Tinv3x3;
+    std::vector<sofa::type::Mat3x3f> T3x3_per_tetra;
 
-        // Draws the initial state
-        Mat3x3d T = {r0-r3, r1-r3, r2-r3};
-        T.transpose();
-        Mat3x3d Tinv = T.inverted();
-
-        Vec3d coef0 = Tinv * (r0-r3);
-        Vec3d coef1 = Tinv * (r1-r3);
-        Vec3d coef2 = Tinv * (r2-r3);
-    }
 
     if(!data.get())
         return;
@@ -314,34 +268,88 @@ void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
     if(!data->isInited)
         data->init();
 
+    data->initialPositions.clear();
+    data->currentPositions.clear();
+
+    std::cout << "======================================================" << std::endl;
+    for(auto tetra : l_topology->getTetrahedra())
+    {
+        Vec3d r0 = x[tetra[0]];
+        Vec3d r1 = x[tetra[1]];
+        Vec3d r2 = x[tetra[2]];
+        Vec3d r3 = x[tetra[3]];
+        data->currentPositions.push_back(r0);
+        data->currentPositions.push_back(r1);
+        data->currentPositions.push_back(r2);
+        data->currentPositions.push_back(r3);
+
+        Vec3d u0 = x_0[tetra[0]];
+        Vec3d u1 = x_0[tetra[1]];
+        Vec3d u2 = x_0[tetra[2]];
+        Vec3d u3 = x_0[tetra[3]];
+        data->initialPositions.push_back(u0);
+        data->initialPositions.push_back(u1);
+        data->initialPositions.push_back(u2);
+        data->initialPositions.push_back(u3);
+
+
+        // Draws the initial state
+        Mat3x3f T = {r0-r3, r1-r3, r2-r3};
+        T.transpose();
+        //Mat3x3f Tinv = T.inverted();
+        Tinv3x3.push_back(T);
+
+        Vec3d middle_point = (r0+r1+r2+r3)/4.0;
+
+        Vec3d l13 = T.inverted() * Vec3d{ r0-r3 };
+        Vec4d lambda {l13.x(), l13.y(), l13.z(), 1.0-l13.x()-l13.y()-l13.z()};
+        Mat4x4d base = { Vec4d{r0.x(),r1.x(),r2.x(),r3.x()},
+                         Vec4d{r0.y(),r1.y(),r2.y(),r3.y()},
+                         Vec4d{r0.z(), r1.z(), r2.z(), r3.z()},
+                         Vec4d{0.0,0.0,0.0,0.0},
+                       };
+
+        /*
+        std::cout << "I    : " << r0 << " : " << r1 << " : " << r2 << " : " << r3 << std::endl;
+        std::cout << "C    : " << u0 << " : " << u1 << " : " << u2 << " : " << u3 << std::endl;
+        std::cout << "T    : " <<T << std::endl;
+        std::cout << "Base : " <<base << std::endl;
+        std::cout << "Coordinates : " <<(base * lambda)<< std::endl;
+        std::cout << "Millieu    : " <<(r0)<< std::endl;
+        */
+    }
+
     data->vertices.clear();
-    data->displacements.clear();
     for(sofa::Index i=0;i<x.size();++i)
     {
         auto& vertex = x[i];
-        auto& vertex_at_rest_position = x_0[i];
         data->vertices.push_back(vertex);
-        data->displacements.push_back( vertex_at_rest_position );
     }
 
     std::vector<unsigned int> indices;
+    unsigned int tetra_index = 0;
     for(auto tetra : l_topology->getTetrahedra())
     {
         indices.push_back(tetra[0]);
         indices.push_back(tetra[1]);
         indices.push_back(tetra[2]);
+        //Tinv3x3.push_back( T3x3_per_tetra[tetra_index] );
 
         indices.push_back(tetra[1]);
         indices.push_back(tetra[0]);
         indices.push_back(tetra[3]);
+        //Tinv3x3.push_back( T3x3_per_tetra[tetra_index] );
 
         indices.push_back(tetra[0]);
         indices.push_back(tetra[2]);
         indices.push_back(tetra[3]);
+        //Tinv3x3.push_back( T3x3_per_tetra[tetra_index] );
 
         indices.push_back(tetra[2]);
         indices.push_back(tetra[1]);
         indices.push_back(tetra[3]);
+        //Tinv3x3.push_back( T3x3_per_tetra[tetra_index] );
+        tetra_index++;
     }
 
     ////// Compute sphere and depth
@@ -365,7 +373,12 @@ void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
         auto uZNear = l_shader->getUniform(l_shader->getCurrentIndex(), "zNear");
         auto uZFar = l_shader->getUniform(l_shader->getCurrentIndex(), "zFar");
 
+        auto uMousePosition = l_shader->getUniform(l_shader->getCurrentIndex(), "mousePosition");
+
         l_shader->start();
+        glUniform2f(uMousePosition, data->mousePosition.x(), data->mousePosition.y());
+        std::cout << "MINCE POSITION: " << data->mousePosition << std::endl;
+
         glUniform1f(uZNear, v->zNear());
         glUniform1f(uZFar, v->zFar());
 
@@ -385,10 +398,10 @@ void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
                  data->vertices.data(), GL_DYNAMIC_DRAW);
 
     //// Upload the displacement data into the buffer.
-    glBindBuffer(GL_ARRAY_BUFFER, data->displacementBufferObject);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(sofa::type::Vec3f)*data->displacements.size(),
-                 data->displacements.data(), GL_DYNAMIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, data->displacementBufferObject);
+    //glBufferData(GL_ARRAY_BUFFER,
+    //             sizeof(sofa::type::Vec3f)*data->displacements.size(),
+    //             data->displacements.data(), GL_DYNAMIC_DRAW);
 
     /// Position
     glEnableVertexAttribArray(0);
@@ -396,21 +409,44 @@ void DisplacementField::draw(const sofa::core::visual::VisualParams* v)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     /// Displacement
-    glEnableVertexAttribArray(1);                                   // activates the generic vertex array
-    glBindBuffer(GL_ARRAY_BUFFER, data->displacementBufferObject);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);          // define an array of generic vertex attribute data
+    //glEnableVertexAttribArray(1);                                   // activates the generic vertex array
+    //glBindBuffer(GL_ARRAY_BUFFER, data->displacementBufferObject);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);          // define an array of generic vertex attribute data
+
+    /// Initial position
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, data->tetraInitialPositionsBufferObject);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(sofa::type::Vec3f)*data->initialPositions.size(),data->initialPositions.data(), GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, data->tetraInitialPositionsBufferObject);
+    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    /// Current position
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, data->tetraCurrentPositionsBufferObject);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(sofa::type::Vec3f)*data->currentPositions.size(),data->currentPositions.data(), GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, data->tetraCurrentPositionsBufferObject);
+    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    /// TInv matrix
+    std::cout << "HLLO WORLD: " << Tinv3x3.size() << "->" << Tinv3x3.size()*sizeof(Mat3x3f) << "bytes ..)>" << sizeof(Mat3x3f)  << std::endl;
+    std::cout << "          : " << Tinv3x3.size() << "->" << Tinv3x3.size()*sizeof(Mat3x3f) << "bytes ..)>" << sizeof(Mat3x3f)  << std::endl;
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, data->tetraBasesBufferObject);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, Tinv3x3.size()*sizeof(Mat3x3f), Tinv3x3.data(), GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, data->tetraBasesBufferObject);
+    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     /// Type, count, format, pointer
-    glDrawElements(GL_TRIANGLES, 100, GL_UNSIGNED_INT, indices.data());
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+
+    glFlush();
+    std::cout << "SHADER SOURCE [" << l_shader->getGlslPrintfAsString() << "]";
+
     if(l_shader.get())
         l_shader->stop();
 
 }
 
-} /// sofaimplicitfield
-=======
 Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3)
 {
     Vec4d barycentric_coefs {0.0, 0.0, 0.0, 0.0};
@@ -428,7 +464,16 @@ Vec4d DisplacementField::getBarycentricCoordinates(const Vec3d& p, const Vec3d& 
     barycentric_coefs[3] = d4/d0;
     return barycentric_coefs;
 }
->>>>>>> defrost/stage-nicola-zotto
+
+void DisplacementField::handleEvent(sofa::core::objectmodel::Event *event)
+{
+    if (sofa::core::objectmodel::MouseEvent::checkEventType(event))
+    {
+        sofa::core::objectmodel::MouseEvent *mev = static_cast<sofa::core::objectmodel::MouseEvent *>(event);
+        data->mousePosition = sofa::type::Vec2f{1.0*mev->getPosX(), 1.0*mev->getPosY()};
+    }
+};
+
 
 bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3, Vec4d& barycentric_coefs)
 {
@@ -438,7 +483,7 @@ bool DisplacementField::checkPointInTetrahedronAndGetBarycentricCoordinates(cons
     double d1 = determinant4x4ForVec3And1(p, v1, v2, v3);
     double d2 = determinant4x4ForVec3And1(v0, p, v2, v3);
     double d3 = determinant4x4ForVec3And1(v0, v1, p, v3);
-    double d4 = determinant4x4ForVec3And1(v0, v1, v2, p); 
+    double d4 = determinant4x4ForVec3And1(v0, v1, v2, p);
     if ((d0<0 && d1<=0 && d2<=0 && d3<=0 && d4<=0) || (d0>0 && d1>=0 && d2>=0 && d3>=0 && d4>=0))
     {
         // Compute the barycentric coeffcients.

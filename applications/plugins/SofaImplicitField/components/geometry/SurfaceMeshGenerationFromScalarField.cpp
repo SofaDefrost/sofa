@@ -26,7 +26,7 @@ using sofa::core::visual::VisualParams ;
 #include <sofa/core/ObjectFactory.h>
 using sofa::core::RegisterObject ;
 
-using sofa::defaulttype::Vec3dTypes ;
+using sofa::type::Vec3dTypes ;
 // using sofa::defaulttype::ExtVec3fTypes ;
 using sofa::defaulttype::Vec4f ;
 

@@ -171,7 +171,7 @@ namespace sofa
 
 
 		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::defaulttype::Vec3dTypes >;
-		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::defaulttype::Vec2dTypes >;
+		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::type::Vec2dTypes >;
 		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::defaulttype::Vec1dTypes >;
 		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::defaulttype::Vec6dTypes >;
 		//extern template class SOFA_XICATHPLUGIN_API DataExchange< sofa::defaulttype::Vec3dTypes >;

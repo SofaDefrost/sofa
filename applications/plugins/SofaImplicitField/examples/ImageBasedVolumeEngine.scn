@@ -5,6 +5,10 @@
     <RequiredPlugin name='SofaLoader'/>
     <RequiredPlugin name='SofaGeneralSimpleFem'/>
    
+    <Node name="Shaders">
+        <OglShader name="implicitFieldShader"/>
+    </Node>     
+   
     <Node name="AnimatedField"> 
         <!-- FEM support mesh-->
         <MeshGmshLoader name="meshLoaderOne" filename="mesh/cube_low_res.msh" translation="-2 0 0"/>
@@ -15,7 +19,8 @@
         <DisplacementField name="displacement" 
                            field="@field" 
                            topology="@topo"
-                           dofs="@dofs"/>
+                           dofs="@dofs"
+                           shader="@../Shaders/implicitFieldShader"/>
         <!-- Sphere drawing -->
         <RayMarchingEngine name="raymarching" field="@displacement"
                            renderingCube="-3.0 1.0 -2.0 2.0 -2.0 2.0"
@@ -24,7 +29,7 @@
         <!-- TODO: Animate the sphere. -->
     </Node>
 
-    <Node name="RigidField">
+    <Node name="RigidField" actived="False" sleeping="True">
         <!-- FEM support mesh-->
         <MeshGmshLoader name="meshLoaderTwo" filename="mesh/cube_low_res.msh" translation="1 0 0"/>
         <TetrahedronSetTopologyContainer name="topo" src="@meshLoaderTwo" />
@@ -34,7 +39,8 @@
         <DisplacementField name="displacement"
                                field="@field"
                                topology="@topo"
-                               dofs="@dofs"/>
+                               dofs="@dofs"
+                               shader="@../Shaders/implicitFieldShader"/>
         <!-- Sphere drawing -->
         <RayMarchingEngine name="raymarching" field="@field"
                            renderingCube="0.0 4.0 -2.0 2.0 -2.0 2.0"
@@ -42,7 +48,7 @@
         <PointSplatRenderer name="renderer" points="@raymarching.intersections" radius="0.1"/>
     </Node>
 
-    <Node name="CandidateCollisionDetection">
+    <Node name="CandidateCollisionDetection" actived="False" sleeping="True">
         <ImageBasedVolumeEngine name="ImageBasedInterpenetrationVolumeEstimator"
                                 field_one="@../AnimatedField/displacement"
                                 field_two="@../RigidField/displacement"/>

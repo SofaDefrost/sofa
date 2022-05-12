@@ -36,8 +36,8 @@ namespace geometry
 
 namespace _triprismfield_
 {
-using sofa::defaulttype::Vec3d ;
-using sofa::defaulttype::Vec2d ;
+using sofa::type::Vec3d ;
+using sofa::type::Vec2d ;
 
 TriprismField::TriprismField()
     : Tr_center(initData(&Tr_center, Vec3d(0.0,0.0,0.0), "center" , "height of the prism. default = 1 1"))

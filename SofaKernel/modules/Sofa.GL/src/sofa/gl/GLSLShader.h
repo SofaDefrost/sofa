@@ -26,7 +26,7 @@
 #include <sofa/helper/system/FileMonitor.h>
 #include <sofa/gl/gl.h>
 #include <map>
-
+#include "./glslDebug.h"
 /// Forward declaration.
 namespace sofa::gl 
 {
@@ -214,6 +214,9 @@ public:
     GLint GetGeometryVerticesOut() { return geometry_vertices_out; }
     void  SetGeometryVerticesOut(GLint v) { geometry_vertices_out = v; }
 #endif
+
+    std::string getGlslPrintfAsString();
+    GLuint debugBufferObject;
 
 protected:
     /// A shader is a source code, as such it can be loaded either directly by its source or a filename (containing the source)

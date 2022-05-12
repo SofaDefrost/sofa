@@ -52,7 +52,7 @@ int ScalarFieldIntersection::computeIntersection(ScalarFieldCollisionElement& co
         return 0;
 
     /// The the evaluation point.
-    sofa::defaulttype::Vec3 p1 = point.p();
+    sofa::type::Vec3 p1 = point.p();
 
     /// Evaluate the field at this p1 point.
     SReal d = field->getValue(p1);
@@ -67,7 +67,7 @@ int ScalarFieldIntersection::computeIntersection(ScalarFieldCollisionElement& co
 
     /// Here we are in collision so we will compute the gradient to estimate the
     /// direction to push out the penetrating point.
-    sofa::defaulttype::Vec3 grad = field->getGradient(p1);
+    sofa::type::Vec3 grad = field->getGradient(p1);
 
     /// Generates the contact response and add it to the output set of contacts.
     contacts->resize(contacts->size()+1);

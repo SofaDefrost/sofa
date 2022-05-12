@@ -35,11 +35,9 @@ namespace sofaimplicitfield
 using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofa::component::geometry::ScalarField;
-using sofa::defaulttype::Vec3d;
+using sofa::type::Vec3d;
+using sofa::type::Vec4d;
 using sofa::defaulttype::Vec3Types;
-using sofa::defaulttype::Vec4d;
-//using sofa::defaulttype::Vec4Types;
-
 
 class SOFA_SOFAIMPLICITFIELD_API DisplacementField : public sofaimplicitfield::ScalarField
 {
@@ -55,10 +53,10 @@ public:
    int getDomain(Vec3d& pos, int domain) override;   
    double getValue(Vec3d& pos, int& domain) override;
    Vec3d getGradient(Vec3d& pos, int& domain) override;
-   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof);
-   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::helper::vector<Vec3d>>& dof, Vec4d& barycentric_coefs);
+   Vec4d getBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::type::vector<Vec3d>>& dof);
+   bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, int& domain, sofa::helper::ReadAccessor<sofa::type::vector<Vec3d>>& dof,
+                                                            Vec4d& barycentric_coefs);
 
-   double getValue(Vec3d& pos, int& domain) override;
    void draw(const sofa::core::visual::VisualParams*) override;
 protected:
    DisplacementField();
@@ -68,12 +66,49 @@ protected:
    
    Vec4d getBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3);
 
-<<<<<<< HEAD
+   void handleEvent(sofa::core::objectmodel::Event *event);
+
+   class InternalData
+   {
+   public:
+       GLuint vertexBufferObject;
+       GLuint displacementBufferObject;
+       GLuint tetraInitialPositionsBufferObject;
+       GLuint tetraCurrentPositionsBufferObject;
+       GLuint tetraBasesBufferObject;
+
+       std::vector<sofa::type::Vec3f> vertices;
+       std::vector<sofa::type::Vec3f> currentPositions;
+       std::vector<sofa::type::Vec3f> initialPositions;
+       std::vector<unsigned int> indices;
+       bool isInited = false;
+       GLuint mvpMatrixID ;
+       sofa::type::Vec2f mousePosition;
+
+       void init()
+       {
+           std::cout << "DisplacementField init internal data" << std::endl;
+           isInited = true;
+
+           /// Create a vertex buffer object so we can draw it
+           glGenBuffers(1, &vertexBufferObject);
+
+           /// Create a vertex buffer object so we can draw it
+           glGenBuffers(1, &displacementBufferObject);
+
+           /// Create a vertex buffer object so we can draw it
+           glGenBuffers(1, &tetraInitialPositionsBufferObject);
+           glGenBuffers(1, &tetraCurrentPositionsBufferObject);
+           glGenBuffers(1, &tetraBasesBufferObject);
+
+
+       }
+   };
+
+
     class InternalData;
     std::unique_ptr<InternalData> data;
-=======
    bool checkPointInTetrahedronAndGetBarycentricCoordinates(const Vec3d& p, const Vec3d& v0, const Vec3d& v1, const Vec3d& v2, const Vec3d& v3, Vec4d& barycentric_coefs);
->>>>>>> defrost/stage-nicola-zotto
 };
 
 }

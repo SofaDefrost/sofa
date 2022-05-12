@@ -25,15 +25,15 @@
 #include <sofa/core/visual/VisualModel.h>
 #include <sofa/defaulttype/VecTypes.h>
 #include <SofaBaseTopology/TopologyData.h>
-#include <sofa/defaulttype/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa::component::visualmodel
 {
 
 using sofa::core::visual::VisualModel;
-using sofa::defaulttype::RGBAColor;
-using sofa::defaulttype::Vec3;
-using sofa::helper::vector;
+using sofa::type::RGBAColor;
+using sofa::type::Vec3;
+using sofa::type::vector;
 
 class SOFA_OPENGL_VISUAL_API PointSplatRenderer : public VisualModel
 {

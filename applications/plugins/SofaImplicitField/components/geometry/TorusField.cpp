@@ -20,7 +20,7 @@
 * Contact information: contact@sofa-framework.org                             *
 ******************************************************************************/
 #include <sofa/core/ObjectFactory.h>
-#include <sofa/defaulttype/Mat.h>
+#include <sofa/type/Mat.h>
 
 using sofa::core::RegisterObject ;
 
@@ -39,8 +39,8 @@ namespace geometry
 
 namespace _torusfield_
 {
-using sofa::defaulttype::Vec3d ;
-using sofa::defaulttype::Vec2d ;
+using sofa::type::Vec3d ;
+using sofa::type::Vec2d ;
 using namespace Eigen;
 
 

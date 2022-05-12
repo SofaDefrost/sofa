@@ -3,7 +3,7 @@
 #include <SofaImplicitField/config.h>
 #include <sofa/core/objectmodel/BaseObject.h>
 #include <sofa/defaulttype/VecTypes.h>
-#include <sofa/defaulttype/Ray.h>
+#include <sofa/type/Ray.h>
 
 #include <sofa/core/DataEngine.h>
 #include <SofaImplicitField/components/geometry/DisplacementField.h>
@@ -17,8 +17,8 @@ using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofaimplicitfield::DisplacementField;
 using sofa::core::DataEngine;
-using sofa::defaulttype::Vec3;
-using sofa::defaulttype::Vec2i;
+using sofa::type::Vec3;
+using sofa::type::Vec2i;
 
 // Make Template with <FieldIn, FieldOut> with variations:
 //      <DisplacementField, DisplacementField>
@@ -42,10 +42,10 @@ public:
     Data<Vec2i> d_resolution;
     Data<double> d_epsilon;
     // Outputs:
-    Data<sofa::helper::vector<Vec3>> d_intersections;
+    Data<sofa::type::vector<Vec3>> d_intersections;
     Data<double> d_volume;
-    Data<sofa::helper::vector<Vec3>> d_volume_gradients_one;
-    Data<sofa::helper::vector<Vec3>> d_volume_gradients_two;
+    Data<sofa::type::vector<Vec3>> d_volume_gradients_one;
+    Data<sofa::type::vector<Vec3>> d_volume_gradients_two;
 
 protected:
     ImageBasedVolumeEngine();
@@ -62,7 +62,7 @@ protected:
     };
 
     // Doesn't change regardless of template!
-    Hit sphereTracing(const sofa::defaulttype::Ray& r, const double eps, const double max_depth);
+    Hit sphereTracing(const sofa::type::Ray& r, const double eps, const double max_depth);
 };
 
 }

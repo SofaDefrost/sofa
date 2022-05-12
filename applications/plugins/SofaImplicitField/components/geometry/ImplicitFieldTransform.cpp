@@ -26,8 +26,8 @@
 namespace sofa::core::objectmodel::BaseObject
 {
 ///using sofa::defaulttype::RGBAColor;
-///using sofa::defaulttype::Ray;
-using sofa::defaulttype::Vec3d ;
+///using sofa::type::Ray;
+using sofa::type::Vec3d ;
 
 /// Register in the Factory
 static int ImplicitFieldTransformClass = core::RegisterObject("registering of ImplicitFieldTransform class") .add<ImplicitFieldTransform>();

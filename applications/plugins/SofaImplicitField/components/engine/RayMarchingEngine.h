@@ -32,8 +32,8 @@ namespace sofa::component::engine
 using sofa::component::visualmodel::BaseCamera;
 using sofa::component::geometry::ScalarField;
 using sofa::core::DataEngine;
-using sofa::defaulttype::Vec3;
-using sofa::defaulttype::Vec2i;
+using sofa::type::Vec3;
+using sofa::type::Vec2i;
 
 class SOFA_SOFAIMPLICITFIELD_API RayMarchingEngine : public DataEngine
 {
@@ -46,9 +46,9 @@ public:
 
    SingleLink<RayMarchingEngine, ScalarField, BaseLink::FLAG_STRONGLINK> l_field; ///< The input scalar field
 
-   Data<sofa::helper::vector<Vec3>> d_intersections;
-   Data<sofa::defaulttype::BoundingBox> d_renderingCube;
-   Data<sofa::defaulttype::Vec2i> d_resolution;
+   Data<sofa::type::vector<Vec3>> d_intersections;
+   Data<sofa::type::BoundingBox> d_renderingCube;
+   Data<sofa::type::Vec2i> d_resolution;
 
    void draw(const sofa::core::visual::VisualParams* params) override;
 
@@ -56,7 +56,7 @@ protected:
    RayMarchingEngine();
    ~RayMarchingEngine() override {}
 
-   bool raymarch(const sofa::defaulttype::Ray& r, Vec3& out, ScalarField* field);
+   bool raymarch(const sofa::type::Ray& r, Vec3& out, ScalarField* field);
 };
 
 }

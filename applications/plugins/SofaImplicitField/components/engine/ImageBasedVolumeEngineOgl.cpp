@@ -20,7 +20,7 @@ AFFICHER LES RESULTATS UNE ITERATION A LA FOIS
 
 namespace sofa::component::engine
 {
-using sofa::defaulttype::Ray;
+using sofa::type::Ray;
 using sofa::helper::getReadAccessor;
 using sofa::helper::getWriteAccessor;
 using sofaimplicitfield::DisplacementField;
@@ -155,7 +155,7 @@ public:
         return;
     }
 
-    void setStaticData(sofa::helper::ReadAccessor<sofa::helper::vector<sofa::defaulttype::Vec3d>>& restPositions, 
+    void setStaticData(sofa::helper::ReadAccessor<sofa::helper::vector<sofa::type::Vec3d>>& restPositions, 
                        const sofa::core::topology::BaseMeshTopology::SeqTetrahedra& tetrahedra,
                        /*std::vector<sofa::core::topology::BaseMeshTopology::Tetrahedron>& tetrahedra,*/
                        float smallStep, float epsilon, float h)
@@ -206,7 +206,7 @@ public:
         return;
     }
 
-    void updateCurrentPositionTexture(sofa::helper::ReadAccessor<sofa::helper::vector<sofa::defaulttype::Vec3d>>& currentPositions)
+    void updateCurrentPositionTexture(sofa::helper::ReadAccessor<sofa::helper::vector<sofa::type::Vec3d>>& currentPositions)
     {
         std::cout << "ImageBasedVolumeEngineOgl::InternalData updateCurrentPositionTexture()" << std::endl;
         // Fill dofs positions.
@@ -438,9 +438,9 @@ void ImageBasedVolumeEngineOgl::doUpdate()
 
     // Initialize accessors.
     // Inputs.
-    sofa::defaulttype::BoundingBox bbox_one(l_field_one->l_dofs->f_bbox.getValue());
+    sofa::type::BoundingBox bbox_one(l_field_one->l_dofs->f_bbox.getValue());
     auto dof_one = getReadAccessor(*l_field_one->l_dofs->read(sofa::core::VecCoordId::position()));
-    sofa::defaulttype::BoundingBox bbox_two(l_field_two->l_dofs->f_bbox.getValue());
+    sofa::type::BoundingBox bbox_two(l_field_two->l_dofs->f_bbox.getValue());
     auto dof_two = getReadAccessor(*l_field_two->l_dofs->read(sofa::core::VecCoordId::position()));
     auto res = getReadAccessor(d_resolution);
     double eps = getReadAccessor(d_epsilon);
@@ -521,7 +521,7 @@ void ImageBasedVolumeEngineOgl::doUpdate()
     data_two->updateCurrentPositionTexture(dof_two);
 
     // Iterate over the faces of the AABB, pairing the opposite faces together.
-    std::vector<sofa::defaulttype::Vec2i> planes {{1,2}, {0,1}, {0,2}};
+    std::vector<sofa::type::Vec2i> planes {{1,2}, {0,1}, {0,2}};
 
     for (unsigned int plane_it=0; plane_it<3; plane_it++)
     {

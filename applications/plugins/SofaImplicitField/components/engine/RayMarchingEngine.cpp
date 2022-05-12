@@ -27,7 +27,7 @@
 namespace sofa::component::engine
 {
 using sofa::type::RGBAColor;
-using sofa::defaulttype::Ray;
+using sofa::type::Ray;
 
 /// Register in the Factory
 static int RayMarchingEngineEngineClass = core::RegisterObject("A software implementation of the ray marching algorithm. "
@@ -104,7 +104,7 @@ void RayMarchingEngine::doUpdate()
     Vec3 minb=box->minBBox();
     Vec3 maxb=box->maxBBox();
     Vec3 diffb=maxb-minb;
-    std::vector<sofa::defaulttype::Vec2i> t {{1,2}, {1,2},
+    std::vector<sofa::type::Vec2i> t {{1,2}, {1,2},
                                              {0,1}, {0,1},
                                              {0,2}, {0,2}};
     std::vector<Vec3> begin{minb, {maxb.x(), minb.y(), minb.z()},
@@ -164,7 +164,7 @@ void RayMarchingEngine::draw(const sofa::core::visual::VisualParams* params)
     Vec3 maxb=box->maxBBox();
     Vec3 diffb=maxb-minb;
 
-    std::vector<sofa::defaulttype::Vec2i> t {{1,2}, {1,2},
+    std::vector<sofa::type::Vec2i> t {{1,2}, {1,2},
                                              {0,1}, {0,1},
                                              {0,2}, {0,2}};
     std::vector<Vec3> begin{minb, {maxb.x(), minb.y(), minb.z()},

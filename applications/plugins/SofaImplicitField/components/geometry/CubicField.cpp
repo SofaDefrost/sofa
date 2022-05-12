@@ -36,7 +36,7 @@ namespace geometry
 
 namespace _cubicfield_
 {
-using sofa::defaulttype::Vec3d ;
+using sofa::type::Vec3d ;
 
 CubicField::CubicField()
     : c_inside(initData(&c_inside, false, "inside", "If true the field is oriented inside (resp. outside) the cube. (default = false)"))

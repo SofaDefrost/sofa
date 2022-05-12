@@ -32,8 +32,8 @@
 ///using sofa::component::visualmodel::BaseCamera;
 using sofa::component::geometry::ScalarField;
 ///using sofa::core::DataEngine;
-using sofa::defaulttype::Vec3d ;
-///using sofa::defaulttype::Vec2i;
+using sofa::type::Vec3d ;
+///using sofa::type::Vec2i;
 
 class SOFA_SOFAIMPLICITFIELD_API ImplicitFieldTransform : public sofa::core::objectmodel::BaseObject
 {

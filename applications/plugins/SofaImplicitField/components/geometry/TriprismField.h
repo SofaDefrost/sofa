@@ -36,8 +36,8 @@ namespace geometry
 namespace _triprismfield_
 {
 
-using sofa::defaulttype::Vec3d ;
-using sofa::defaulttype::Vec2d ;
+using sofa::type::Vec3d ;
+using sofa::type::Vec2d ;
 
 class  SOFA_SOFAIMPLICITFIELD_API TriprismField  : public ScalarField
 {

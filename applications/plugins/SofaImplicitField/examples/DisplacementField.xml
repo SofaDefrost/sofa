@@ -16,6 +16,7 @@
         <TetrahedronSetGeometryAlgorithms template="Vec3d" name="GeomAlgo" />
         <DiagonalMass  name="computed using mass density" massDensity="1" />
         <TetrahedralCorotationalFEMForceField template="Vec3d" name="FEM" method="large" poissonRatio="0.3" youngModulus="3000" computeGlobalMatrix="0" />
+        <RestShapeSpringsForceField/>
     </Node>      
    
     <Node name="RigidField">
@@ -24,6 +25,7 @@
             <SphericalField name="field" center="1.0 0.0 0.0" radius="2.0"/>
             <DisplacementField name="displacement" 
                                field="@field" 
+                               listening='1'
                                shader="@spheretracer"
                                topology="@../DisplacementField/topo"
                                dofs="@../DisplacementField/dofs"/>

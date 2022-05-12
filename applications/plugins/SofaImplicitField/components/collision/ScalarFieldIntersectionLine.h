@@ -36,7 +36,7 @@ using sofa::component::collision::ScalarFieldCollisionElement;
 using sofa::component::collision::DiscreteIntersection;
 using sofa::component::collision::PointCollisionModel;
 using sofa::component::collision::LineCollisionModel;
-using sofa::defaulttype::Vec3d ;
+using sofa::type::Vec3d ;
 
 
 class SOFA_SOFAIMPLICITFIELD_API ScalarFieldIntersectionLine : public BaseIntersector

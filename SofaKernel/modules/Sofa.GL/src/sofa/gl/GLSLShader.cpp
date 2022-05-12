@@ -184,7 +184,7 @@ std::string GLSLShader::LoadTextFile(const std::string& strFile)
     fin.close();
 
     // Return the text file's data
-    return strText;
+    return addPrintToSource(strText);
 }
 
 std::string CombineHeaders(std::string header, const std::string &shaderStage, std::string source)
@@ -301,10 +301,11 @@ bool GLSLShader::CompileShader(GLint target, const ShaderContents& shaderContent
         msg_error() << logString;
         free(logString);
     }
-    if (compiled)
+    if (compiled){
         m_hShaders[target] = shader;
-    else
+    }else{
         glDeleteObjectARB(shader);
+    }
     return (compiled != 0);
 }
 
@@ -316,7 +317,7 @@ void GLSLShader::InitShaders()
     if( !GetVertexShaderFileName().length() || !GetFragmentShaderFileName().length() )
     {
         if(m_hShaderContents.find(GL_VERTEX_SHADER_ARB) == m_hShaderContents.end()
-            || m_hShaderContents.find(GL_FRAGMENT_SHADER_ARB) == m_hShaderContents.end())
+                || m_hShaderContents.find(GL_FRAGMENT_SHADER_ARB) == m_hShaderContents.end())
         {
             msg_error() << "GLSLShader requires setting a VertexShader and a FragmentShader";
             return;
@@ -381,8 +382,16 @@ void GLSLShader::InitShaders()
 
     }
 
+     debugBufferObject = createPrintBuffer();
+     bindPrintBuffer(m_hProgramObject, debugBufferObject);
+
     // Now, let's turn off the shader initially.
     glUseProgramObjectARB(0);
+}
+
+std::string GLSLShader::getGlslPrintfAsString()
+{
+    return getPrintBufferString(debugBufferObject);
 }
 
 std::string GLSLShader::GetShaderFileName(GLint type) const
@@ -451,7 +460,12 @@ void GLSLShader::SetMatrix4x3(GLint variable,GLsizei count,GLboolean transpose, 
 #endif
 
 // These 2 functions turn on and off our shader
-void GLSLShader::TurnOn()	{ if (m_hProgramObject) glUseProgramObjectARB(m_hProgramObject); }
+void GLSLShader::TurnOn()	{
+    if (m_hProgramObject){
+        glUseProgramObjectARB(m_hProgramObject);
+        bindPrintBuffer(m_hProgramObject, debugBufferObject);
+    }
+}
 void GLSLShader::TurnOff()	{ if (m_hProgramObject) glUseProgramObjectARB(0);                }
 
 ///	This function returns a variable ID for a shader variable

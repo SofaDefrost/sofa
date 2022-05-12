@@ -25,7 +25,7 @@
 #include <sofa/core/ObjectFactory.h>
 #include <SofaOpenglVisual/PointSplatRenderer.h>
 #include <sofa/core/visual/VisualParams.h>
-#include <sofa/defaulttype/RGBAColor.h>
+#include <sofa/type/RGBAColor.h>
 
 namespace sofa::component::visualmodel
 {

@@ -24,7 +24,7 @@ namespace forcefield
 using sofa::core::objectmodel::BaseLink;
 using sofa::core::objectmodel::SingleLink;
 using sofaimplicitfield::DisplacementField;
-using sofa::defaulttype::Vec3;
+using sofa::type::Vec3;
 
 template<class DataTypes>
 class InterpenetrationVolumeForceField : public core::behavior::ForceField<DataTypes>

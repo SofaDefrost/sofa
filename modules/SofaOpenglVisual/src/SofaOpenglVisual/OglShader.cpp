@@ -264,6 +264,16 @@ void OglShader::stop()
     }
 }
 
+std::string OglShader::getGlslPrintfAsString()
+{
+    if(turnOn.getValue() && shaderVector[indexActiveShader.getValue()]->IsReady())
+    {
+        return shaderVector[indexActiveShader.getValue()]->getGlslPrintfAsString();
+    }
+    return "Shader not activated";
+}
+
+
 void OglShader::start()
 {
     if(turnOn.getValue() && shaderVector[indexActiveShader.getValue()]->IsReady())
