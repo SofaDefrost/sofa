@@ -576,7 +576,8 @@ template<class DataTypes>
 inline void TetrahedronFEMForceField<DataTypes>::accumulateForceSmall(Vector& f, const Vector & p,
                                                                        type::vector<VoigtTensor>& elasticStrains,
                                                                        type::vector<VoigtTensor>& plasticStrains,
-                                                                       typename VecElement::const_iterator elementIt, Index elementIndex , Real plasticYieldThreshold, Real plasticMaxThreshold, Real plasticCreep)
+                                                                       typename VecElement::const_iterator elementIt, Index elementIndex ,
+                                                                       Real plasticYieldThreshold, Real plasticMaxThreshold, Real plasticCreep)
 {
     const VecCoord &initialPoints=d_initialPoints.getValue();
     Element index = *elementIt;
@@ -607,7 +608,7 @@ inline void TetrahedronFEMForceField<DataTypes>::accumulateForceSmall(Vector& f,
                       strainDisplacements[elementIndex],
                       plasticYieldThreshold, plasticMaxThreshold, plasticCreep );
     }
-    else if(d_plasticMaxThreshold.getValue() <= 0 )
+    else if(plasticMaxThreshold <= 0 )
     {
         Transformation Rot;
         Rot[0][0]=Rot[1][1]=Rot[2][2]=1;
@@ -1611,9 +1612,6 @@ inline void TetrahedronFEMForceField<DataTypes>::reinit()
 template<class DataTypes>
 inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::MechanicalParams* /*mparams*/, DataVecDeriv& d_f, const DataVecCoord& d_x, const DataVecDeriv& /* d_v */)
 {
-    VecDeriv& f = *d_f.beginEdit();
-    const VecCoord& p = d_x.getValue();
-
     Real plasticYieldThreshold = d_plasticYieldThreshold.getValue();
     Real plasticMaxThreshold = d_plasticYieldThreshold.getValue();
     Real plasticCreep = d_plasticCreep.getValue();
@@ -1624,6 +1622,8 @@ inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::Mechanica
     auto plasticStrains = helper::getWriteOnlyAccessor(d_plasticStrains);
     plasticStrains.resize(_indexedElements->size());
 
+    auto p = helper::getReadAccessor(d_x);
+    auto f = helper::getWriteOnlyAccessor(d_f);
     f.resize(p.size());
 
     if (needUpdateTopology)
@@ -1640,7 +1640,7 @@ inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::Mechanica
     {
         for(it=_indexedElements->begin(), i = 0 ; it!=_indexedElements->end(); ++it,++i)
         {
-            accumulateForceSmall( f, p, elasticStrains.wref(), plasticStrains.wref(), it, i,
+            accumulateForceSmall( f.wref(), p.ref(), elasticStrains.wref(), plasticStrains.wref(), it, i,
                                   plasticYieldThreshold, plasticMaxThreshold, plasticCreep );
         }
         break;
@@ -1649,7 +1649,7 @@ inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::Mechanica
     {
         for(it=_indexedElements->begin(), i = 0 ; it!=_indexedElements->end(); ++it,++i)
         {
-            accumulateForceLarge( f, p, elasticStrains.wref(), plasticStrains.wref(), it, i,
+            accumulateForceLarge( f.wref(), p.ref(), elasticStrains.wref(), plasticStrains.wref(), it, i,
                                   plasticYieldThreshold, plasticMaxThreshold, plasticCreep );
         }
         break;
@@ -1658,7 +1658,7 @@ inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::Mechanica
     {
         for(it=_indexedElements->begin(), i = 0 ; it!=_indexedElements->end(); ++it,++i)
         {
-            accumulateForcePolar( f, p, elasticStrains.wref(), plasticStrains.wref(), it, i,
+            accumulateForcePolar( f.wref(), p.ref(), elasticStrains.wref(), plasticStrains.wref(), it, i,
                                   plasticYieldThreshold, plasticMaxThreshold, plasticCreep );
         }
         break;
@@ -1667,14 +1667,12 @@ inline void TetrahedronFEMForceField<DataTypes>::addForce (const core::Mechanica
     {
         for(it=_indexedElements->begin(), i = 0 ; it!=_indexedElements->end(); ++it,++i)
         {
-            accumulateForceSVD( f, p, elasticStrains.wref(), plasticStrains.wref(), it, i,
+            accumulateForceSVD( f.wref(), p.ref(), elasticStrains.wref(), plasticStrains.wref(), it, i,
                                 plasticYieldThreshold, plasticMaxThreshold, plasticCreep );
         }
         break;
     }
     }
-    d_f.endEdit();
-
     updateVonMisesStress = true;
 }
 
